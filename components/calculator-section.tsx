@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import Image from "next/image"
 import { Calculator, MessageCircle, ShoppingBag } from "lucide-react"
 
 type Edad = "cachorro" | "adulto" | "senior"
@@ -54,6 +55,7 @@ export function CalculatorSection() {
     <section id="calculadora" className="py-20 md:py-32 bg-background border-t border-border">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center">
+          <Image src="/placeholder-logo.svg" alt="Logo FEROX" width={160} height={40} className="mx-auto h-10 w-auto" />
           <span className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium tracking-wider uppercase text-muted-foreground">
             <Calculator className="h-3 w-3" />
             Calculadora BARF
@@ -62,7 +64,7 @@ export function CalculatorSection() {
             Descubre cuánta comida necesita tu perro
           </h2>
           <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
-            Solo ingresa peso, edad y nivel de actividad. Obtén su porción diaria en segundos.
+            Solo ingresa peso, edad y nivel de actividad. Es rápido, fácil y personalizado.
           </p>
         </div>
 

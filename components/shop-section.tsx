@@ -1,28 +1,31 @@
 import Image from "next/image"
-import { ArrowUpRight } from "lucide-react"
+import { ArrowUpRight, ShoppingCart, ReceiptText } from "lucide-react"
 
 const products = [
   {
-    name: "Plan Pequeño",
-    weight: "Hasta 10 kg",
-    price: "$ 24.990",
-    portion: "200 – 300 g / día",
-    badge: "Mini",
+    name: "Fórmula Vacuno",
+    weight: "1 kg",
+    price: "$ 5.990",
+    portion: "Ideal para rotación proteica",
+    badge: "Vacuno",
+    image: "/product-pack.jpg",
   },
   {
-    name: "Plan Mediano",
-    weight: "10 a 25 kg",
-    price: "$ 39.990",
-    portion: "300 – 600 g / día",
+    name: "Mix de proteína",
+    weight: "1 kg",
+    price: "$ 6.490",
+    portion: "Combinación balanceada",
     badge: "Más vendido",
     featured: true,
+    image: "/barf-food.jpg",
   },
   {
-    name: "Plan Grande",
-    weight: "25 kg o más",
-    price: "$ 59.990",
-    portion: "600 – 900 g / día",
-    badge: "XL",
+    name: "Pack mensual BARF",
+    weight: "15 kg",
+    price: "$ 89.990",
+    portion: "Plan para 30 días",
+    badge: "Pack",
+    image: "/placeholder.jpg",
   },
 ]
 
@@ -32,14 +35,16 @@ export function ShopSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div className="max-w-2xl">
-            <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
+            <Image src="/placeholder-logo.svg" alt="Logo FEROX" width={170} height={42} className="h-10 w-auto" />
+            <span className="mt-4 inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
               Tienda
             </span>
             <h2 className="mt-4 font-serif text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
-              Elige el plan ideal para tu perro
+              Compra fácil, rápida y directa
             </h2>
             <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
-              Productos preparados con ingredientes seleccionados. Compra fácil, rápido y directo.
+              Agrega productos BARF al carrito, confirma el pedido y coordina pago por transferencia o efectivo contra
+              entrega.
             </p>
           </div>
         </div>
@@ -56,7 +61,7 @@ export function ShopSection() {
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                 <Image
-                  src="/product-pack.jpg"
+                  src={product.image}
                   alt={`${product.name} FEROX BARF`}
                   fill
                   sizes="(min-width: 768px) 33vw, 100vw"
@@ -75,35 +80,20 @@ export function ShopSection() {
 
               <div className="flex-1 p-6 flex flex-col">
                 <h3 className="font-serif text-2xl font-bold">{product.name}</h3>
-                <p
-                  className={`mt-1 text-sm ${
-                    product.featured ? "text-background/70" : "text-muted-foreground"
-                  }`}
-                >
+                <p className={`mt-1 text-sm ${product.featured ? "text-background/70" : "text-muted-foreground"}`}>
                   {product.weight}
                 </p>
 
                 <div className="mt-6 flex items-baseline gap-2">
                   <span className="font-serif text-3xl font-bold">{product.price}</span>
-                  <span
-                    className={`text-sm ${
-                      product.featured ? "text-background/60" : "text-muted-foreground"
-                    }`}
-                  >
-                    /mes
-                  </span>
                 </div>
-                <p
-                  className={`mt-2 text-sm ${
-                    product.featured ? "text-background/70" : "text-muted-foreground"
-                  }`}
-                >
+                <p className={`mt-2 text-sm ${product.featured ? "text-background/70" : "text-muted-foreground"}`}>
                   {product.portion}
                 </p>
 
                 <a
                   href={`https://wa.me/56912345678?text=${encodeURIComponent(
-                    `Hola, quiero comprar el ${product.name} de FEROX BARF`,
+                    `Hola, quiero comprar ${product.name} de FEROX BARF`,
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -121,8 +111,19 @@ export function ShopSection() {
           ))}
         </div>
 
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="rounded-xl border border-border p-4 text-sm text-muted-foreground flex items-start gap-3">
+            <ShoppingCart className="h-4 w-4 mt-0.5 text-foreground" />
+            Carrito de compra activo: agrega productos y confirma cantidades para cerrar tu pedido.
+          </div>
+          <div className="rounded-xl border border-border p-4 text-sm text-muted-foreground flex items-start gap-3">
+            <ReceiptText className="h-4 w-4 mt-0.5 text-foreground" />
+            Finalización: confirmamos por WhatsApp y enviamos mensaje automático de pedido recibido.
+          </div>
+        </div>
+
         <p className="mt-8 text-center text-sm text-muted-foreground">
-          Métodos de pago: Transferencia bancaria · Efectivo contra entrega
+          Métodos de pago: Transferencia bancaria · Efectivo contra entrega. Seguimiento manual vía WhatsApp.
         </p>
       </div>
     </section>

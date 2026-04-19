@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 
 const navLinks = [
   { href: "#que-es-barf", label: "¿Qué es BARF?" },
@@ -35,17 +36,17 @@ export function SiteHeader() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2" aria-label="FEROX BARF inicio">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-background font-serif text-lg font-bold shadow-lg shadow-primary/30">
-              F
-            </div>
-            <span className="font-serif text-xl font-bold tracking-tight text-foreground">
-              FEROX
-              <span className="ml-1 text-xs font-sans font-normal text-muted-foreground tracking-widest">
-                BARF
-              </span>
-            </span>
-          </Link>
+          
+          <Link href="/" className="flex items-center" aria-label="FEROX BARF inicio">
+  <Image
+    src="/logo.png"
+    alt="FEROX Nutrición BARF Premium"
+    width={220}
+    height={44}
+    priority
+    className="h-10 w-auto md:h-16"
+  />
+</Link>
 
           <nav className="hidden md:flex items-center gap-8" aria-label="Navegación principal">
             {navLinks.map((link) => (
