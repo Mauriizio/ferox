@@ -14,12 +14,14 @@ export function HeroSection() {
           sizes="100vw"
           className="object-cover object-center opacity-40 md:opacity-60"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/50 to-background md:bg-gradient-to-r md:from-background md:via-background/80 md:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/45 to-background md:bg-gradient-to-r md:from-background md:via-background/70 md:to-transparent" />
       </div>
+      <div className="pointer-events-none absolute -left-16 top-32 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
+      <div className="pointer-events-none absolute right-0 top-20 h-52 w-52 rounded-full bg-accent/35 blur-3xl" />
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="max-w-2xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 backdrop-blur px-3 py-1 text-xs font-medium tracking-wider uppercase text-muted-foreground">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border glass px-3 py-1 text-xs font-medium tracking-wider uppercase text-muted-foreground shadow-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
             Alimentación 100% Natural
           </span>
@@ -35,29 +37,29 @@ export function HeroSection() {
           <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:items-center">
             <Link
               href="#calculadora"
-              className="group inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm sm:text-base font-medium text-background hover:bg-foreground/90 transition-all"
+              className="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-4 text-sm sm:text-base font-medium text-primary-foreground hover:brightness-95 transition-all shadow-xl shadow-primary/35"
             >
               Calcular ahora
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               href="#que-es-barf"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background/60 backdrop-blur px-6 py-4 text-sm sm:text-base font-medium text-foreground hover:bg-muted transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-border glass px-6 py-4 text-sm sm:text-base font-medium text-foreground hover:bg-muted transition-colors"
             >
               ¿Qué es BARF?
             </Link>
           </div>
 
           <dl className="mt-12 grid grid-cols-3 gap-4 sm:gap-8 max-w-md">
-            <div>
+            <div className="rounded-xl border border-border/70 glass p-3">
               <dt className="text-xs uppercase tracking-wider text-muted-foreground">Natural</dt>
               <dd className="mt-1 font-serif text-2xl sm:text-3xl font-bold text-foreground">100%</dd>
             </div>
-            <div>
+            <div className="rounded-xl border border-border/70 glass p-3">
               <dt className="text-xs uppercase tracking-wider text-muted-foreground">Sin químicos</dt>
               <dd className="mt-1 font-serif text-2xl sm:text-3xl font-bold text-foreground">0</dd>
             </div>
-            <div>
+            <div className="rounded-xl border border-border/70 glass p-3">
               <dt className="text-xs uppercase tracking-wider text-muted-foreground">Cálculo en</dt>
               <dd className="mt-1 font-serif text-2xl sm:text-3xl font-bold text-foreground">30s</dd>
             </div>

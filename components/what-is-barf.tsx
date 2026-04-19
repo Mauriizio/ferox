@@ -2,10 +2,10 @@ import Image from "next/image"
 
 export function WhatIsBarf() {
   return (
-    <section id="que-es-barf" className="py-20 md:py-32 bg-background border-t border-border">
+    <section id="que-es-barf" className="py-20 md:py-32 bg-background border-t border-border/70">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          <div className="relative aspect-[4/5] sm:aspect-square lg:aspect-[4/5] overflow-hidden rounded-2xl bg-muted order-last lg:order-first">
+          <div className="relative aspect-[4/5] sm:aspect-square lg:aspect-[4/5] overflow-hidden rounded-2xl bg-muted order-last lg:order-first ring-1 ring-border shadow-2xl shadow-foreground/10">
             <Image
               src="/barf-food.jpg"
               alt="Plato de comida BARF con carne cruda, huesos y vegetales frescos"
@@ -39,7 +39,7 @@ export function WhatIsBarf() {
                 { label: "Huesos", value: "20%" },
                 { label: "Órganos", value: "10%" },
               ].map((item) => (
-                <div key={item.label} className="border border-border rounded-xl p-4 text-center">
+                <div key={item.label} className="border border-border rounded-xl p-4 text-center glass shadow-sm">
                   <div className="font-serif text-2xl sm:text-3xl font-bold text-foreground">{item.value}</div>
                   <div className="mt-1 text-xs sm:text-sm uppercase tracking-wide text-muted-foreground">
                     {item.label}
