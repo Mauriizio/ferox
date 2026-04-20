@@ -55,7 +55,7 @@ export function SiteHeader() {
 
             <Link href="/" className="flex items-center" aria-label="FEROX BARF inicio">
               <Image
-                src="/logo.png"
+                src="/logoblanco.png"
                 alt="FEROX Nutrición BARF Premium"
                 width={220}
                 height={64}
@@ -75,7 +75,7 @@ export function SiteHeader() {
 
           <Link href="/" className="hidden md:flex items-center" aria-label="FEROX BARF inicio">
             <Image
-              src="/logo.png"
+              src="/logoblanco.png"
               alt="FEROX Nutrición BARF Premium"
               width={300}
               height={90}

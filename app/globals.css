@@ -146,6 +146,29 @@
 }
 
 @layer utilities {
+  @keyframes ferox-ticker {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    min-width: 100%;
+    white-space: nowrap;
+    animation: ferox-ticker 28s linear infinite;
+  }
+
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    padding-right: 2.75rem;
+  }
+
   .glass {
     background: color-mix(in oklab, var(--color-card) 78%, white);
     border: 1px solid color-mix(in oklab, var(--color-border) 78%, white);

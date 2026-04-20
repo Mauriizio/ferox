@@ -12,10 +12,10 @@ export function HeroSection() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-[76%_center] md:object-[68%_center] opacity-90"
+          className="object-cover object-[82%_center] md:object-[72%_center] opacity-95"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/78 via-black/50 to-black/12" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_40%,transparent_10%,rgba(0,0,0,0.28)_65%,rgba(0,0,0,0.4)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.85)_0%,rgba(0,0,0,0.72)_14%,rgba(0,0,0,0.38)_30%,rgba(0,0,0,0)_52%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.68)_28%,rgba(0,0,0,0.35)_48%,rgba(0,0,0,0.08)_68%,rgba(0,0,0,0)_100%)]" />
       </div>
 
       <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8 pt-28 pb-8 md:pt-32 md:pb-12">
