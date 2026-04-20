@@ -66,32 +66,32 @@ export function SiteHeader() {
             <button
               type="button"
               className={cn(
-                "inline-flex h-10 w-10 items-center justify-center rounded-full border transition-all",
+                "inline-flex h-10 w-10 items-center justify-center transition-all",
                 onHero
-                  ? "text-white border-white/40 bg-black/25 hover:bg-white/10"
-                  : "text-foreground border-black/15 bg-black/[0.03] hover:bg-black/[0.06]",
+                  ? "text-white/95 hover:text-white"
+                  : "text-foreground/90 hover:text-foreground",
               )}
               onClick={() => setOpen((v) => !v)}
               aria-label="Abrir menú"
               aria-expanded={open}
             >
-              <span className="relative h-4 w-4">
+              <span className="relative h-[16px] w-[22px]">
                 <span
                   className={cn(
-                    "absolute left-0 top-[2px] h-[1.8px] w-4 rounded-full bg-current transition-all",
-                    open && "top-[7px] rotate-45",
+                    "absolute left-0 top-0 h-[2.6px] w-[22px] rounded-full bg-current transition-all duration-300 ease-out",
+                    open && "top-[6.8px] rotate-45",
                   )}
                 />
                 <span
                   className={cn(
-                    "absolute left-0 top-[7px] h-[1.8px] w-4 rounded-full bg-current transition-all",
+                    "absolute left-0 top-[6.8px] h-[2.6px] w-[22px] rounded-full bg-current transition-all duration-300 ease-out",
                     open && "opacity-0",
                   )}
                 />
                 <span
                   className={cn(
-                    "absolute left-0 top-[12px] h-[1.8px] w-4 rounded-full bg-current transition-all",
-                    open && "top-[7px] -rotate-45",
+                    "absolute left-0 top-[13.6px] h-[2.6px] w-[22px] rounded-full bg-current transition-all duration-300 ease-out",
+                    open && "top-[6.8px] -rotate-45",
                   )}
                 />
               </span>

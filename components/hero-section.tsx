@@ -6,22 +6,26 @@ export function HeroSection() {
   return (
     <section className="relative h-[100svh] min-h-[100svh] overflow-hidden bg-background">
       <div className="absolute inset-0 z-0">
-        <Image
-          src="/image/color-mobile.png"
-          alt="Perro fuerte y saludable alimentado con dieta BARF"
-          fill
-          priority
-          sizes="100vw"
-          className="object-contain object-center md:hidden"
-        />
-        <Image
-  src="/image/color.png"
-  alt="Perro fuerte y saludable alimentado con dieta BARF"
-  fill
-  priority
-  sizes="100vw"
-  className="object-cover object-[92%_40%] md:object-[80%_34%] scale-[1.12] md:scale-[1.03] opacity-95"
-/>
+        <div className="absolute inset-0 md:hidden">
+          <Image
+            src="/image/color-mobile.png"
+            alt="Perro fuerte y saludable alimentado con dieta BARF"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[56%_34%] scale-[1.02]"
+          />
+        </div>
+        <div className="absolute inset-0 hidden md:block">
+          <Image
+            src="/image/color.png"
+            alt="Perro fuerte y saludable alimentado con dieta BARF"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[80%_34%] scale-[1.03] opacity-95"
+          />
+        </div>
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.82)_16%,rgba(0,0,0,0.56)_34%,rgba(0,0,0,0.18)_54%,rgba(0,0,0,0)_72%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.84)_22%,rgba(0,0,0,0.62)_42%,rgba(0,0,0,0.28)_62%,rgba(0,0,0,0.08)_78%,rgba(0,0,0,0)_100%)]" />
       </div>
@@ -33,7 +37,7 @@ export function HeroSection() {
           </span>
 
           <h1 className="mt-6 font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.98] tracking-tight text-white text-balance">
-            COMIDA REAL PARA PERROS REALES
+            NUTRICIÓN REAL PREMIUM
           </h1>
 
           <p className="mt-5 text-base sm:text-lg md:text-xl text-white/85 leading-relaxed text-pretty max-w-lg">
