@@ -31,7 +31,7 @@ export function HeroSection() {
       </div>
 
       <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8 pt-24 pb-8 md:pt-32 md:pb-12">
-        <div className="max-w-lg -translate-y-5 md:translate-y-0 text-center md:text-left flex flex-col items-center md:items-start">
+        <div className="max-w-lg -translate-y-6 md:translate-y-0 text-center md:text-left flex flex-col items-center md:items-start">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/25 px-3 py-1 text-[11px] font-medium tracking-[0.18em] uppercase text-white/90 backdrop-blur-sm">
             FEROX BARF PREMIUM
           </span>
@@ -44,12 +44,16 @@ export function HeroSection() {
             Carne, órganos y vegetales frescos. Sin químicos. Sin rellenos.
           </p>
 
+          <p className="mt-2 text-sm sm:text-base text-white/80 leading-relaxed max-w-md mx-auto md:mx-0">
+            Planes BARF personalizados según peso, edad y actividad.
+          </p>
+
           <div className="mt-9 md:mt-8 flex flex-col sm:flex-row gap-2.5 sm:gap-3 sm:items-center">
             <Link
               href="#tienda"
               className="group inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full bg-white px-4 sm:px-6 py-2.5 sm:py-4 text-sm sm:text-base font-semibold text-black text-center hover:bg-white/90 transition-all shadow-xl shadow-black/35"
             >
-              Comprar plan premium
+              Comprar ahora
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
 
@@ -57,9 +61,25 @@ export function HeroSection() {
               href="#calculadora"
               className="inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full border border-white/40 bg-black/20 px-4 sm:px-6 py-2.5 sm:py-4 text-sm sm:text-base font-medium text-white text-center hover:bg-black/35 transition-colors"
             >
-              Calcular porción
+              Calcular ración
             </Link>
           </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-2">
+            <span className="rounded-full border border-white/25 bg-black/20 px-3 py-1 text-[11px] sm:text-xs tracking-[0.04em] text-white/90">
+              Avalado por veterinario
+            </span>
+            <span className="rounded-full border border-white/25 bg-black/20 px-3 py-1 text-[11px] sm:text-xs tracking-[0.04em] text-white/90">
+              Sin químicos
+            </span>
+            <span className="rounded-full border border-white/25 bg-black/20 px-3 py-1 text-[11px] sm:text-xs tracking-[0.04em] text-white/90">
+              Entrega a domicilio
+            </span>
+          </div>
+
+          <p className="mt-3 text-[11px] sm:text-xs text-white/70 tracking-[0.01em]">
+            Recomendado por Dr. Camilo González · Bluaveterinaria.cl
+          </p>
         </div>
       </div>
     </section>
