@@ -5,13 +5,19 @@ import Link from "next/link"
 import { ShoppingCart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
+import localFont from "next/font/local"
+
+const feroxSecondary = localFont({
+  src: "../styles/fonts/ferox-font/ferox2.ttf",
+  display: "swap",
+})
 
 const navLinks = [
-  { href: "#que-es-barf", label: "¿Qué es BARF?" },
-  { href: "#beneficios", label: "Beneficios" },
-  { href: "#calculadora", label: "Calculadora" },
-  { href: "#tienda", label: "Tienda" },
-  { href: "#testimonios", label: "Testimonios" },
+  { href: "#que-es-barf", label: "¿QUE ES BARF?" },
+  { href: "#beneficios", label: "BENEFICIOS" },
+  { href: "#calculadora", label: "CALCULADORA" },
+  { href: "#tienda", label: "TIENDA" },
+  { href: "#testimonios", label: "TESTIMONIOS" },
 ]
 
 export function SiteHeader() {
@@ -170,16 +176,21 @@ export function SiteHeader() {
         </div>
 
         {open && (
-          <div className={cn("md:hidden border-t py-4", onHero ? "border-white/20 bg-black/85" : "border-border bg-background")}>
-            <nav className="mx-auto flex max-w-xs flex-col items-center gap-1.5 text-center" aria-label="Navegación móvil">
+          <div className="md:hidden relative overflow-hidden border-t border-white/20 py-5">
+            <div className="pointer-events-none absolute inset-0 bg-black/88 backdrop-blur-xl supports-[backdrop-filter]:bg-black/78" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/35" />
+            <nav
+              className="relative mx-auto flex w-full max-w-sm flex-col items-center justify-center gap-2 px-3 text-center"
+              aria-label="Navegación móvil"
+            >
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "w-full px-3 py-3 text-base rounded-md transition-colors",
-                    onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted",
+                    feroxSecondary.className,
+                    "inline-flex w-full items-center justify-center rounded-md px-4 py-3 text-[1.15rem] leading-none tracking-[0.02em] text-white/95 transition-colors hover:bg-white/10 hover:text-white",
                   )}
                 >
                   {link.label}
@@ -189,8 +200,8 @@ export function SiteHeader() {
                 href="#tienda"
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "mt-3 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium",
-                  onHero ? "bg-white text-black" : "bg-foreground text-background",
+                  feroxSecondary.className,
+                  "mt-3 inline-flex w-full items-center justify-center rounded-full border border-white/35 bg-white/95 px-5 py-3 text-base leading-none tracking-[0.03em] text-black shadow-[0_10px_24px_rgba(0,0,0,0.35)] transition-colors hover:bg-white",
                 )}
               >
                 Comprar ahora

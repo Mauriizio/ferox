@@ -30,13 +30,13 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.84)_22%,rgba(0,0,0,0.62)_42%,rgba(0,0,0,0.28)_62%,rgba(0,0,0,0.08)_78%,rgba(0,0,0,0)_100%)]" />
       </div>
 
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8 pt-28 pb-8 md:pt-32 md:pb-12">
-        <div className="max-w-lg">
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8 pt-24 pb-8 md:pt-32 md:pb-12">
+        <div className="max-w-lg -translate-y-3 md:translate-y-0">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/25 px-3 py-1 text-[11px] font-medium tracking-[0.18em] uppercase text-white/90 backdrop-blur-sm">
             FEROX BARF PREMIUM
           </span>
 
-          <h1 className="mt-6 font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.98] tracking-tight text-white text-balance">
+          <h1 className="mt-7 md:mt-6 font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.98] tracking-tight text-white text-balance">
             NUTRICIÓN REAL PREMIUM
           </h1>
 
@@ -44,10 +44,10 @@ export function HeroSection() {
             Carne, órganos y vegetales frescos. Sin químicos. Sin rellenos.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-2.5 sm:gap-3 sm:items-center">
+          <div className="mt-9 md:mt-8 flex flex-col sm:flex-row gap-2.5 sm:gap-3 sm:items-center">
             <Link
               href="#tienda"
-              className="group inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full bg-white px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base font-semibold text-black text-center hover:bg-white/90 transition-all shadow-xl shadow-black/35"
+              className="group inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full bg-white px-4 sm:px-6 py-2.5 sm:py-4 text-sm sm:text-base font-semibold text-black text-center hover:bg-white/90 transition-all shadow-xl shadow-black/35"
             >
               Comprar plan premium
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -55,7 +55,7 @@ export function HeroSection() {
 
             <Link
               href="#calculadora"
-              className="inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full border border-white/40 bg-black/20 px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base font-medium text-white text-center hover:bg-black/35 transition-colors"
+              className="inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full border border-white/40 bg-black/20 px-4 sm:px-6 py-2.5 sm:py-4 text-sm sm:text-base font-medium text-white text-center hover:bg-black/35 transition-colors"
             >
               Calcular porción
             </Link>
