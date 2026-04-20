@@ -57,10 +57,10 @@ export function SiteHeader() {
               <Image
                 src="/logo.png"
                 alt="FEROX Nutrición BARF Premium"
-                width={180}
-                height={44}
+                width={220}
+                height={64}
                 priority
-                className="h-10 w-auto"
+                className="h-12 w-auto"
               />
             </Link>
 
@@ -77,10 +77,10 @@ export function SiteHeader() {
             <Image
               src="/logo.png"
               alt="FEROX Nutrición BARF Premium"
-              width={220}
-              height={44}
+              width={300}
+              height={90}
               priority
-              className="h-10 w-auto md:h-16"
+              className="h-12 w-auto lg:h-16"
             />
           </Link>
 

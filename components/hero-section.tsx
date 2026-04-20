@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react"
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[100svh] flex items-center pt-[7.5rem] md:pt-24 overflow-hidden bg-background">
+    <section className="relative h-[100svh] min-h-[100svh] overflow-hidden bg-background">
       <div className="absolute inset-0 z-0">
         <Image
           src="/image/perros.png"
@@ -12,58 +12,41 @@ export function HeroSection() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-70 md:opacity-90"
+          className="object-cover object-[76%_center] md:object-[68%_center] opacity-90"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/75 via-background/30 to-background/70 md:bg-gradient-to-r md:from-background/85 md:via-background/45 md:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/78 via-black/50 to-black/12" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_40%,transparent_10%,rgba(0,0,0,0.28)_65%,rgba(0,0,0,0.4)_100%)]" />
       </div>
-      <div className="pointer-events-none absolute -left-16 top-32 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
-      <div className="pointer-events-none absolute right-0 top-20 h-52 w-52 rounded-full bg-accent/35 blur-3xl" />
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="max-w-2xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border glass px-3 py-1 text-xs font-medium tracking-wider uppercase text-muted-foreground shadow-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
-            Alimentación 100% Natural
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8 pt-28 pb-8 md:pt-32 md:pb-12">
+        <div className="max-w-xl">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/25 px-3 py-1 text-[11px] font-medium tracking-[0.18em] uppercase text-white/90 backdrop-blur-sm">
+            FEROX BARF PREMIUM
           </span>
 
-          <h1 className="mt-6 font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight text-foreground text-balance">
-            Alimenta a tu perro como realmente lo necesita
+          <h1 className="mt-6 font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.98] tracking-tight text-white text-balance">
+            COMIDA REAL PARA PERROS REALES
           </h1>
 
-          <p className="mt-6 text-base sm:text-lg md:text-xl text-foreground/80 leading-relaxed text-pretty max-w-xl">
-            Calcula en segundos la porción ideal de alimentación BARF según su peso, edad y nivel de actividad.
+          <p className="mt-5 text-base sm:text-lg md:text-xl text-white/85 leading-relaxed text-pretty max-w-lg">
+            Carne, órganos y vegetales frescos. Sin químicos. Sin rellenos.
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:items-center">
             <Link
-              href="#calculadora"
-              className="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-4 text-sm sm:text-base font-medium text-primary-foreground hover:brightness-95 transition-all shadow-xl shadow-primary/35"
+              href="#tienda"
+              className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-4 text-sm sm:text-base font-semibold text-black hover:bg-white/90 transition-all shadow-xl shadow-black/35"
             >
-              Calcular ahora
+              Comprar plan premium
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
-              href="#que-es-barf"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-border glass px-6 py-4 text-sm sm:text-base font-medium text-foreground hover:bg-muted transition-colors"
+              href="#calculadora"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/40 bg-black/20 px-6 py-4 text-sm sm:text-base font-medium text-white hover:bg-black/35 transition-colors"
             >
-              ¿Qué es BARF?
+              Calcular porción
             </Link>
           </div>
-
-          <dl className="mt-12 grid grid-cols-3 gap-4 sm:gap-8 max-w-md">
-            <div className="rounded-xl border border-border/70 glass p-3">
-              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Natural</dt>
-              <dd className="mt-1 font-serif text-2xl sm:text-3xl font-bold text-foreground">100%</dd>
-            </div>
-            <div className="rounded-xl border border-border/70 glass p-3">
-              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Sin químicos</dt>
-              <dd className="mt-1 font-serif text-2xl sm:text-3xl font-bold text-foreground">0</dd>
-            </div>
-            <div className="rounded-xl border border-border/70 glass p-3">
-              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Cálculo en</dt>
-              <dd className="mt-1 font-serif text-2xl sm:text-3xl font-bold text-foreground">30s</dd>
-            </div>
-          </dl>
         </div>
       </div>
     </section>
