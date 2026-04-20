@@ -31,7 +31,7 @@ export function HeroSection() {
       </div>
 
       <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8 pt-24 pb-8 md:pt-32 md:pb-12">
-        <div className="max-w-lg -translate-y-3 md:translate-y-0">
+        <div className="max-w-lg -translate-y-5 md:translate-y-0 text-center md:text-left flex flex-col items-center md:items-start">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/25 px-3 py-1 text-[11px] font-medium tracking-[0.18em] uppercase text-white/90 backdrop-blur-sm">
             FEROX BARF PREMIUM
           </span>
@@ -40,7 +40,7 @@ export function HeroSection() {
             NUTRICIÓN REAL PREMIUM
           </h1>
 
-          <p className="mt-5 text-base sm:text-lg md:text-xl text-white/85 leading-relaxed text-pretty max-w-lg">
+          <p className="mt-5 text-base sm:text-lg md:text-xl text-white/85 leading-relaxed text-pretty max-w-lg mx-auto md:mx-0">
             Carne, órganos y vegetales frescos. Sin químicos. Sin rellenos.
           </p>
 
