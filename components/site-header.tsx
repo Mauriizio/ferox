@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X } from "lucide-react"
+import { Menu, ShoppingCart, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
@@ -34,19 +34,55 @@ export function SiteHeader() {
           : "bg-transparent",
       )}
     >
+      <div className="bg-black text-white">
+        <div className="mx-auto max-w-7xl px-4 py-2 text-center text-xs sm:text-sm font-medium">
+          🎁 Precios especiales por mayo: en tu plan premium te llevas un regalo sorpresa.
+        </div>
+      </div>
+
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          
-          <Link href="/" className="flex items-center" aria-label="FEROX BARF inicio">
-  <Image
-    src="/logo.png"
-    alt="FEROX Nutrición BARF Premium"
-    width={220}
-    height={44}
-    priority
-    className="h-10 w-auto md:h-16"
-  />
-</Link>
+          <div className="flex md:hidden w-full items-center justify-between">
+            <button
+              type="button"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground"
+              onClick={() => setOpen((v) => !v)}
+              aria-label="Abrir menú"
+              aria-expanded={open}
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+
+            <Link href="/" className="flex items-center" aria-label="FEROX BARF inicio">
+              <Image
+                src="/logo.png"
+                alt="FEROX Nutrición BARF Premium"
+                width={180}
+                height={44}
+                priority
+                className="h-10 w-auto"
+              />
+            </Link>
+
+            <Link
+              href="#tienda"
+              aria-label="Ir al carrito de compras"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground"
+            >
+              <ShoppingCart className="h-5 w-5" />
+            </Link>
+          </div>
+
+          <Link href="/" className="hidden md:flex items-center" aria-label="FEROX BARF inicio">
+            <Image
+              src="/logo.png"
+              alt="FEROX Nutrición BARF Premium"
+              width={220}
+              height={44}
+              priority
+              className="h-10 w-auto md:h-16"
+            />
+          </Link>
 
           <nav className="hidden md:flex items-center gap-8" aria-label="Navegación principal">
             {navLinks.map((link) => (
@@ -68,16 +104,6 @@ export function SiteHeader() {
               Calcular ahora
             </Link>
           </div>
-
-          <button
-            type="button"
-            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground"
-            onClick={() => setOpen((v) => !v)}
-            aria-label="Abrir menú"
-            aria-expanded={open}
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
         </div>
 
         {open && (

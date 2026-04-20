@@ -4,17 +4,17 @@ import { ArrowRight } from "lucide-react"
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[100svh] flex items-center pt-20 overflow-hidden bg-background">
+    <section className="relative min-h-[100svh] flex items-center pt-[7.5rem] md:pt-24 overflow-hidden bg-background">
       <div className="absolute inset-0 z-0">
         <Image
-          src="/hero-dog.jpg"
+          src="/image/perros.png"
           alt="Perro fuerte y saludable alimentado con dieta BARF"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-40 md:opacity-60"
+          className="object-cover object-center opacity-70 md:opacity-90"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/45 to-background md:bg-gradient-to-r md:from-background md:via-background/70 md:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/75 via-background/30 to-background/70 md:bg-gradient-to-r md:from-background/85 md:via-background/45 md:to-transparent" />
       </div>
       <div className="pointer-events-none absolute -left-16 top-32 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
       <div className="pointer-events-none absolute right-0 top-20 h-52 w-52 rounded-full bg-accent/35 blur-3xl" />
