@@ -12,14 +12,14 @@ export function HeroSection() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-[82%_center] md:object-[72%_center] opacity-95"
+          className="object-cover object-[92%_center] md:object-[80%_center] scale-[1.18] md:scale-[1.08] opacity-95"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.85)_0%,rgba(0,0,0,0.72)_14%,rgba(0,0,0,0.38)_30%,rgba(0,0,0,0)_52%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.68)_28%,rgba(0,0,0,0.35)_48%,rgba(0,0,0,0.08)_68%,rgba(0,0,0,0)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.82)_16%,rgba(0,0,0,0.56)_34%,rgba(0,0,0,0.18)_54%,rgba(0,0,0,0)_72%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.84)_22%,rgba(0,0,0,0.62)_42%,rgba(0,0,0,0.28)_62%,rgba(0,0,0,0.08)_78%,rgba(0,0,0,0)_100%)]" />
       </div>
 
       <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8 pt-28 pb-8 md:pt-32 md:pb-12">
-        <div className="max-w-xl">
+        <div className="max-w-lg">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/25 px-3 py-1 text-[11px] font-medium tracking-[0.18em] uppercase text-white/90 backdrop-blur-sm">
             FEROX BARF PREMIUM
           </span>

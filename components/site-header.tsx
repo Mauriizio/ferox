@@ -17,6 +17,7 @@ const navLinks = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const onHero = !scrolled
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12)
@@ -30,13 +31,21 @@ export function SiteHeader() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         scrolled
-          ? "bg-background/75 backdrop-blur-xl border-b border-border shadow-[0_10px_30px_rgba(0,0,0,0.07)]"
-          : "bg-transparent",
+          ? "bg-background/88 backdrop-blur-md border-b border-black/8 shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
+          : "bg-black/22 backdrop-blur-[2px]",
       )}
     >
-      <div className="bg-black text-white">
-        <div className="mx-auto max-w-7xl px-4 py-2 text-center text-xs sm:text-sm font-medium">
-          🎁 Precios especiales por mayo: en tu plan premium te llevas un regalo sorpresa.
+      <div className="relative bg-black text-white/85 border-b border-white/10 overflow-hidden">
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-black to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-black to-transparent" />
+        <div className="ticker-track py-1 text-[9px] sm:text-[10px] font-medium tracking-[0.16em] uppercase">
+          <span className="ticker-item">
+            FEROX BARF PREMIUM · COMIDA REAL PARA PERROS REALES · SIN QUÍMICOS · SIN RELLENOS · INGREDIENTES REALES
+          </span>
+          <span className="ticker-item" aria-hidden="true">
+            NUTRICIÓN NATURAL · DIETA BARF PREMIUM · ENVÍOS PROGRAMADOS · FEROX BARF PREMIUM · COMIDA REAL PARA PERROS
+            REALES
+          </span>
         </div>
       </div>
 
@@ -45,7 +54,10 @@ export function SiteHeader() {
           <div className="flex md:hidden w-full items-center justify-between">
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground"
+              className={cn(
+                "inline-flex h-10 w-10 items-center justify-center rounded-md transition-colors",
+                onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-black/5",
+              )}
               onClick={() => setOpen((v) => !v)}
               aria-label="Abrir menú"
               aria-expanded={open}
@@ -55,19 +67,22 @@ export function SiteHeader() {
 
             <Link href="/" className="flex items-center" aria-label="FEROX BARF inicio">
               <Image
-                src="/logoblanco.png"
+                src={onHero ? "/logoblanco.png" : "/logo.png"}
                 alt="FEROX Nutrición BARF Premium"
                 width={220}
                 height={64}
                 priority
-                className="h-12 w-auto"
+                className={cn("h-12 w-auto transition-all", onHero && "brightness-0 invert")}
               />
             </Link>
 
             <Link
               href="#tienda"
               aria-label="Ir al carrito de compras"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground"
+              className={cn(
+                "inline-flex h-10 w-10 items-center justify-center rounded-md transition-colors",
+                onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-black/5",
+              )}
             >
               <ShoppingCart className="h-5 w-5" />
             </Link>
@@ -75,21 +90,32 @@ export function SiteHeader() {
 
           <Link href="/" className="hidden md:flex items-center" aria-label="FEROX BARF inicio">
             <Image
-              src="/logoblanco.png"
+              src={onHero ? "/logoblanco.png" : "/logo.png"}
               alt="FEROX Nutrición BARF Premium"
               width={300}
               height={90}
               priority
-              className="h-12 w-auto lg:h-16"
+              className={cn("h-12 w-auto lg:h-16 transition-all", onHero && "brightness-0 invert")}
             />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8" aria-label="Navegación principal">
+          <nav
+            className={cn(
+              "hidden md:flex items-center gap-8",
+              onHero && "rounded-full bg-black/35 border border-white/15 px-5 py-2 backdrop-blur-sm",
+            )}
+            aria-label="Navegación principal"
+          >
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm text-foreground/80 hover:text-foreground transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
+                className={cn(
+                  "text-sm transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:transition-all hover:after:w-full",
+                  onHero
+                    ? "text-white/95 hover:text-white after:bg-white [text-shadow:0_1px_8px_rgba(0,0,0,0.65)]"
+                    : "text-foreground/80 hover:text-foreground after:bg-primary",
+                )}
               >
                 {link.label}
               </Link>
@@ -98,33 +124,44 @@ export function SiteHeader() {
 
           <div className="hidden md:block">
             <Link
-              href="#calculadora"
-              className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:brightness-95 transition-all shadow-lg shadow-primary/30"
+              href="#tienda"
+              className={cn(
+                "inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-medium transition-all",
+                onHero
+                  ? "bg-white text-black hover:bg-white/90 shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
+                  : "bg-primary text-primary-foreground hover:brightness-95 shadow-lg shadow-primary/30",
+              )}
             >
-              Calcular ahora
+              Comprar ahora
             </Link>
           </div>
         </div>
 
         {open && (
-          <div className="md:hidden border-t border-border py-4 bg-background">
+          <div className={cn("md:hidden border-t py-4", onHero ? "border-white/20 bg-black/85" : "border-border bg-background")}>
             <nav className="flex flex-col gap-1" aria-label="Navegación móvil">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="px-3 py-3 text-base text-foreground hover:bg-muted rounded-md transition-colors"
+                  className={cn(
+                    "px-3 py-3 text-base rounded-md transition-colors",
+                    onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted",
+                  )}
                 >
                   {link.label}
                 </Link>
               ))}
               <Link
-                href="#calculadora"
+                href="#tienda"
                 onClick={() => setOpen(false)}
-                className="mt-3 inline-flex items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background"
+                className={cn(
+                  "mt-3 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium",
+                  onHero ? "bg-white text-black" : "bg-foreground text-background",
+                )}
               >
-                Calcular ahora
+                Comprar ahora
               </Link>
             </nav>
           </div>

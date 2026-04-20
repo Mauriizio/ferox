@@ -160,7 +160,7 @@
     width: max-content;
     min-width: 100%;
     white-space: nowrap;
-    animation: ferox-ticker 28s linear infinite;
+    animation: ferox-ticker 38s linear infinite;
   }
 
   .ticker-item {
