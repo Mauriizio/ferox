@@ -39,13 +39,24 @@ export function SiteHeader() {
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-black to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-black to-transparent" />
         <div className="ticker-track py-1 text-[9px] sm:text-[10px] font-medium tracking-[0.16em] uppercase">
-          <span className="ticker-item">
-            FEROX BARF PREMIUM · COMIDA REAL PARA PERROS REALES · SIN QUÍMICOS · SIN RELLENOS · INGREDIENTES REALES
-          </span>
-          <span className="ticker-item" aria-hidden="true">
-            NUTRICIÓN NATURAL · DIETA BARF PREMIUM · ENVÍOS PROGRAMADOS · FEROX BARF PREMIUM · COMIDA REAL PARA PERROS
-            REALES
-          </span>
+          <div className="ticker-group">
+            <span className="ticker-item">FEROX BARF PREMIUM · NUTRICIÓN NATURAL PARA PERROS</span>
+            <span className="ticker-item">CARNE REAL · ÓRGANOS · VEGETALES FRESCOS</span>
+            <span className="ticker-item">SIN QUÍMICOS · SIN RELLENOS · SIN ULTRAPROCESADOS</span>
+            <span className="ticker-item">MÁS ENERGÍA · MEJOR DIGESTIÓN · PELO MÁS BRILLANTE</span>
+            <span className="ticker-item">ALIMENTACIÓN BIOLÓGICAMENTE APROPIADA</span>
+            <span className="ticker-item">FRESCO · NATURAL · FUNCIONAL</span>
+            <span className="ticker-item">NUTRICIÓN QUE SE NOTA EN SU CUERPO</span>
+          </div>
+          <div className="ticker-group" aria-hidden="true">
+            <span className="ticker-item">FEROX BARF PREMIUM · NUTRICIÓN NATURAL PARA PERROS</span>
+            <span className="ticker-item">CARNE REAL · ÓRGANOS · VEGETALES FRESCOS</span>
+            <span className="ticker-item">SIN QUÍMICOS · SIN RELLENOS · SIN ULTRAPROCESADOS</span>
+            <span className="ticker-item">MÁS ENERGÍA · MEJOR DIGESTIÓN · PELO MÁS BRILLANTE</span>
+            <span className="ticker-item">ALIMENTACIÓN BIOLÓGICAMENTE APROPIADA</span>
+            <span className="ticker-item">FRESCO · NATURAL · FUNCIONAL</span>
+            <span className="ticker-item">NUTRICIÓN QUE SE NOTA EN SU CUERPO</span>
+          </div>
         </div>
       </div>
 
@@ -72,7 +83,7 @@ export function SiteHeader() {
                 width={220}
                 height={64}
                 priority
-                className={cn("h-12 w-auto transition-all", onHero && "brightness-0 invert")}
+                className="h-12 w-auto transition-all"
               />
             </Link>
 
@@ -95,7 +106,7 @@ export function SiteHeader() {
               width={300}
               height={90}
               priority
-              className={cn("h-12 w-auto lg:h-16 transition-all", onHero && "brightness-0 invert")}
+              className="h-12 w-auto lg:h-16 transition-all"
             />
           </Link>
 
