@@ -28,7 +28,7 @@ export function AccountPetsSection() {
                 ["Nombre", "Tu nombre"],
                 ["Apellido", "Tu apellido"],
                 ["Correo", "correo@ejemplo.com"],
-                ["Teléfono", "+56 9 ..."],
+                ["Teléfono", "+56 9 2797 3379"],
               ].map(([label, placeholder]) => (
                 <label key={label} className="text-sm text-foreground">
                   {label}

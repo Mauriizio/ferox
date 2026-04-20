@@ -92,7 +92,7 @@ export function ShopSection() {
                 </p>
 
                 <a
-                  href={`https://wa.me/56912345678?text=${encodeURIComponent(
+                  href={`https://wa.me/56927973379?text=${encodeURIComponent(
                     `Hola, quiero comprar ${product.name} de FEROX BARF`,
                   )}`}
                   target="_blank"

@@ -34,7 +34,7 @@ export function CtaSection() {
             Calcular su porción
           </Link>
           <a
-            href="https://wa.me/56912345678?text=Hola,%20quiero%20info%20de%20FEROX%20BARF"
+            href="https://wa.me/56927973379?text=Hola,%20quiero%20info%20de%20FEROX%20BARF"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 rounded-full border border-background/30 px-6 py-4 text-sm sm:text-base font-medium text-background hover:bg-background/10 transition-colors"

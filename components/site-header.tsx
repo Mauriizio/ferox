@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, ShoppingCart, X } from "lucide-react"
+import { ShoppingCart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
@@ -66,14 +66,35 @@ export function SiteHeader() {
             <button
               type="button"
               className={cn(
-                "inline-flex h-10 w-10 items-center justify-center rounded-md transition-colors",
-                onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-black/5",
+                "inline-flex h-10 w-10 items-center justify-center rounded-full border transition-all",
+                onHero
+                  ? "text-white border-white/40 bg-black/25 hover:bg-white/10"
+                  : "text-foreground border-black/15 bg-black/[0.03] hover:bg-black/[0.06]",
               )}
               onClick={() => setOpen((v) => !v)}
               aria-label="Abrir menú"
               aria-expanded={open}
             >
-              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              <span className="relative h-4 w-4">
+                <span
+                  className={cn(
+                    "absolute left-0 top-[2px] h-[1.8px] w-4 rounded-full bg-current transition-all",
+                    open && "top-[7px] rotate-45",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "absolute left-0 top-[7px] h-[1.8px] w-4 rounded-full bg-current transition-all",
+                    open && "opacity-0",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "absolute left-0 top-[12px] h-[1.8px] w-4 rounded-full bg-current transition-all",
+                    open && "top-[7px] -rotate-45",
+                  )}
+                />
+              </span>
             </button>
 
             <Link href="/" className="flex items-center" aria-label="FEROX BARF inicio">
@@ -150,14 +171,14 @@ export function SiteHeader() {
 
         {open && (
           <div className={cn("md:hidden border-t py-4", onHero ? "border-white/20 bg-black/85" : "border-border bg-background")}>
-            <nav className="flex flex-col gap-1" aria-label="Navegación móvil">
+            <nav className="mx-auto flex max-w-xs flex-col items-center gap-1.5 text-center" aria-label="Navegación móvil">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "px-3 py-3 text-base rounded-md transition-colors",
+                    "w-full px-3 py-3 text-base rounded-md transition-colors",
                     onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted",
                   )}
                 >
@@ -168,7 +189,7 @@ export function SiteHeader() {
                 href="#tienda"
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "mt-3 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium",
+                  "mt-3 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium",
                   onHero ? "bg-white text-black" : "bg-foreground text-background",
                 )}
               >

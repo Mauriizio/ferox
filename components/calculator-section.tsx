@@ -8,7 +8,7 @@ type Edad = "cachorro" | "adulto" | "senior"
 type Actividad = "baja" | "moderada" | "alta"
 type Estado = "normal" | "esterilizado" | "sobrepeso"
 
-const PHONE = "56912345678" // FEROX BARF WhatsApp number
+const PHONE = "56927973379" // FEROX BARF WhatsApp number
 
 function calcularPorcentaje(edad: Edad, actividad: Actividad, estado: Estado): number {
   let pct: number

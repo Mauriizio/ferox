@@ -24,7 +24,7 @@ export function SiteFooter() {
 
             <div className="mt-6 flex items-center gap-3">
               <a
-                href="https://wa.me/56912345678"
+                href="https://wa.me/56927973379"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-foreground hover:text-background transition-colors"
@@ -80,12 +80,12 @@ export function SiteFooter() {
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
               <li>
                 <a
-                  href="https://wa.me/56912345678"
+                  href="https://wa.me/56927973379"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-foreground transition-colors"
                 >
-                  +56 9 1234 5678
+                  +56 9 2797 3379
                 </a>
               </li>
               <li>
