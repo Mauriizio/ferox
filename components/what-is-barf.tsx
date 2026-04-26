@@ -7,7 +7,7 @@ export function WhatIsBarf() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div className="relative aspect-[4/5] sm:aspect-square lg:aspect-[4/5] overflow-hidden rounded-2xl bg-muted order-last lg:order-first ring-1 ring-border shadow-2xl shadow-foreground/10">
             <Image
-              src="/barf-food.jpg"
+              src="/perros/napoleon.png"
               alt="Plato de comida BARF con carne cruda, huesos y vegetales frescos"
               fill
               sizes="(min-width: 1024px) 50vw, 100vw"

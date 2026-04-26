@@ -15,7 +15,7 @@ export function HeroSection() {
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 md:hidden">
           <Image
-            src="/image/color-mobile.png"
+            src="/hero-m.png"
             alt="Perro fuerte y saludable alimentado con dieta BARF"
             fill
             priority
@@ -25,7 +25,7 @@ export function HeroSection() {
         </div>
         <div className="absolute inset-0 hidden md:block">
           <Image
-            src="/image/color.png"
+            src="/hero.png"
             alt="Perro fuerte y saludable alimentado con dieta BARF"
             fill
             priority

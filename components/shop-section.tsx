@@ -8,7 +8,7 @@ const products = [
     price: "$ 5.990",
     portion: "Ideal para rotación proteica",
     badge: "Vacuno",
-    image: "/product-pack.jpg",
+    image: "/product/product1.png",
   },
   {
     name: "Mix de proteína",
@@ -17,15 +17,15 @@ const products = [
     portion: "Combinación balanceada",
     badge: "Más vendido",
     featured: true,
-    image: "/barf-food.jpg",
+    image: "/product/product2.png",
   },
   {
-    name: "Pack mensual BARF",
+    name: "Snack de pollo",
     weight: "15 kg",
-    price: "$ 89.990",
-    portion: "Plan para 30 días",
+    price: "$ 15.990",
+    portion: "Patitas de pollo deshidratadas",
     badge: "Pack",
-    image: "/placeholder.jpg",
+    image: "/product/product3.png",
   },
 ]
 
