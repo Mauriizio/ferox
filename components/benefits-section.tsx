@@ -35,8 +35,8 @@ const benefits = [
 
 export function BenefitsSection() {
   return (
-    <section id="beneficios" className="min-h-[100svh] bg-foreground text-background flex items-center">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16 md:py-20">
+    <section id="beneficios" className="min-h-[100svh] bg-foreground text-background">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-background/60">
             Beneficios
@@ -49,7 +49,7 @@ export function BenefitsSection() {
           </p>
         </div>
 
-        <ul className="mt-8 md:mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-background/10 border border-background/10 rounded-2xl overflow-hidden">
+        <ul className="mt-6 md:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-background/10 border border-background/10 rounded-2xl overflow-hidden">
           {benefits.map((benefit) => {
             const Icon = benefit.icon
             return (

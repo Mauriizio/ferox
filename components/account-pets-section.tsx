@@ -2,8 +2,8 @@ import { Dog, UserRound } from "lucide-react"
 
 export function AccountPetsSection() {
   return (
-    <section id="cuenta" className="min-h-[100svh] bg-muted border-t border-border flex items-center">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-14 md:py-16">
+    <section id="cuenta" className="min-h-[100svh] bg-muted border-t border-border">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
             Usuarios y mascotas
@@ -17,7 +17,7 @@ export function AccountPetsSection() {
           </p>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <article className="rounded-2xl border border-border bg-background p-5 sm:p-6">
             <div className="flex items-center gap-2 text-foreground">
               <UserRound className="h-5 w-5" />

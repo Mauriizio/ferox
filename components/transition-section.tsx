@@ -7,8 +7,8 @@ const phases = [
 
 export function TransitionSection() {
   return (
-    <section className="min-h-[100svh] bg-background border-t border-border flex items-center">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16 md:py-20">
+    <section className="min-h-[100svh] bg-background border-t border-border">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
             Transición a BARF
@@ -22,7 +22,7 @@ export function TransitionSection() {
           </p>
         </div>
 
-        <ol className="mt-8 md:mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <ol className="mt-6 md:mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {phases.map((phase, idx) => (
             <li
               key={phase.days}

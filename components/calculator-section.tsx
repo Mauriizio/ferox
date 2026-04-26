@@ -52,8 +52,8 @@ export function CalculatorSection() {
   )
 
   return (
-    <section id="calculadora" className="min-h-[100svh] bg-background border-t border-border flex items-center">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-14 md:py-16">
+    <section id="calculadora" className="min-h-[100svh] bg-background border-t border-border">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
         <div className="max-w-3xl mx-auto text-center">
           <Image src="/placeholder-logo.svg" alt="Logo FEROX" width={160} height={40} className="mx-auto h-10 w-auto" />
           <span className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium tracking-wider uppercase text-muted-foreground">
@@ -68,9 +68,9 @@ export function CalculatorSection() {
           </p>
         </div>
 
-        <div className="mt-8 md:mt-10 grid lg:grid-cols-5 gap-4 lg:gap-6">
+        <div className="mt-6 md:mt-8 grid lg:grid-cols-5 gap-3 lg:gap-5">
           <div className="lg:col-span-3 rounded-2xl border border-border bg-background p-5 sm:p-6">
-            <form className="space-y-4 sm:space-y-5" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-3 sm:space-y-4" onSubmit={(e) => e.preventDefault()}>
               <div>
                 <label htmlFor="peso" className="block text-sm font-medium text-foreground">
                   Peso del perro (kg)
@@ -89,7 +89,8 @@ export function CalculatorSection() {
                 />
               </div>
 
-              <div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
                 <span className="block text-sm font-medium text-foreground">Edad</span>
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   {(
@@ -114,9 +115,9 @@ export function CalculatorSection() {
                     </button>
                   ))}
                 </div>
-              </div>
+                </div>
 
-              <div>
+                <div>
                 <span className="block text-sm font-medium text-foreground">Nivel de actividad</span>
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   {(
@@ -147,6 +148,7 @@ export function CalculatorSection() {
                     Para {edad === "cachorro" ? "cachorros" : "perros senior"} se usa un cálculo específico por edad.
                   </p>
                 )}
+                </div>
               </div>
 
               <div>

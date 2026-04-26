@@ -12,8 +12,8 @@ const rows = [
 
 export function ComparisonSection() {
   return (
-    <section className="min-h-[100svh] bg-muted border-t border-border flex items-center">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16 md:py-20">
+    <section className="min-h-[100svh] bg-muted border-t border-border">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
             BARF vs Pellet
