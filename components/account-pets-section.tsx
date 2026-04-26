@@ -2,8 +2,8 @@ import { Dog, UserRound } from "lucide-react"
 
 export function AccountPetsSection() {
   return (
-    <section id="cuenta" className="py-20 md:py-32 bg-muted border-t border-border">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="cuenta" className="min-h-[100svh] bg-muted border-t border-border flex items-center">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-14 md:py-16">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
             Usuarios y mascotas
@@ -17,13 +17,13 @@ export function AccountPetsSection() {
           </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <article className="rounded-2xl border border-border bg-background p-6 sm:p-8">
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <article className="rounded-2xl border border-border bg-background p-5 sm:p-6">
             <div className="flex items-center gap-2 text-foreground">
               <UserRound className="h-5 w-5" />
               <h3 className="font-semibold">Registro de usuario</h3>
             </div>
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 ["Nombre", "Tu nombre"],
                 ["Apellido", "Tu apellido"],
@@ -40,17 +40,17 @@ export function AccountPetsSection() {
                 </label>
               ))}
             </div>
-            <button className="mt-6 inline-flex rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background hover:bg-foreground/90">
+            <button className="mt-5 inline-flex rounded-full bg-foreground px-5 py-3 text-sm font-medium text-background hover:bg-foreground/90">
               Crear cuenta
             </button>
           </article>
 
-          <article className="rounded-2xl border border-border bg-background p-6 sm:p-8">
+          <article className="rounded-2xl border border-border bg-background p-5 sm:p-6">
             <div className="flex items-center gap-2 text-foreground">
               <Dog className="h-5 w-5" />
               <h3 className="font-semibold">Registro de perros</h3>
             </div>
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {["Nombre", "Peso", "Edad", "Tamaño", "Actividad", "Estado físico"].map((label) => (
                 <label key={label} className="text-sm text-foreground">
                   {label}
@@ -62,7 +62,7 @@ export function AccountPetsSection() {
                 </label>
               ))}
             </div>
-            <button className="mt-6 inline-flex rounded-full border border-foreground px-5 py-3 text-sm font-medium text-foreground hover:bg-muted">
+            <button className="mt-5 inline-flex rounded-full border border-foreground px-5 py-3 text-sm font-medium text-foreground hover:bg-muted">
               Añadir perro
             </button>
           </article>

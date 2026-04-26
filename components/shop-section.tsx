@@ -31,8 +31,8 @@ const products = [
 
 export function ShopSection() {
   return (
-    <section id="tienda" className="py-20 md:py-32 bg-background border-t border-border">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="tienda" className="min-h-[100svh] bg-background border-t border-border flex items-center">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-14 md:py-16">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div className="max-w-2xl">
             <Image src="/placeholder-logo.svg" alt="Logo FEROX" width={170} height={42} className="h-10 w-auto" />
@@ -49,7 +49,7 @@ export function ShopSection() {
           </div>
         </div>
 
-        <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="mt-8 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
           {products.map((product) => (
             <article
               key={product.name}
@@ -78,13 +78,13 @@ export function ShopSection() {
                 </div>
               </div>
 
-              <div className="flex-1 p-6 flex flex-col">
+              <div className="flex-1 p-5 flex flex-col">
                 <h3 className="font-serif text-2xl font-bold">{product.name}</h3>
                 <p className={`mt-1 text-sm ${product.featured ? "text-background/70" : "text-muted-foreground"}`}>
                   {product.weight}
                 </p>
 
-                <div className="mt-6 flex items-baseline gap-2">
+                <div className="mt-4 flex items-baseline gap-2">
                   <span className="font-serif text-3xl font-bold">{product.price}</span>
                 </div>
                 <p className={`mt-2 text-sm ${product.featured ? "text-background/70" : "text-muted-foreground"}`}>
@@ -97,7 +97,7 @@ export function ShopSection() {
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`mt-8 inline-flex items-center justify-between gap-2 rounded-full px-5 py-3 text-sm font-medium transition-colors ${
+                  className={`mt-6 inline-flex items-center justify-between gap-2 rounded-full px-5 py-3 text-sm font-medium transition-colors ${
                     product.featured
                       ? "bg-background text-foreground hover:bg-background/90"
                       : "bg-foreground text-background hover:bg-foreground/90"
@@ -111,7 +111,7 @@ export function ShopSection() {
           ))}
         </div>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="rounded-xl border border-border p-4 text-sm text-muted-foreground flex items-start gap-3">
             <ShoppingCart className="h-4 w-4 mt-0.5 text-foreground" />
             Carrito de compra activo: agrega productos y confirma cantidades para cerrar tu pedido.
@@ -122,7 +122,7 @@ export function ShopSection() {
           </div>
         </div>
 
-        <p className="mt-8 text-center text-sm text-muted-foreground">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           Métodos de pago: Transferencia bancaria · Efectivo contra entrega. Seguimiento manual vía WhatsApp.
         </p>
       </div>

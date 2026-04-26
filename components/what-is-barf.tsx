@@ -2,9 +2,9 @@ import Image from "next/image"
 
 export function WhatIsBarf() {
   return (
-    <section id="que-es-barf" className="py-20 md:py-32 bg-background border-t border-border/70">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+    <section id="que-es-barf" className="min-h-[100svh] bg-background border-t border-border/70 flex items-center">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16 md:py-20">
+        <div className="grid lg:grid-cols-2 gap-8 md:gap-10 lg:gap-16 items-center">
           <div className="relative aspect-[4/5] sm:aspect-square lg:aspect-[4/5] overflow-hidden rounded-2xl bg-muted order-last lg:order-first ring-1 ring-border shadow-2xl shadow-foreground/10">
             <Image
               src="/perros/napoleon.png"
@@ -15,7 +15,7 @@ export function WhatIsBarf() {
             />
           </div>
 
-          <div>
+          <div className="lg:py-2">
             <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
               ¿Qué es BARF?
             </span>
@@ -33,7 +33,7 @@ export function WhatIsBarf() {
               </p>
             </div>
 
-            <div className="mt-8 grid grid-cols-3 gap-2 sm:gap-4">
+            <div className="mt-6 md:mt-8 grid grid-cols-3 gap-2 sm:gap-3">
               {[
                 { label: "Carne", value: "70%" },
                 { label: "Huesos", value: "20%" },

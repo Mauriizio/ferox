@@ -35,8 +35,8 @@ const benefits = [
 
 export function BenefitsSection() {
   return (
-    <section id="beneficios" className="py-20 md:py-32 bg-foreground text-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="beneficios" className="min-h-[100svh] bg-foreground text-background flex items-center">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16 md:py-20">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-background/60">
             Beneficios
@@ -49,15 +49,15 @@ export function BenefitsSection() {
           </p>
         </div>
 
-        <ul className="mt-12 md:mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-background/10 border border-background/10 rounded-2xl overflow-hidden">
+        <ul className="mt-8 md:mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-background/10 border border-background/10 rounded-2xl overflow-hidden">
           {benefits.map((benefit) => {
             const Icon = benefit.icon
             return (
-              <li key={benefit.title} className="bg-foreground p-6 sm:p-8 group hover:bg-background/5 transition-colors">
+              <li key={benefit.title} className="bg-foreground p-5 sm:p-6 group hover:bg-background/5 transition-colors">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full border border-background/20 group-hover:border-background/50 transition-colors">
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 </div>
-                <h3 className="mt-6 font-serif text-xl font-bold">{benefit.title}</h3>
+                <h3 className="mt-4 font-serif text-xl font-bold">{benefit.title}</h3>
                 <p className="mt-2 text-sm text-background/70 leading-relaxed">{benefit.description}</p>
               </li>
             )

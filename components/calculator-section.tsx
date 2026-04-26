@@ -52,8 +52,8 @@ export function CalculatorSection() {
   )
 
   return (
-    <section id="calculadora" className="py-20 md:py-32 bg-background border-t border-border">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="calculadora" className="min-h-[100svh] bg-background border-t border-border flex items-center">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-14 md:py-16">
         <div className="max-w-3xl mx-auto text-center">
           <Image src="/placeholder-logo.svg" alt="Logo FEROX" width={160} height={40} className="mx-auto h-10 w-auto" />
           <span className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium tracking-wider uppercase text-muted-foreground">
@@ -68,9 +68,9 @@ export function CalculatorSection() {
           </p>
         </div>
 
-        <div className="mt-12 md:mt-16 grid lg:grid-cols-5 gap-6 lg:gap-8">
-          <div className="lg:col-span-3 rounded-2xl border border-border bg-background p-6 sm:p-8">
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+        <div className="mt-8 md:mt-10 grid lg:grid-cols-5 gap-4 lg:gap-6">
+          <div className="lg:col-span-3 rounded-2xl border border-border bg-background p-5 sm:p-6">
+            <form className="space-y-4 sm:space-y-5" onSubmit={(e) => e.preventDefault()}>
               <div>
                 <label htmlFor="peso" className="block text-sm font-medium text-foreground">
                   Peso del perro (kg)
@@ -103,7 +103,7 @@ export function CalculatorSection() {
                       key={opt.v}
                       type="button"
                       onClick={() => setEdad(opt.v)}
-                      className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
+                      className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                         edad === opt.v
                           ? "border-foreground bg-foreground text-background"
                           : "border-border bg-background text-foreground hover:bg-muted"
@@ -131,7 +131,7 @@ export function CalculatorSection() {
                       type="button"
                       onClick={() => setActividad(opt.v)}
                       disabled={edad !== "adulto"}
-                      className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
+                      className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                         actividad === opt.v
                           ? "border-foreground bg-foreground text-background"
                           : "border-border bg-background text-foreground hover:bg-muted"
@@ -163,7 +163,7 @@ export function CalculatorSection() {
                       key={opt.v}
                       type="button"
                       onClick={() => setEstado(opt.v)}
-                      className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
+                      className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                         estado === opt.v
                           ? "border-foreground bg-foreground text-background"
                           : "border-border bg-background text-foreground hover:bg-muted"
@@ -178,12 +178,12 @@ export function CalculatorSection() {
             </form>
           </div>
 
-          <div className="lg:col-span-2 rounded-2xl bg-foreground text-background p-6 sm:p-8 flex flex-col">
+          <div className="lg:col-span-2 rounded-2xl bg-foreground text-background p-5 sm:p-6 flex flex-col">
             <div className="flex-1">
               <span className="text-xs uppercase tracking-widest text-background/60">Resultado</span>
               <h3 className="mt-3 font-serif text-2xl font-bold">Porción diaria recomendada</h3>
 
-              <div className="mt-8 space-y-6">
+              <div className="mt-6 space-y-5">
                 <div>
                   <div className="text-xs uppercase tracking-widest text-background/60">Por día</div>
                   <div className="mt-1 flex items-baseline gap-2">
@@ -208,7 +208,7 @@ export function CalculatorSection() {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col gap-3">
+            <div className="mt-6 flex flex-col gap-2.5">
               <a
                 href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
                 target="_blank"

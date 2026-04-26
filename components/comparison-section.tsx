@@ -12,8 +12,8 @@ const rows = [
 
 export function ComparisonSection() {
   return (
-    <section className="py-20 md:py-32 bg-muted border-t border-border">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="min-h-[100svh] bg-muted border-t border-border flex items-center">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16 md:py-20">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
             BARF vs Pellet
@@ -27,7 +27,7 @@ export function ComparisonSection() {
           </p>
         </div>
 
-        <div className="mt-12 md:mt-16 overflow-hidden rounded-2xl border border-border bg-background">
+        <div className="mt-8 md:mt-10 overflow-hidden rounded-2xl border border-border bg-background">
           <div className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[2fr_1fr_1fr]">
             <div className="bg-muted px-4 sm:px-6 py-4 text-xs sm:text-sm font-medium uppercase tracking-wider text-muted-foreground">
               Característica
