@@ -38,13 +38,7 @@ export function ShopSection() {
       <div className="viewport-shell mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-6">
           <div className="max-w-2xl">
-            <Image
-              src="/placeholder-logo.svg"
-              alt="Logo FEROX"
-              width={170}
-              height={42}
-              className="hidden h-8 w-auto sm:block md:h-10"
-            />
+           
             <span className="mt-1 sm:mt-3 md:mt-4 inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
               Tienda
             </span>

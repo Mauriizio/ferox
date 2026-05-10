@@ -62,17 +62,8 @@ export function CalculatorSection() {
     >
       <div className="viewport-shell mx-auto flex w-full max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-3 sm:py-5 md:py-8">
         <div className="max-w-3xl mx-auto text-center">
-          <Image
-            src="/placeholder-logo.svg"
-            alt="Logo FEROX"
-            width={160}
-            height={40}
-            className="mx-auto hidden h-8 w-auto sm:block md:h-10"
-          />
-          <span className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium tracking-wider uppercase text-muted-foreground">
-            <Calculator className="h-3 w-3" />
-            Calculadora BARF
-          </span>
+          
+          
           <h2 className="mt-2 sm:mt-3 font-serif text-2xl sm:text-3xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
             Descubre cuánta comida necesita tu perro
           </h2>
