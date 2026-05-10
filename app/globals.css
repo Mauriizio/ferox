@@ -1,11 +1,12 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 @font-face {
   font-family: "Ferox";
-  src: url("../styles/fonts/ferox-font/ferox.otf") format("opentype"),
+  src:
+    url("../styles/fonts/ferox-font/ferox.otf") format("opentype"),
     url("../styles/fonts/ferox-font/ferox.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
@@ -86,7 +87,7 @@
 @theme inline {
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Ferox", var(--font-serif), ui-serif, Georgia, serif;
-  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -128,7 +129,29 @@
 @layer base {
   html,
   body {
+    width: 100%;
+    max-width: 100%;
     overflow-x: hidden;
+  }
+
+  @supports (overflow: clip) {
+    html,
+    body {
+      overflow-x: clip;
+    }
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
   }
 
   * {
@@ -147,6 +170,29 @@
   h6 {
     font-family: "Ferox", var(--font-serif), ui-serif, Georgia, serif;
     letter-spacing: 0.01em;
+  }
+}
+
+@layer components {
+  .viewport-section {
+    height: 100svh;
+    min-height: 100svh;
+    max-height: 100svh;
+    overflow: hidden;
+  }
+
+  @supports (height: 100dvh) {
+    .viewport-section {
+      height: 100dvh;
+      min-height: 100dvh;
+      max-height: 100dvh;
+    }
+  }
+
+  .viewport-shell {
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
   }
 }
 

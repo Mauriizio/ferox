@@ -1,10 +1,10 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Calculator, MessageCircle } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { Calculator, MessageCircle } from "lucide-react";
 
 export function CtaSection() {
   return (
-    <section className="relative overflow-hidden min-h-[100svh] bg-foreground text-background border-t border-border">
+    <section className="viewport-section relative bg-foreground text-background border-t border-border">
       <div className="absolute inset-0 z-0 opacity-20">
         <Image
           src="/happy-dog.jpg"
@@ -17,15 +17,16 @@ export function CtaSection() {
         <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/70 to-foreground/40" />
       </div>
 
-      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-4xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 text-center">
-        <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight text-balance">
+      <div className="viewport-shell relative z-10 mx-auto flex w-full max-w-4xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 text-center">
+        <h2 className="font-serif text-3xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight text-balance">
           Tu perro depende de ti para comer bien.
         </h2>
-        <p className="mt-6 text-lg sm:text-xl text-background/80 leading-relaxed text-pretty max-w-2xl mx-auto">
-          Dale lo que realmente necesita. Calcula su porción ideal o escríbenos directo por WhatsApp.
+        <p className="mt-4 text-base sm:text-lg md:text-xl text-background/80 leading-relaxed text-pretty max-w-2xl mx-auto">
+          Dale lo que realmente necesita. Calcula su porción ideal o escríbenos
+          directo por WhatsApp.
         </p>
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center">
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center">
           <Link
             href="#calculadora"
             className="inline-flex items-center justify-center gap-2 rounded-full bg-background px-6 py-4 text-sm sm:text-base font-medium text-foreground hover:bg-background/90 transition-colors"
@@ -45,5 +46,5 @@ export function CtaSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

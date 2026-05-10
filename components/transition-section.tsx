@@ -3,43 +3,47 @@ const phases = [
   { days: "Día 4 – 6", barf: 50, current: 50 },
   { days: "Día 7 – 9", barf: 75, current: 25 },
   { days: "Día 10", barf: 100, current: 0 },
-]
+];
 
 export function TransitionSection() {
   return (
-    <section className="min-h-[100svh] bg-background border-t border-border">
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
+    <section className="viewport-section bg-background border-t border-border">
+      <div className="viewport-shell mx-auto flex w-full max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
             Transición a BARF
           </span>
-          <h2 className="mt-4 font-serif text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
+          <h2 className="mt-2 sm:mt-3 font-serif text-2xl sm:text-3xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
             Cambiar es muy sencillo. Hazlo paso a paso.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
-            Recomendamos una transición progresiva en 10 días para evitar problemas digestivos y que tu perro se adapte
-            sin estrés.
+          <p className="mt-2 sm:mt-3 text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed">
+            Recomendamos una transición progresiva en 10 días para evitar
+            problemas digestivos y que tu perro se adapte sin estrés.
           </p>
         </div>
 
-        <ol className="mt-6 md:mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <ol className="mt-4 md:mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
           {phases.map((phase, idx) => (
             <li
               key={phase.days}
-              className="relative rounded-2xl border border-border p-5 bg-background hover:border-foreground transition-colors"
+              className="relative rounded-2xl border border-border p-3 sm:p-4 lg:p-5 bg-background hover:border-foreground transition-colors"
             >
               <div className="flex items-center justify-between">
-                <span className="font-serif text-3xl font-bold text-foreground">0{idx + 1}</span>
+                <span className="font-serif text-2xl sm:text-3xl font-bold text-foreground">
+                  0{idx + 1}
+                </span>
                 <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {phase.days}
                 </span>
               </div>
 
-              <div className="mt-6 space-y-3">
+              <div className="mt-3 sm:mt-5 space-y-2 sm:space-y-3">
                 <div>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">BARF</span>
-                    <span className="font-medium text-foreground">{phase.barf}%</span>
+                    <span className="font-medium text-foreground">
+                      {phase.barf}%
+                    </span>
                   </div>
                   <div className="mt-1 h-2 w-full rounded-full bg-muted overflow-hidden">
                     <div
@@ -50,8 +54,12 @@ export function TransitionSection() {
                 </div>
                 <div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Alimento actual</span>
-                    <span className="font-medium text-foreground">{phase.current}%</span>
+                    <span className="text-muted-foreground">
+                      Alimento actual
+                    </span>
+                    <span className="font-medium text-foreground">
+                      {phase.current}%
+                    </span>
                   </div>
                   <div className="mt-1 h-2 w-full rounded-full bg-muted overflow-hidden">
                     <div
@@ -66,5 +74,5 @@ export function TransitionSection() {
         </ol>
       </div>
     </section>
-  )
+  );
 }
