@@ -7,26 +7,26 @@ const phases = [
 
 export function TransitionSection() {
   return (
-    <section className="viewport-section bg-background border-t border-border">
-      <div className="viewport-shell mx-auto flex w-full max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+    <section className="bg-background border-t border-border">
+      <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
             Transición a BARF
           </span>
-          <h2 className="mt-2 sm:mt-3 font-serif text-2xl sm:text-3xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
+          <h2 className="mt-2 sm:mt-3 font-serif text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
             Cambiar es muy sencillo. Hazlo paso a paso.
           </h2>
-          <p className="mt-2 sm:mt-3 text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
             Recomendamos una transición progresiva en 10 días para evitar
             problemas digestivos y que tu perro se adapte sin estrés.
           </p>
         </div>
 
-        <ol className="mt-4 md:mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <ol className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {phases.map((phase, idx) => (
             <li
               key={phase.days}
-              className="relative rounded-2xl border border-border p-3 sm:p-4 lg:p-5 bg-background hover:border-foreground transition-colors"
+              className="relative rounded-2xl border border-border p-5 sm:p-6 bg-background hover:border-foreground transition-colors"
             >
               <div className="flex items-center justify-between">
                 <span className="font-serif text-2xl sm:text-3xl font-bold text-foreground">

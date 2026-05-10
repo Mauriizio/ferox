@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import { Instagram, Facebook, MessageCircle } from "lucide-react"
 
@@ -7,16 +8,14 @@ export function SiteFooter() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2">
-            <Link href="/" className="flex items-center gap-2" aria-label="FEROX BARF inicio">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-background font-serif text-lg font-bold">
-                F
-              </div>
-              <span className="font-serif text-xl font-bold tracking-tight text-foreground">
-                FEROX
-                <span className="ml-1 text-xs font-sans font-normal text-muted-foreground tracking-widest">
-                  BARF
-                </span>
-              </span>
+            <Link href="/" className="inline-flex items-center" aria-label="FEROX BARF inicio">
+              <Image
+                src="/logo.png"
+                alt="FEROX Nutrición BARF Premium"
+                width={260}
+                height={78}
+                className="h-14 w-auto"
+              />
             </Link>
             <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-sm">
               Alimentación natural, fresca y biológicamente adecuada para perros. Comida real para una vida mejor.

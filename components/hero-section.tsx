@@ -1,17 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Inter } from "next/font/google";
-
-const heroInter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-});
-
 export function HeroSection() {
   return (
-    <section className="viewport-section relative bg-background">
+    <section className="relative min-h-[100svh] overflow-hidden bg-background">
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 md:hidden">
           <Image
@@ -37,20 +29,20 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.84)_22%,rgba(0,0,0,0.62)_42%,rgba(0,0,0,0.28)_62%,rgba(0,0,0,0.08)_78%,rgba(0,0,0,0)_100%)]" />
       </div>
 
-      <div className="viewport-shell relative z-10 mx-auto flex w-full max-w-7xl items-start md:items-center px-4 sm:px-6 lg:px-8 pt-24 pb-20 md:pt-28 md:pb-14">
+      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-7xl items-start px-4 pb-24 pt-28 sm:px-6 sm:pt-32 md:items-center md:px-8 md:pb-20 md:pt-28">
         <div className="max-w-lg translate-y-2 md:-translate-y-2 text-center md:text-left flex flex-col items-center md:items-start">
           <h1 className="mt-5 md:mt-6 font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.98] tracking-tight text-white text-balance">
             NUTRICIÓN REAL PREMIUM
           </h1>
 
           <p
-            className={`${heroInter.className} mt-7 md:mt-5 text-base sm:text-lg md:text-xl text-white/85 leading-relaxed text-pretty max-w-lg mx-auto md:mx-0`}
+            className="mt-7 md:mt-5 text-base sm:text-lg md:text-xl text-white/85 leading-relaxed text-pretty max-w-lg mx-auto md:mx-0"
           >
             Carne, órganos y vegetales frescos. Planes BARF personalizados según
             peso, edad y actividad.
           </p>
 
-          <div className="mt-14 md:mt-8 flex flex-col sm:flex-row gap-2.5 sm:gap-3 sm:items-center">
+          <div className="mt-10 md:mt-8 flex flex-col sm:flex-row gap-2.5 sm:gap-3 sm:items-center">
             <Link
               href="#tienda"
               className="group inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full bg-white px-4 sm:px-6 py-2.5 sm:py-4 text-sm sm:text-base font-semibold text-black text-center hover:bg-white/90 transition-all shadow-xl shadow-black/35"
@@ -67,9 +59,7 @@ export function HeroSection() {
             </Link>
           </div>
 
-          <div
-            className={`${heroInter.className} mt-14 md:mt-9 flex flex-wrap items-center justify-center md:justify-start gap-2`}
-          >
+          <div className="mt-10 md:mt-9 flex flex-wrap items-center justify-center md:justify-start gap-2">
             <span className="rounded-full border border-white/25 bg-black/20 px-3 py-1 text-[11px] sm:text-xs tracking-[0.04em] text-white/90">
               Sin químicos
             </span>
@@ -83,7 +73,7 @@ export function HeroSection() {
       <div className="pointer-events-none absolute inset-x-0 bottom-10 z-10 md:bottom-8">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <p
-            className={`${heroInter.className} text-center md:text-left text-[11px] sm:text-xs text-white/70 tracking-[0.01em]`}
+            className="text-center md:text-left text-[11px] sm:text-xs text-white/70 tracking-[0.01em]"
           >
             Recomendado por Dr. Camilo González · Bluaveterinaria.cl
           </p>

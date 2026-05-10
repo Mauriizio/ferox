@@ -58,25 +58,23 @@ export function CalculatorSection() {
   return (
     <section
       id="calculadora"
-      className="viewport-section bg-background border-t border-border"
+      className="bg-background border-t border-border"
     >
-      <div className="viewport-shell mx-auto flex w-full max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-3 sm:py-5 md:py-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="max-w-3xl mx-auto text-center">
-          
-          
-          <h2 className="mt-2 sm:mt-3 font-serif text-2xl sm:text-3xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
+          <h2 className="mt-2 sm:mt-3 font-serif text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
             Descubre cuánta comida necesita tu perro
           </h2>
-          <p className="mt-2 sm:mt-3 text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
             Solo ingresa peso, edad y nivel de actividad. Es rápido, fácil y
             personalizado.
           </p>
         </div>
 
-        <div className="mt-3 sm:mt-5 md:mt-6 grid lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-5">
-          <div className="lg:col-span-3 rounded-2xl border border-border bg-background p-3 sm:p-4 lg:p-6">
+        <div className="mt-10 grid lg:grid-cols-5 gap-5 lg:gap-6">
+          <div className="lg:col-span-3 rounded-2xl border border-border bg-background p-5 sm:p-6 lg:p-8">
             <form
-              className="space-y-2 sm:space-y-3 lg:space-y-4"
+              className="space-y-6"
               onSubmit={(e) => e.preventDefault()}
             >
               <div>
@@ -105,7 +103,7 @@ export function CalculatorSection() {
                   <span className="block text-sm font-medium text-foreground">
                     Edad
                   </span>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
+                  <div className="mt-3 grid grid-cols-1 min-[420px]:grid-cols-3 gap-2">
                     {(
                       [
                         { v: "cachorro", l: "Cachorro" },
@@ -117,7 +115,7 @@ export function CalculatorSection() {
                         key={opt.v}
                         type="button"
                         onClick={() => setEdad(opt.v)}
-                        className={`rounded-lg border px-2 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm font-medium transition-colors ${
+                        className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
                           edad === opt.v
                             ? "border-foreground bg-foreground text-background"
                             : "border-border bg-background text-foreground hover:bg-muted"
@@ -134,7 +132,7 @@ export function CalculatorSection() {
                   <span className="block text-sm font-medium text-foreground">
                     Nivel de actividad
                   </span>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
+                  <div className="mt-3 grid grid-cols-1 min-[420px]:grid-cols-3 gap-2">
                     {(
                       [
                         { v: "baja", l: "Baja" },
@@ -147,7 +145,7 @@ export function CalculatorSection() {
                         type="button"
                         onClick={() => setActividad(opt.v)}
                         disabled={edad !== "adulto"}
-                        className={`rounded-lg border px-2 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm font-medium transition-colors ${
+                        className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
                           actividad === opt.v
                             ? "border-foreground bg-foreground text-background"
                             : "border-border bg-background text-foreground hover:bg-muted"
@@ -171,7 +169,7 @@ export function CalculatorSection() {
                 <span className="block text-sm font-medium text-foreground">
                   Estado físico
                 </span>
-                <div className="mt-2 grid grid-cols-3 gap-2">
+                <div className="mt-3 grid grid-cols-1 min-[420px]:grid-cols-3 gap-2">
                   {(
                     [
                       { v: "normal", l: "Normal" },
@@ -183,7 +181,7 @@ export function CalculatorSection() {
                       key={opt.v}
                       type="button"
                       onClick={() => setEstado(opt.v)}
-                      className={`rounded-lg border px-2 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm font-medium transition-colors ${
+                      className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
                         estado === opt.v
                           ? "border-foreground bg-foreground text-background"
                           : "border-border bg-background text-foreground hover:bg-muted"
@@ -198,7 +196,7 @@ export function CalculatorSection() {
             </form>
           </div>
 
-          <div className="lg:col-span-2 rounded-2xl bg-foreground text-background p-3 sm:p-4 lg:p-6 flex flex-col">
+          <div className="lg:col-span-2 rounded-2xl bg-foreground text-background p-5 sm:p-6 lg:p-8 flex flex-col">
             <div className="flex-1">
               <span className="text-xs uppercase tracking-widest text-background/60">
                 Resultado
@@ -207,7 +205,7 @@ export function CalculatorSection() {
                 Porción diaria recomendada
               </h3>
 
-              <div className="mt-3 sm:mt-5 space-y-3 sm:space-y-5">
+              <div className="mt-6 space-y-6">
                 <div>
                   <div className="text-xs uppercase tracking-widest text-background/60">
                     Por día
@@ -238,19 +236,19 @@ export function CalculatorSection() {
               </div>
             </div>
 
-            <div className="mt-3 sm:mt-5 flex flex-row lg:flex-col gap-2">
+            <div className="mt-6 flex flex-col gap-3">
               <a
                 href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-background px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-medium text-foreground hover:bg-background/90 transition-colors"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-background px-4 py-2.5 sm:px-5 sm:py-3 text-sm font-medium text-foreground hover:bg-background/90 transition-colors"
               >
                 <MessageCircle className="h-4 w-4" />
                 Pedir por WhatsApp
               </a>
               <a
                 href="#tienda"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-background/30 px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-medium text-background hover:bg-background/10 transition-colors"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-background/30 px-4 py-2.5 sm:px-5 sm:py-3 text-sm font-medium text-background hover:bg-background/10 transition-colors"
               >
                 <ShoppingBag className="h-4 w-4" />
                 Ver tienda

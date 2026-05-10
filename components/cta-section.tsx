@@ -4,7 +4,7 @@ import { Calculator, MessageCircle } from "lucide-react";
 
 export function CtaSection() {
   return (
-    <section className="viewport-section relative bg-foreground text-background border-t border-border">
+    <section className="relative overflow-hidden bg-foreground text-background border-t border-border">
       <div className="absolute inset-0 z-0 opacity-20">
         <Image
           src="/happy-dog.jpg"
@@ -17,7 +17,7 @@ export function CtaSection() {
         <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/70 to-foreground/40" />
       </div>
 
-      <div className="viewport-shell relative z-10 mx-auto flex w-full max-w-4xl flex-col justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 text-center">
+      <div className="relative z-10 mx-auto flex min-h-[72svh] w-full max-w-4xl flex-col justify-center px-4 py-20 text-center sm:px-6 sm:py-24 lg:px-8 lg:py-28">
         <h2 className="font-serif text-3xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight text-balance">
           Tu perro depende de ti para comer bien.
         </h2>
@@ -26,7 +26,7 @@ export function CtaSection() {
           directo por WhatsApp.
         </p>
 
-        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center">
+        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center">
           <Link
             href="#calculadora"
             className="inline-flex items-center justify-center gap-2 rounded-full bg-background px-6 py-4 text-sm sm:text-base font-medium text-foreground hover:bg-background/90 transition-colors"

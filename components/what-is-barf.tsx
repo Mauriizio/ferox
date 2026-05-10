@@ -2,8 +2,8 @@ import Image from "next/image"
 
 export function WhatIsBarf() {
   return (
-    <section id="que-es-barf" className="min-h-[100svh] bg-background border-t border-border/70">
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
+    <section id="que-es-barf" className="bg-background border-t border-border/70">
+      <div className="mx-auto flex w-full max-w-7xl items-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-14 items-center w-full">
           <div className="relative aspect-[4/5] sm:aspect-square lg:aspect-[4/5] lg:min-h-[68svh] overflow-hidden rounded-2xl bg-muted order-last lg:order-first ring-1 ring-border shadow-2xl shadow-foreground/10">
             <Image
@@ -33,13 +33,13 @@ export function WhatIsBarf() {
               </p>
             </div>
 
-            <div className="mt-5 md:mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { label: "Carne", value: "70%" },
                 { label: "Huesos", value: "20%" },
                 { label: "Órganos", value: "10%" },
               ].map((item) => (
-                <div key={item.label} className="border border-border rounded-xl p-4 text-center glass shadow-sm">
+                <div key={item.label} className="border border-border rounded-xl p-5 text-center glass shadow-sm">
                   <div className="font-serif text-2xl sm:text-3xl font-bold text-foreground">{item.value}</div>
                   <div className="mt-1 text-xs sm:text-sm uppercase tracking-wide text-muted-foreground">
                     {item.label}
