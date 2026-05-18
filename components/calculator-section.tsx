@@ -35,10 +35,10 @@ const edadOptions: {
   { v: "senior", l: "Senior", icon: HeartPulse },
 ];
 
-const actividadOptions: { v: Actividad; l: string }[] = [
-  { v: "baja", l: "Baja" },
-  { v: "moderada", l: "Media" },
-  { v: "alta", l: "Alta" },
+const actividadOptions: { v: Actividad; l: string; hint: string }[] = [
+  { v: "baja", l: "Baja", hint: "Poco movimiento" },
+  { v: "moderada", l: "Media", hint: "Rutina normal" },
+  { v: "alta", l: "Alta", hint: "Muy activo" },
 ];
 
 const estadoOptions: { v: Estado; l: string }[] = [
