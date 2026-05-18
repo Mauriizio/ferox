@@ -101,6 +101,101 @@ export function CalculatorSection() {
     setPeso(Number(boundedPeso.toFixed(1)).toString());
   };
 
+  const renderResultCard = (className: string) => (
+    <div className={className}>
+      <div className="sticky top-6 overflow-hidden rounded-[1.5rem] bg-foreground text-background shadow-[0_20px_55px_rgba(0,0,0,0.18)]">
+        <div className="relative p-4 sm:p-5">
+          <Image
+            src="/icon.svg"
+            alt="FEROX BARF"
+            width={120}
+            height={120}
+            className="absolute -right-5 -top-5 h-24 w-24 opacity-10 invert sm:h-32 sm:w-32"
+          />
+
+          <div className="relative flex items-center gap-2">
+            <span className="grid h-9 w-9 place-items-center rounded-2xl bg-background/10">
+              <Calculator className="h-4 w-4" />
+            </span>
+            <div>
+              <span className="text-[11px] uppercase tracking-[0.2em] text-background/55">
+                Resultado
+              </span>
+              <h3 className="font-serif text-lg font-bold sm:text-xl">
+                Tu porción BARF
+              </h3>
+            </div>
+          </div>
+
+          <div className="relative mt-3 rounded-[1.25rem] bg-background p-4 text-foreground">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Por día
+            </div>
+            <div className="mt-1 flex items-end gap-2">
+              <span className="font-serif text-4xl font-bold leading-none sm:text-5xl">
+                {gramosDia.toLocaleString("es-CL")}
+              </span>
+              <span className="pb-1 text-base font-semibold text-muted-foreground">
+                g
+              </span>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Divide esta cantidad en 1 o 2 comidas, según su rutina.
+            </p>
+          </div>
+
+          <div className="relative mt-3 grid grid-cols-2 gap-2">
+            <div className="rounded-2xl bg-background/10 p-3">
+              <div className="text-[10px] uppercase tracking-widest text-background/50">
+                Por mes
+              </div>
+              <div className="mt-1 text-xl font-bold">
+                {(gramosMes / 1000).toLocaleString("es-CL", {
+                  maximumFractionDigits: 1,
+                })}
+                <span className="ml-1 text-xs text-background/60">kg</span>
+              </div>
+            </div>
+            <div className="rounded-2xl bg-background/10 p-3">
+              <div className="text-[10px] uppercase tracking-widest text-background/50">
+                Fórmula
+              </div>
+              <div className="mt-1 text-xl font-bold">
+                {(porcentaje * 100).toLocaleString("es-CL", {
+                  maximumFractionDigits: 2,
+                })}
+                <span className="ml-1 text-xs text-background/60">%</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative mt-3 grid gap-2">
+            <a
+              href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-transform hover:-translate-y-0.5"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Pedir asesoría
+            </a>
+            <a
+              href="#productos"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2.5 text-sm font-semibold text-background transition-colors hover:bg-background/10"
+            >
+              <ShoppingBag className="h-4 w-4" />
+              Ver productos
+            </a>
+            <p className="text-center text-[11px] leading-relaxed text-background/55">
+              Recomendación orientativa. Ajusta con un profesional si tu
+              perro tiene una condición específica.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <section
       id="calculadora"
@@ -108,7 +203,7 @@ export function CalculatorSection() {
     >
       <div className="pointer-events-none absolute left-1/2 top-10 h-52 w-52 -translate-x-1/2 rounded-full bg-foreground/5 blur-3xl sm:hidden" />
 
-      <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+      <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground shadow-sm sm:px-4 sm:py-2 sm:text-xs">
             <Sparkles className="h-3.5 w-3.5 text-foreground" />
@@ -118,18 +213,17 @@ export function CalculatorSection() {
             Descubre cuánta comida necesita tu perro
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Ajusta peso, edad y condición. El resultado queda visible de forma
-            rápida, especialmente en mobile.
+            Selecciona el peso arriba y revisa el resultado justo debajo. Luego afina edad, actividad y condición.
           </p>
         </div>
 
-        <div className="mt-6 grid gap-4 lg:mt-8 lg:grid-cols-5 lg:gap-5">
-          <div className="rounded-[1.75rem] border border-white/70 bg-background/85 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.07)] backdrop-blur sm:p-5 lg:col-span-3 lg:p-6">
+        <div className="mt-5 grid gap-3 lg:mt-7 lg:grid-cols-5 lg:gap-4">
+          <div className="rounded-[1.5rem] border border-white/70 bg-background/85 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.07)] backdrop-blur sm:p-4 lg:col-span-3 lg:p-5">
             <form
-              className="space-y-4"
+              className="space-y-3"
               onSubmit={(e) => e.preventDefault()}
             >
-              <div className="rounded-[1.35rem] bg-foreground p-3 text-background shadow-lg sm:p-4">
+              <div className="rounded-[1.25rem] bg-foreground p-3 text-background shadow-lg">
                 <div className="flex items-center justify-between gap-3">
                   <label
                     htmlFor="peso"
@@ -145,7 +239,7 @@ export function CalculatorSection() {
                   </div>
                 </div>
 
-                <div className="mt-3 grid grid-cols-[auto_1fr_auto] items-center gap-2">
+                <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-2">
                   <button
                     type="button"
                     onClick={() => updatePeso((pesoNumber || 1) - 0.5)}
@@ -163,7 +257,7 @@ export function CalculatorSection() {
                     step="0.5"
                     value={peso}
                     onChange={(e) => setPeso(e.target.value)}
-                    className="h-12 w-full rounded-2xl border border-background/10 bg-background px-4 text-center text-2xl font-bold text-foreground shadow-inner outline-none focus:ring-2 focus:ring-background/50 sm:h-14 sm:text-3xl"
+                    className="h-11 w-full rounded-2xl border border-background/10 bg-background px-4 text-center text-2xl font-bold text-foreground shadow-inner outline-none focus:ring-2 focus:ring-background/50 sm:h-12 sm:text-3xl"
                     placeholder="12"
                   />
                   <button
@@ -177,11 +271,13 @@ export function CalculatorSection() {
                 </div>
               </div>
 
+              {renderResultCard("lg:hidden")}
+
               <div>
                 <span className="block text-sm font-semibold text-foreground">
                   Etapa de vida
                 </span>
-                <div className="mt-2 grid grid-cols-3 gap-2">
+                <div className="mt-2 grid grid-cols-3 gap-1.5">
                   {edadOptions.map((opt) => {
                     const Icon = opt.icon;
                     return (
@@ -189,7 +285,7 @@ export function CalculatorSection() {
                         key={opt.v}
                         type="button"
                         onClick={() => setEdad(opt.v)}
-                        className={`flex items-center justify-center gap-1.5 rounded-2xl border px-2 py-2.5 text-sm font-bold transition-all sm:px-3 ${
+                        className={`flex items-center justify-center gap-1.5 rounded-2xl border px-2 py-2 text-sm font-bold transition-all sm:px-3 ${
                           edad === opt.v
                             ? "border-foreground bg-foreground text-background shadow-lg shadow-foreground/15"
                             : "border-border bg-white/75 text-foreground hover:-translate-y-0.5 hover:bg-white"
@@ -204,8 +300,8 @@ export function CalculatorSection() {
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-3xl border border-border bg-white/65 p-3 sm:p-4">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="rounded-2xl border border-border bg-white/65 p-3">
                   <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <Activity className="h-4 w-4" />
                     Actividad
@@ -241,7 +337,7 @@ export function CalculatorSection() {
                   ) : null}
                 </div>
 
-                <div className="rounded-3xl border border-border bg-white/65 p-3 sm:p-4">
+                <div className="rounded-2xl border border-border bg-white/65 p-3">
                   <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <ShieldCheck className="h-4 w-4" />
                     Condición
@@ -268,98 +364,7 @@ export function CalculatorSection() {
             </form>
           </div>
 
-          <div className="order-first lg:order-none lg:col-span-2">
-            <div className="sticky top-6 overflow-hidden rounded-[1.75rem] bg-foreground text-background shadow-[0_20px_55px_rgba(0,0,0,0.18)]">
-              <div className="relative p-4 sm:p-5 lg:p-6">
-                <Image
-                  src="/icon.svg"
-                  alt="FEROX BARF"
-                  width={120}
-                  height={120}
-                  className="absolute -right-5 -top-5 h-24 w-24 opacity-10 invert sm:h-32 sm:w-32"
-                />
-
-                <div className="relative flex items-center gap-2">
-                  <span className="grid h-9 w-9 place-items-center rounded-2xl bg-background/10">
-                    <Calculator className="h-4 w-4" />
-                  </span>
-                  <div>
-                    <span className="text-[11px] uppercase tracking-[0.2em] text-background/55">
-                      Resultado
-                    </span>
-                    <h3 className="font-serif text-lg font-bold sm:text-xl">
-                      Tu porción BARF
-                    </h3>
-                  </div>
-                </div>
-
-                <div className="relative mt-4 rounded-[1.35rem] bg-background p-4 text-foreground">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                    Por día
-                  </div>
-                  <div className="mt-1 flex items-end gap-2">
-                    <span className="font-serif text-4xl font-bold leading-none sm:text-5xl">
-                      {gramosDia.toLocaleString("es-CL")}
-                    </span>
-                    <span className="pb-1 text-base font-semibold text-muted-foreground">
-                      g
-                    </span>
-                  </div>
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    Divide esta cantidad en 1 o 2 comidas, según su rutina.
-                  </p>
-                </div>
-
-                <div className="relative mt-3 grid grid-cols-2 gap-2">
-                  <div className="rounded-2xl bg-background/10 p-3">
-                    <div className="text-[10px] uppercase tracking-widest text-background/50">
-                      Por mes
-                    </div>
-                    <div className="mt-1 text-xl font-bold">
-                      {(gramosMes / 1000).toLocaleString("es-CL", {
-                        maximumFractionDigits: 1,
-                      })}
-                      <span className="ml-1 text-xs text-background/60">kg</span>
-                    </div>
-                  </div>
-                  <div className="rounded-2xl bg-background/10 p-3">
-                    <div className="text-[10px] uppercase tracking-widest text-background/50">
-                      Fórmula
-                    </div>
-                    <div className="mt-1 text-xl font-bold">
-                      {(porcentaje * 100).toLocaleString("es-CL", {
-                        maximumFractionDigits: 2,
-                      })}
-                      <span className="ml-1 text-xs text-background/60">%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="relative mt-4 grid gap-2">
-                  <a
-                    href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-transform hover:-translate-y-0.5"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    Pedir asesoría
-                  </a>
-                  <a
-                    href="#productos"
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2.5 text-sm font-semibold text-background transition-colors hover:bg-background/10"
-                  >
-                    <ShoppingBag className="h-4 w-4" />
-                    Ver productos
-                  </a>
-                  <p className="text-center text-[11px] leading-relaxed text-background/55">
-                    Recomendación orientativa. Ajusta con un profesional si tu
-                    perro tiene una condición específica.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          {renderResultCard("hidden lg:block lg:col-span-2")}
         </div>
       </div>
     </section>

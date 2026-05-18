@@ -7,6 +7,7 @@ import { TransitionSection } from "@/components/transition-section"
 import { ComparisonSection } from "@/components/comparison-section"
 import { ShopSection } from "@/components/shop-section"
 import { TestimonialsSection } from "@/components/testimonials-section"
+import { CommentsSection } from "@/components/comments-section"
 import { AccountPetsSection } from "@/components/account-pets-section"
 import { CtaSection } from "@/components/cta-section"
 import { SiteFooter } from "@/components/site-footer"
@@ -26,6 +27,7 @@ export default function HomePage() {
         <ShopSection />
         <AccountPetsSection />
         <TestimonialsSection />
+        <CommentsSection />
         <CtaSection />
       </main>
       <SiteFooter />
