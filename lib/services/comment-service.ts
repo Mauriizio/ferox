@@ -131,9 +131,12 @@ export async function createComment(
     throw new Error("Escribe un comentario antes de publicarlo.");
   }
 
+  const payload = { user_id: userId, body: cleanBody };
+  console.info("[FEROX comments] create payload", payload);
+
   const { data, error } = await supabase
     .from("comments")
-    .insert({ user_id: userId, body: cleanBody })
+    .insert(payload)
     .select("*")
     .single();
 
@@ -164,9 +167,12 @@ export async function toggleCommentLike(userId: string, commentId: string) {
     return { liked: false };
   }
 
+  const payload = { user_id: userId, comment_id: commentId };
+  console.info("[FEROX comment_likes] create payload", payload);
+
   const { error } = await supabase
     .from("comment_likes")
-    .insert({ user_id: userId, comment_id: commentId });
+    .insert(payload);
 
   if (error) {
     if (error.code === "23505") return { liked: true };

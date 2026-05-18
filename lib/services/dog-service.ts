@@ -1,11 +1,11 @@
 import { supabase } from "@/lib/supabase/client";
 import type { Dog } from "@/lib/supabase/database.types";
-import { isMissingSchemaError } from "@/lib/supabase/schema-errors";
 
 export type DogFormData = {
   nombre: string;
   peso: number | null;
-  edad: string;
+  edad: number | null;
+  etapa_vida: string;
   tamano: string;
   actividad: string;
   estado_fisico: string;
@@ -25,6 +25,7 @@ function normalizeDog(row: DogRow): Dog {
     nombre: row.nombre,
     peso: row.peso ?? null,
     edad: row.edad ?? null,
+    etapa_vida: row.etapa_vida ?? null,
     tamano: row.tamano ?? null,
     actividad: row.actividad ?? null,
     estado_fisico: row.estado_fisico ?? null,
@@ -53,11 +54,14 @@ export async function createDog(
     nombre: dog.nombre.trim(),
     peso: dog.peso,
     edad: dog.edad,
+    etapa_vida: dog.etapa_vida,
     tamano: dog.tamano,
     actividad: dog.actividad,
     estado_fisico: dog.estado_fisico,
     photo_url: dog.photo_url?.trim() || null,
   };
+
+  console.info("[FEROX dogs] create payload", payload);
 
   const { data, error } = await supabase
     .from("dogs")

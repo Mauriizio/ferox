@@ -32,6 +32,7 @@ export type Database = {
           avatar_url?: string | null;
           updated_at?: string | null;
         };
+        Relationships: [];
       };
       dogs: {
         Row: {
@@ -70,6 +71,7 @@ export type Database = {
           estado_fisico?: string | null;
           photo_url?: string | null;
         };
+        Relationships: [];
       };
       food_calculations: {
         Row: {
@@ -107,6 +109,7 @@ export type Database = {
           actividad?: string | null;
           estado_fisico?: string | null;
         };
+        Relationships: [];
       };
       comments: {
         Row: {
@@ -124,6 +127,7 @@ export type Database = {
         Update: {
           body?: string;
         };
+        Relationships: [];
       };
       comment_likes: {
         Row: {
@@ -139,8 +143,13 @@ export type Database = {
           comment_id: string;
         };
         Update: Record<string, never>;
+        Relationships: [];
       };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 };
 

@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
 import type { FoodCalculation } from "@/lib/supabase/database.types";
-import { isMissingSchemaError } from "@/lib/supabase/schema-errors";
 
 export type SaveFoodCalculationInput = {
   userId: string;
@@ -8,7 +7,8 @@ export type SaveFoodCalculationInput = {
   gramosDiarios: number;
   gramosMensuales: number;
   peso: number | null;
-  edad: string | null;
+  edad: number | null;
+  etapaVida: string | null;
   actividad: string | null;
   estadoFisico: string | null;
 };
@@ -29,6 +29,7 @@ function normalizeFoodCalculation(row: FoodCalculationRow): FoodCalculation {
     gramos_mensuales: row.gramos_mensuales ?? 0,
     peso: row.peso ?? null,
     edad: row.edad ?? null,
+    etapa_vida: row.etapa_vida ?? null,
     actividad: row.actividad ?? null,
     estado_fisico: row.estado_fisico ?? null,
   };
@@ -54,21 +55,27 @@ export async function saveFoodCalculation({
   gramosMensuales,
   peso,
   edad,
+  etapaVida,
   actividad,
   estadoFisico,
 }: SaveFoodCalculationInput): Promise<FoodCalculation> {
+  const payload = {
+    user_id: userId,
+    dog_id: dogId,
+    gramos_diarios: gramosDiarios,
+    gramos_mensuales: gramosMensuales,
+    peso,
+    edad,
+    etapa_vida: etapaVida,
+    actividad,
+    estado_fisico: estadoFisico,
+  };
+
+  console.info("[FEROX food_calculations] create payload", payload);
+
   const { data, error } = await supabase
     .from("food_calculations")
-    .insert({
-      user_id: userId,
-      dog_id: dogId,
-      gramos_diarios: gramosDiarios,
-      gramos_mensuales: gramosMensuales,
-      peso,
-      edad,
-      actividad,
-      estado_fisico: estadoFisico,
-    })
+    .insert(payload)
     .select("*")
     .single();
 

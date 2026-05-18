@@ -23,7 +23,7 @@ La migración:
 
 - agrega `profiles.avatar_url` si falta;
 - agrega `dogs.photo_url` si falta;
-- mantiene las columnas reales en español de `dogs` (`nombre`, `peso`, `edad`, `tamano`, `actividad`, `estado_fisico`, `user_id`);
+- mantiene las columnas reales en español de `dogs` (`nombre`, `peso`, `edad`, `etapa_vida`, `tamano`, `actividad`, `estado_fisico`, `user_id`, `photo_url`), con `edad` numérica y `etapa_vida` como texto;
 - agrega columnas mínimas para guardar `food_calculations` con gramos diarios y mensuales;
 - activa RLS y políticas por usuario autenticado;
 - deja `comments` y `comment_likes` listos como base social.
@@ -51,8 +51,8 @@ El botón ya está implementado en la UI. Para activarlo:
 
 ## 5. Storage de fotos
 
-Esta fase permite dejar vacías las imágenes (`avatar_url` y `photo_url` se guardan como `null`) para no bloquear el producto con carga de archivos ni exigir URLs manuales. Si luego quieres subir archivos a Supabase Storage:
+La app usa carga real de archivos al bucket público `media`; no pide URLs manuales ni guarda base64 en Postgres.
 
-1. Crea buckets privados o públicos según la estrategia de negocio, por ejemplo `avatars` y `dogs`.
-2. Mantén las columnas `profiles.avatar_url` y `dogs.photo_url` como destino de la URL pública o firmada.
-3. Agrega políticas de Storage para que cada usuario solo pueda escribir sus propios archivos.
+1. Verifica que exista el bucket `media`.
+2. Mantén `profiles.avatar_url` y `dogs.photo_url` como destino de la URL pública devuelta por Storage.
+3. Agrega políticas de Storage para que cada usuario autenticado pueda escribir dentro de sus carpetas (`avatars/` y `dogs/`) y pueda leer archivos públicos según la estrategia del bucket.

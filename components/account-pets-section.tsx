@@ -56,7 +56,8 @@ import type {
 const emptyDogForm: DogFormData = {
   nombre: "",
   peso: null,
-  edad: "adulto",
+  edad: null,
+  etapa_vida: "adulto",
   tamano: "mediano",
   actividad: "moderada",
   estado_fisico: "normal",
@@ -312,6 +313,11 @@ export function AccountPetsSection() {
       return;
     }
 
+    if (dogForm.edad === null || !Number.isInteger(dogForm.edad)) {
+      setMessage("Agrega la edad numérica del perro en años.");
+      return;
+    }
+
     setIsSaving(true);
     setMessage("");
 
@@ -333,10 +339,13 @@ export function AccountPetsSection() {
           })
         : null;
 
-      const dog = await createDog(userData.user.id, {
+      const dogPayload = {
         ...dogForm,
         photo_url: photoUrl,
-      });
+      };
+      console.info("[FEROX dogs] form payload", dogPayload);
+
+      const dog = await createDog(userData.user.id, dogPayload);
       setDogs((currentDogs) => [dog, ...currentDogs]);
       setDogForm(emptyDogForm);
       clearDogPhotoSelection();
@@ -684,9 +693,33 @@ export function AccountPetsSection() {
                         className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
                       />
                     </label>
+                    <label className="text-sm font-medium text-foreground">
+                      Edad (años)
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min="0"
+                        step="1"
+                        value={dogForm.edad ?? ""}
+                        onChange={(event) =>
+                          setDogForm((form) => ({
+                            ...form,
+                            edad: event.target.value
+                              ? Number.parseInt(event.target.value, 10)
+                              : null,
+                          }))
+                        }
+                        placeholder="Ej: 3"
+                        className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
+                      />
+                    </label>
                     {(
                       [
-                        ["edad", "Edad", ["cachorro", "adulto", "senior"]],
+                        [
+                          "etapa_vida",
+                          "Etapa de vida",
+                          ["cachorro", "adulto", "senior"],
+                        ],
                         ["tamano", "Talla", ["pequeño", "mediano", "grande"]],
                         [
                           "actividad",
@@ -793,8 +826,9 @@ export function AccountPetsSection() {
                       ? calcularRacionBarf({
                           peso: dog.peso,
                           edad:
-                            dog.edad === "cachorro" || dog.edad === "senior"
-                              ? dog.edad
+                            dog.etapa_vida === "cachorro" ||
+                            dog.etapa_vida === "senior"
+                              ? dog.etapa_vida
                               : "adulto",
                           actividad:
                             dog.actividad === "baja" || dog.actividad === "alta"
@@ -849,7 +883,14 @@ export function AccountPetsSection() {
                           </div>
 
                           <div className="mt-4 flex flex-wrap gap-2">
-                            {[dog.edad, dog.actividad, dog.estado_fisico]
+                            {[
+                              dog.edad
+                                ? `${dog.edad} año${dog.edad === 1 ? "" : "s"}`
+                                : null,
+                              dog.etapa_vida,
+                              dog.actividad,
+                              dog.estado_fisico,
+                            ]
                               .filter(Boolean)
                               .map((tag) => (
                                 <span
