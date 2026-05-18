@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import Image from "next/image";
 import type { Session } from "@supabase/supabase-js";
 import {
@@ -34,8 +41,13 @@ import {
 } from "@/lib/services/dog-service";
 import { getFoodCalculationsByUser } from "@/lib/services/food-calculation-service";
 import { calcularRacionBarf } from "@/lib/domain/feeding";
+import { uploadImageToMediaBucket } from "@/lib/services/storage-service";
 import { supabase } from "@/lib/supabase/client";
-import type { Dog, FoodCalculation, Profile } from "@/lib/supabase/database.types";
+import type {
+  Dog,
+  FoodCalculation,
+  Profile,
+} from "@/lib/supabase/database.types";
 
 const emptyDogForm: DogFormData = {
   nombre: "",
@@ -44,8 +56,11 @@ const emptyDogForm: DogFormData = {
   tamaño: "mediano",
   actividad: "moderada",
   estado_fisico: "normal",
-  photo_url: "",
+  photo_url: null,
 };
+
+const imageInputClassName =
+  "mt-2 block w-full cursor-pointer rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground file:mr-4 file:rounded-full file:border-0 file:bg-foreground file:px-4 file:py-2 file:text-sm file:font-semibold file:text-background outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10";
 
 const getFriendlyError = (error: unknown) =>
   error instanceof Error ? error.message : "Ocurrió un error inesperado.";
@@ -61,7 +76,11 @@ export function AccountPetsSection() {
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState("");
   const [dogForm, setDogForm] = useState<DogFormData>(emptyDogForm);
+  const [dogPhotoFile, setDogPhotoFile] = useState<File | null>(null);
+  const [dogPhotoPreview, setDogPhotoPreview] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -79,6 +98,8 @@ export function AccountPetsSection() {
     setUsername(profileData?.username ?? "");
     setFullName(profileData?.full_name ?? "");
     setAvatarUrl(profileData?.avatar_url ?? "");
+    setAvatarFile(null);
+    setAvatarPreview(profileData?.avatar_url ?? "");
     setDogs(userDogs);
     setCalculations(userCalculations);
   }, []);
@@ -113,6 +134,10 @@ export function AccountPetsSection() {
         setProfile(null);
         setDogs([]);
         setCalculations([]);
+        setAvatarFile(null);
+        setAvatarPreview("");
+        setDogPhotoFile(null);
+        setDogPhotoPreview("");
       }
     });
 
@@ -127,22 +152,42 @@ export function AccountPetsSection() {
       }
     };
 
-    window.addEventListener("ferox:food-calculation-saved", refreshAfterCalculation);
+    window.addEventListener(
+      "ferox:food-calculation-saved",
+      refreshAfterCalculation,
+    );
 
     return () => {
       mounted = false;
       data.subscription.unsubscribe();
-      window.removeEventListener("ferox:food-calculation-saved", refreshAfterCalculation);
+      window.removeEventListener(
+        "ferox:food-calculation-saved",
+        refreshAfterCalculation,
+      );
     };
   }, [refreshDashboard]);
 
-  const latestCalculationByDog = useMemo(() => {
-    return calculations.reduce<Record<string, FoodCalculation>>((acc, calculation) => {
-      if (!acc[calculation.dog_id]) {
-        acc[calculation.dog_id] = calculation;
+  useEffect(() => {
+    return () => {
+      if (avatarPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreview);
       }
-      return acc;
-    }, {});
+      if (dogPhotoPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(dogPhotoPreview);
+      }
+    };
+  }, [avatarPreview, dogPhotoPreview]);
+
+  const latestCalculationByDog = useMemo(() => {
+    return calculations.reduce<Record<string, FoodCalculation>>(
+      (acc, calculation) => {
+        if (!acc[calculation.dog_id]) {
+          acc[calculation.dog_id] = calculation;
+        }
+        return acc;
+      },
+      {},
+    );
   }, [calculations]);
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -153,7 +198,9 @@ export function AccountPetsSection() {
     try {
       if (authMode === "signup") {
         await signUpWithPassword(email, password, fullName);
-        setMessage("Registro creado. Revisa tu correo si Supabase solicita confirmar la cuenta.");
+        setMessage(
+          "Registro creado. Revisa tu correo si Supabase solicita confirmar la cuenta.",
+        );
       } else {
         await signInWithPassword(email, password);
         setMessage("Sesión iniciada correctamente.");
@@ -165,19 +212,79 @@ export function AccountPetsSection() {
     }
   };
 
+  const handleAvatarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    setAvatarFile(file);
+
+    if (!file) {
+      setAvatarPreview(avatarUrl);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview((currentPreview) => {
+      if (currentPreview && currentPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(currentPreview);
+      }
+      return previewUrl;
+    });
+  };
+
+  const handleDogPhotoFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    setDogPhotoFile(file);
+
+    if (!file) {
+      setDogPhotoPreview("");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setDogPhotoPreview((currentPreview) => {
+      if (currentPreview && currentPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(currentPreview);
+      }
+      return previewUrl;
+    });
+  };
+
+  const clearDogPhotoSelection = () => {
+    setDogPhotoFile(null);
+    setDogPhotoPreview((currentPreview) => {
+      if (currentPreview && currentPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(currentPreview);
+      }
+      return "";
+    });
+  };
+
   const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!user) return;
+    if (!user) {
+      setMessage("Inicia sesión para continuar.");
+      return;
+    }
 
     setIsSaving(true);
     setMessage("");
 
     try {
+      const nextAvatarUrl = avatarFile
+        ? await uploadImageToMediaBucket({
+            file: avatarFile,
+            userId: user.id,
+            folder: "avatars",
+          })
+        : avatarUrl;
+
       const nextProfile = await upsertProfile(user, {
         username,
         fullName,
-        avatarUrl,
+        avatarUrl: nextAvatarUrl,
       });
+      setAvatarUrl(nextProfile.avatar_url ?? "");
+      setAvatarFile(null);
+      setAvatarPreview(nextProfile.avatar_url ?? "");
       setProfile(nextProfile);
       setMessage("Perfil actualizado correctamente.");
     } catch (error) {
@@ -189,7 +296,10 @@ export function AccountPetsSection() {
 
   const handleDogSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!user) return;
+    if (!user) {
+      setMessage("Inicia sesión para registrar perros.");
+      return;
+    }
 
     if (!dogForm.nombre.trim()) {
       setMessage("Agrega al menos el nombre del perro para guardarlo.");
@@ -200,9 +310,30 @@ export function AccountPetsSection() {
     setMessage("");
 
     try {
-      const dog = await createDog(user.id, dogForm);
+      const { data: userData, error: userError } =
+        await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!userData.user || userData.user.id !== user.id) {
+        throw new Error(
+          "No hay una sesión autenticada válida para registrar el perro.",
+        );
+      }
+
+      const photoUrl = dogPhotoFile
+        ? await uploadImageToMediaBucket({
+            file: dogPhotoFile,
+            userId: userData.user.id,
+            folder: "dogs",
+          })
+        : null;
+
+      const dog = await createDog(userData.user.id, {
+        ...dogForm,
+        photo_url: photoUrl,
+      });
       setDogs((currentDogs) => [dog, ...currentDogs]);
       setDogForm(emptyDogForm);
+      clearDogPhotoSelection();
       setMessage(`${dog.nombre} quedó guardado correctamente.`);
     } catch (error) {
       setMessage(getFriendlyError(error));
@@ -357,13 +488,21 @@ export function AccountPetsSection() {
                   disabled={isSaving || isLoading}
                   className="inline-flex w-full items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isSaving ? "Procesando..." : authMode === "signup" ? "Crear cuenta" : "Entrar"}
+                  {isSaving
+                    ? "Procesando..."
+                    : authMode === "signup"
+                      ? "Crear cuenta"
+                      : "Entrar"}
                 </button>
               </form>
 
               <button
                 type="button"
-                onClick={() => signInWithGoogle().catch((error) => setMessage(getFriendlyError(error)))}
+                onClick={() =>
+                  signInWithGoogle().catch((error) =>
+                    setMessage(getFriendlyError(error)),
+                  )
+                }
                 className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-border px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted"
               >
                 Continuar con Google
@@ -389,8 +528,16 @@ export function AccountPetsSection() {
                   y likes con RLS por usuario.
                 </p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {["Perros privados", "Historial BARF", "Fotos por URL", "Base social"].map((item) => (
-                    <div key={item} className="rounded-2xl bg-background/10 p-4 text-sm font-semibold">
+                  {[
+                    "Perros privados",
+                    "Historial BARF",
+                    "Fotos con upload",
+                    "Base social",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-2xl bg-background/10 p-4 text-sm font-semibold"
+                    >
                       {item}
                     </div>
                   ))}
@@ -440,16 +587,35 @@ export function AccountPetsSection() {
                       />
                     </label>
                   </div>
-                  <label className="text-sm font-medium text-foreground">
-                    Avatar URL
-                    <input
-                      type="url"
-                      value={avatarUrl}
-                      onChange={(event) => setAvatarUrl(event.target.value)}
-                      placeholder="https://..."
-                      className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                    />
-                  </label>
+                  <div className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
+                    <div className="h-20 w-20 overflow-hidden rounded-full bg-muted">
+                      {avatarPreview || profile?.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={avatarPreview || profile?.avatar_url || ""}
+                          alt="Vista previa del avatar"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-muted-foreground">
+                          <UserRound className="h-7 w-7" />
+                        </div>
+                      )}
+                    </div>
+                    <label className="text-sm font-medium text-foreground">
+                      Avatar
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarFileChange}
+                        className={imageInputClassName}
+                      />
+                      <span className="mt-2 block text-xs font-normal text-muted-foreground">
+                        Selecciona una imagen desde tu dispositivo. Si no eliges
+                        una, se conserva el avatar actual o se usa placeholder.
+                      </span>
+                    </label>
+                  </div>
                   <button
                     type="submit"
                     disabled={isSaving}
@@ -478,7 +644,12 @@ export function AccountPetsSection() {
                       <input
                         type="text"
                         value={dogForm.nombre}
-                        onChange={(event) => setDogForm((form) => ({ ...form, nombre: event.target.value }))}
+                        onChange={(event) =>
+                          setDogForm((form) => ({
+                            ...form,
+                            nombre: event.target.value,
+                          }))
+                        }
                         placeholder="Ej: Rocco"
                         className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
                       />
@@ -494,7 +665,9 @@ export function AccountPetsSection() {
                         onChange={(event) =>
                           setDogForm((form) => ({
                             ...form,
-                            peso: event.target.value ? Number(event.target.value) : null,
+                            peso: event.target.value
+                              ? Number(event.target.value)
+                              : null,
                           }))
                         }
                         placeholder="Ej: 12.5"
@@ -505,15 +678,31 @@ export function AccountPetsSection() {
                       [
                         ["edad", "Edad", ["cachorro", "adulto", "senior"]],
                         ["tamaño", "Tamaño", ["pequeño", "mediano", "grande"]],
-                        ["actividad", "Actividad", ["baja", "moderada", "alta"]],
-                        ["estado_fisico", "Estado físico", ["normal", "esterilizado", "sobrepeso"]],
+                        [
+                          "actividad",
+                          "Actividad",
+                          ["baja", "moderada", "alta"],
+                        ],
+                        [
+                          "estado_fisico",
+                          "Estado físico",
+                          ["normal", "esterilizado", "sobrepeso"],
+                        ],
                       ] as [keyof DogFormData, string, string[]][]
                     ).map(([field, label, options]) => (
-                      <label key={field} className="text-sm font-medium text-foreground">
+                      <label
+                        key={field}
+                        className="text-sm font-medium text-foreground"
+                      >
                         {label}
                         <select
                           value={String(dogForm[field] ?? "")}
-                          onChange={(event) => setDogForm((form) => ({ ...form, [field]: event.target.value }))}
+                          onChange={(event) =>
+                            setDogForm((form) => ({
+                              ...form,
+                              [field]: event.target.value,
+                            }))
+                          }
                           className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
                         >
                           {options.map((option) => (
@@ -525,23 +714,42 @@ export function AccountPetsSection() {
                       </label>
                     ))}
                   </div>
-                  <label className="text-sm font-medium text-foreground">
-                    Foto URL del perro
-                    <input
-                      type="url"
-                      value={dogForm.photo_url ?? ""}
-                      onChange={(event) => setDogForm((form) => ({ ...form, photo_url: event.target.value }))}
-                      placeholder="https://..."
-                      className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                    />
-                  </label>
+                  <div className="grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-center">
+                    <div className="h-32 overflow-hidden rounded-3xl bg-muted">
+                      {dogPhotoPreview ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={dogPhotoPreview}
+                          alt="Vista previa del perro"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-muted-foreground">
+                          <Camera className="h-8 w-8" />
+                        </div>
+                      )}
+                    </div>
+                    <label className="text-sm font-medium text-foreground">
+                      Foto del perro
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleDogPhotoFileChange}
+                        className={imageInputClassName}
+                      />
+                      <span className="mt-2 block text-xs font-normal text-muted-foreground">
+                        Opcional. Puedes registrar el perro sin foto y agregarla
+                        más adelante.
+                      </span>
+                    </label>
+                  </div>
                   <button
                     type="submit"
                     disabled={isSaving}
                     className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60"
                   >
                     <Plus className="h-4 w-4" />
-                    Añadir perro
+                    {isSaving ? "Guardando..." : "Añadir perro"}
                   </button>
                 </form>
               </article>
@@ -550,9 +758,12 @@ export function AccountPetsSection() {
             <div className="rounded-[2rem] border border-border bg-background p-5 shadow-sm sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h3 className="font-serif text-2xl font-bold">Mini dashboard</h3>
+                  <h3 className="font-serif text-2xl font-bold">
+                    Mini dashboard
+                  </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Datos privados del perro, último cálculo guardado e historial.
+                    Datos privados del perro, último cálculo guardado e
+                    historial.
                   </p>
                 </div>
                 <a
@@ -571,24 +782,35 @@ export function AccountPetsSection() {
                     const previewCalculation = dog.peso
                       ? calcularRacionBarf({
                           peso: dog.peso,
-                          edad: dog.edad === "cachorro" || dog.edad === "senior" ? dog.edad : "adulto",
+                          edad:
+                            dog.edad === "cachorro" || dog.edad === "senior"
+                              ? dog.edad
+                              : "adulto",
                           actividad:
                             dog.actividad === "baja" || dog.actividad === "alta"
                               ? dog.actividad
                               : "moderada",
                           estadoFisico:
-                            dog.estado_fisico === "esterilizado" || dog.estado_fisico === "sobrepeso"
+                            dog.estado_fisico === "esterilizado" ||
+                            dog.estado_fisico === "sobrepeso"
                               ? dog.estado_fisico
                               : "normal",
                         })
                       : null;
 
                     return (
-                      <article key={dog.id} className="overflow-hidden rounded-3xl border border-border bg-muted/30">
+                      <article
+                        key={dog.id}
+                        className="overflow-hidden rounded-3xl border border-border bg-muted/30"
+                      >
                         <div className="relative h-36 bg-foreground/5">
                           {dog.photo_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={dog.photo_url} alt={dog.nombre} className="h-full w-full object-cover" />
+                            <img
+                              src={dog.photo_url}
+                              alt={dog.nombre}
+                              className="h-full w-full object-cover"
+                            />
                           ) : (
                             <div className="flex h-full items-center justify-center text-muted-foreground">
                               <Camera className="h-8 w-8" />
@@ -598,7 +820,9 @@ export function AccountPetsSection() {
                         <div className="p-4">
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <p className="text-xl font-bold text-foreground">{dog.nombre}</p>
+                              <p className="text-xl font-bold text-foreground">
+                                {dog.nombre}
+                              </p>
                               <p className="text-sm text-muted-foreground">
                                 {dog.peso ? `${dog.peso} kg · ` : ""}
                                 {dog.tamaño || "sin tamaño"}
@@ -615,11 +839,16 @@ export function AccountPetsSection() {
                           </div>
 
                           <div className="mt-4 flex flex-wrap gap-2">
-                            {[dog.edad, dog.actividad, dog.estado_fisico].filter(Boolean).map((tag) => (
-                              <span key={tag} className="rounded-full bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
-                                {tag}
-                              </span>
-                            ))}
+                            {[dog.edad, dog.actividad, dog.estado_fisico]
+                              .filter(Boolean)
+                              .map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="rounded-full bg-background px-3 py-1 text-xs font-medium text-muted-foreground"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
                           </div>
 
                           <div className="mt-4 rounded-2xl bg-background p-4">
@@ -627,16 +856,31 @@ export function AccountPetsSection() {
                               Cantidad calculada
                             </p>
                             <p className="mt-1 text-2xl font-bold text-foreground">
-                              {latestCalculation?.gramos_diarios ?? previewCalculation?.gramosDia ?? 0} g/día
+                              {latestCalculation?.gramos_diarios ??
+                                previewCalculation?.gramosDia ??
+                                0}{" "}
+                              g/día
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {((latestCalculation?.gramos_mensuales ?? previewCalculation?.gramosMes ?? 0) / 1000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} kg/mes
+                              {(
+                                (latestCalculation?.gramos_mensuales ??
+                                  previewCalculation?.gramosMes ??
+                                  0) / 1000
+                              ).toLocaleString("es-CL", {
+                                maximumFractionDigits: 1,
+                              })}{" "}
+                              kg/mes
                             </p>
                           </div>
 
                           <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                             <History className="h-3.5 w-3.5" />
-                            {calculations.filter((calculation) => calculation.dog_id === dog.id).length} cálculo(s) guardado(s)
+                            {
+                              calculations.filter(
+                                (calculation) => calculation.dog_id === dog.id,
+                              ).length
+                            }{" "}
+                            cálculo(s) guardado(s)
                           </div>
                         </div>
                       </article>
@@ -645,7 +889,8 @@ export function AccountPetsSection() {
                 </div>
               ) : (
                 <div className="mt-5 rounded-3xl border border-dashed border-border bg-muted/25 p-8 text-center text-sm text-muted-foreground">
-                  Aún no tienes perros registrados. Agrega el primero para activar el dashboard.
+                  Aún no tienes perros registrados. Agrega el primero para
+                  activar el dashboard.
                 </div>
               )}
             </div>

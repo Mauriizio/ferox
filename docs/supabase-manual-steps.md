@@ -21,8 +21,8 @@ supabase/migrations/20260518000000_app_private_dashboard.sql
 
 La migración:
 
-- agrega `profiles.avatar_url` si falta;
-- agrega `dogs.photo_url` si falta;
+- agrega `profiles.avatar_url` si falta y asegura que acepte `null`;
+- agrega `dogs.photo_url` si falta y asegura que acepte `null`;
 - mantiene las columnas reales en español de `dogs` (`nombre`, `peso`, `edad`, `tamaño`, `actividad`, `estado_fisico`, `user_id`);
 - agrega columnas mínimas para guardar `food_calculations` con gramos diarios y mensuales;
 - activa RLS y políticas por usuario autenticado;
@@ -51,7 +51,7 @@ El botón ya está implementado en la UI. Para activarlo:
 
 ## 5. Storage de fotos
 
-Esta fase usa URLs (`avatar_url` y `photo_url`) para no bloquear el producto con carga de archivos. Si luego quieres subir archivos a Supabase Storage:
+Esta fase permite dejar vacías las imágenes (`avatar_url` y `photo_url` se guardan como `null`) para no bloquear el producto con carga de archivos ni exigir URLs manuales. Si luego quieres subir archivos a Supabase Storage:
 
 1. Crea buckets privados o públicos según la estrategia de negocio, por ejemplo `avatars` y `dogs`.
 2. Mantén las columnas `profiles.avatar_url` y `dogs.photo_url` como destino de la URL pública o firmada.

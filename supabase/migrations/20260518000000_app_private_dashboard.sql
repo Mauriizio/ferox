@@ -2,10 +2,12 @@
 -- Non destructive: only adds missing columns/constraints/policies needed by the app.
 
 alter table public.profiles
-  add column if not exists avatar_url text;
+  add column if not exists avatar_url text,
+  alter column avatar_url drop not null;
 
 alter table public.dogs
-  add column if not exists photo_url text;
+  add column if not exists photo_url text,
+  alter column photo_url drop not null;
 
 do $$
 begin
@@ -52,9 +54,10 @@ alter table public.comments enable row level security;
 alter table public.comment_likes enable row level security;
 
 drop policy if exists "profiles are readable by owner" on public.profiles;
-create policy "profiles are readable by owner"
+drop policy if exists "profiles are readable by authenticated users" on public.profiles;
+create policy "profiles are readable by authenticated users"
   on public.profiles for select
-  using (auth.uid() = id);
+  using (auth.role() = 'authenticated');
 
 drop policy if exists "profiles are writable by owner" on public.profiles;
 create policy "profiles are writable by owner"

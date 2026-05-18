@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase/client";
 import type { FoodCalculation } from "@/lib/supabase/database.types";
+import { isMissingSchemaError } from "@/lib/supabase/schema-errors";
 
 export type SaveFoodCalculationInput = {
   userId: string;
@@ -14,6 +15,16 @@ export type SaveFoodCalculationInput = {
 
 const FOOD_CALCULATION_SELECT =
   "id, created_at, user_id, dog_id, gramos_diarios, gramos_mensuales, peso, edad, actividad, estado_fisico";
+const FOOD_CALCULATION_COLUMNS = [
+  "user_id",
+  "dog_id",
+  "gramos_diarios",
+  "gramos_mensuales",
+  "peso",
+  "edad",
+  "actividad",
+  "estado_fisico",
+];
 
 export async function getFoodCalculationsByUser(
   userId: string,
@@ -24,8 +35,13 @@ export async function getFoodCalculationsByUser(
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
-  return data ?? [];
+  if (!error) return data ?? [];
+
+  if (isMissingSchemaError(error, FOOD_CALCULATION_COLUMNS)) {
+    return [];
+  }
+
+  throw error;
 }
 
 export async function saveFoodCalculation({
