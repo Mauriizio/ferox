@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -18,10 +18,14 @@ import {
   ShoppingBag,
   Sparkles,
 } from "lucide-react";
+import { getCurrentSession } from "@/lib/services/auth-service";
+import { getDogsByUser } from "@/lib/services/dog-service";
+import { saveFoodCalculation } from "@/lib/services/food-calculation-service";
+import { calcularRacionBarf, type Actividad, type Edad, type EstadoFisico } from "@/lib/domain/feeding";
+import { supabase } from "@/lib/supabase/client";
+import type { Dog } from "@/lib/supabase/database.types";
 
-type Edad = "cachorro" | "adulto" | "senior";
-type Actividad = "baja" | "moderada" | "alta";
-type Estado = "normal" | "esterilizado" | "sobrepeso";
+type Estado = EstadoFisico;
 
 const PHONE = "56927973379"; // FEROX BARF WhatsApp number
 
@@ -47,50 +51,90 @@ const estadoOptions: { v: Estado; l: string }[] = [
   { v: "sobrepeso", l: "Sobrepeso" },
 ];
 
-function calcularPorcentaje(
-  edad: Edad,
-  actividad: Actividad,
-  estado: Estado,
-): number {
-  let pct: number;
-
-  if (edad === "cachorro") {
-    pct = 0.07; // 7% promedio
-  } else if (edad === "senior") {
-    pct = 0.0175; // 1.75% promedio
-  } else {
-    // adulto
-    if (actividad === "baja") pct = 0.02;
-    else if (actividad === "moderada") pct = 0.025;
-    else pct = 0.03;
-  }
-
-  if (estado === "sobrepeso") {
-    pct = 0.015;
-  } else if (estado === "esterilizado") {
-    pct = pct * 0.9; // reducir ligeramente
-  }
-
-  return pct;
-}
-
 export function CalculatorSection() {
   const [peso, setPeso] = useState<string>("10");
   const [edad, setEdad] = useState<Edad>("adulto");
   const [actividad, setActividad] = useState<Actividad>("moderada");
   const [estado, setEstado] = useState<Estado>("normal");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [dogs, setDogs] = useState<Dog[]>([]);
+  const [selectedDogId, setSelectedDogId] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const pesoNumber = Number.parseFloat(peso);
 
   const { gramosDia, gramosMes, porcentaje } = useMemo(() => {
-    const p = Number.parseFloat(peso);
-    if (!p || p <= 0 || isNaN(p)) {
-      return { gramosDia: 0, gramosMes: 0, porcentaje: 0 };
-    }
-    const pct = calcularPorcentaje(edad, actividad, estado);
-    const dia = Math.round(p * pct * 1000);
-    return { gramosDia: dia, gramosMes: dia * 30, porcentaje: pct };
+    return calcularRacionBarf({
+      peso: Number.parseFloat(peso),
+      edad,
+      actividad,
+      estadoFisico: estado,
+    });
   }, [peso, edad, actividad, estado]);
+
+  const selectedDog = dogs.find((dog) => dog.id === selectedDogId) ?? null;
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadUserDogs() {
+      try {
+        const session = await getCurrentSession();
+        if (!mounted) return;
+
+        const nextUserId = session?.user.id ?? null;
+        setUserId(nextUserId);
+
+        if (nextUserId) {
+          const userDogs = await getDogsByUser(nextUserId);
+          if (!mounted) return;
+          setDogs(userDogs);
+        }
+      } catch (error) {
+        setSaveMessage(error instanceof Error ? error.message : "No pudimos cargar tus perros.");
+      }
+    }
+
+    loadUserDogs();
+
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      const nextUserId = session?.user.id ?? null;
+      setUserId(nextUserId);
+      setSelectedDogId("");
+
+      if (!nextUserId) {
+        setDogs([]);
+        return;
+      }
+
+      getDogsByUser(nextUserId)
+        .then(setDogs)
+        .catch((error) =>
+          setSaveMessage(error instanceof Error ? error.message : "No pudimos cargar tus perros."),
+        );
+    });
+
+    return () => {
+      mounted = false;
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedDog) return;
+
+    if (selectedDog.peso) setPeso(String(selectedDog.peso));
+    if (selectedDog.edad === "cachorro" || selectedDog.edad === "adulto" || selectedDog.edad === "senior") {
+      setEdad(selectedDog.edad);
+    }
+    if (selectedDog.actividad === "baja" || selectedDog.actividad === "moderada" || selectedDog.actividad === "alta") {
+      setActividad(selectedDog.actividad);
+    }
+    if (selectedDog.estado_fisico === "normal" || selectedDog.estado_fisico === "esterilizado" || selectedDog.estado_fisico === "sobrepeso") {
+      setEstado(selectedDog.estado_fisico);
+    }
+  }, [selectedDog]);
 
   const whatsappMessage = encodeURIComponent(
     `Hola FEROX BARF! Quiero pedir info para mi perro:\n• Peso: ${peso} kg\n• Edad: ${edad}\n• Actividad: ${actividad}\n• Estado: ${estado}\n• Porción diaria: ${gramosDia} g (${(gramosMes / 1000).toFixed(1)} kg al mes)`,
@@ -99,6 +143,40 @@ export function CalculatorSection() {
   const updatePeso = (nextPeso: number) => {
     const boundedPeso = Math.min(100, Math.max(0.5, nextPeso));
     setPeso(Number(boundedPeso.toFixed(1)).toString());
+  };
+
+  const handleSaveCalculation = async () => {
+    if (!userId) {
+      setSaveMessage("Inicia sesión para guardar el cálculo en tu dashboard.");
+      return;
+    }
+
+    if (!selectedDog) {
+      setSaveMessage("Selecciona un perro registrado para guardar este cálculo.");
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveMessage("");
+
+    try {
+      await saveFoodCalculation({
+        userId,
+        dogId: selectedDog.id,
+        gramosDiarios: gramosDia,
+        gramosMensuales: gramosMes,
+        peso: pesoNumber || null,
+        edad,
+        actividad,
+        estadoFisico: estado,
+      });
+      window.dispatchEvent(new CustomEvent("ferox:food-calculation-saved"));
+      setSaveMessage(`Cálculo guardado para ${selectedDog.nombre}.`);
+    } catch (error) {
+      setSaveMessage(error instanceof Error ? error.message : "No pudimos guardar el cálculo.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const renderResultCard = (className: string) => (
@@ -170,11 +248,20 @@ export function CalculatorSection() {
           </div>
 
           <div className="relative mt-3 grid gap-2">
+            <button
+              type="button"
+              onClick={handleSaveCalculation}
+              disabled={isSaving || gramosDia <= 0}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              {isSaving ? "Guardando..." : "Guardar cálculo"}
+            </button>
             <a
               href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-transform hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2.5 text-sm font-semibold text-background transition-colors hover:bg-background/10"
             >
               <MessageCircle className="h-4 w-4" />
               Pedir asesoría
@@ -223,6 +310,34 @@ export function CalculatorSection() {
               className="space-y-3"
               onSubmit={(e) => e.preventDefault()}
             >
+              {userId ? (
+                <label className="block text-sm font-semibold text-foreground">
+                  Usar perro guardado
+                  <select
+                    value={selectedDogId}
+                    onChange={(event) => setSelectedDogId(event.target.value)}
+                    className="mt-2 block w-full rounded-2xl border border-border bg-white/75 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
+                  >
+                    <option value="">Cálculo manual</option>
+                    {dogs.map((dog) => (
+                      <option key={dog.id} value={dog.id}>
+                        {dog.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <div className="rounded-2xl border border-border bg-white/70 p-3 text-sm text-muted-foreground">
+                  Puedes calcular libremente. Inicia sesión en “Cuenta” para guardar perros y resultados.
+                </div>
+              )}
+
+              {saveMessage ? (
+                <div className="rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
+                  {saveMessage}
+                </div>
+              ) : null}
+
               <div className="rounded-[1.25rem] bg-foreground p-3 text-background shadow-lg">
                 <div className="flex items-center justify-between gap-3">
                   <label
