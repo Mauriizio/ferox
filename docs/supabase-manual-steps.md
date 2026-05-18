@@ -21,9 +21,9 @@ supabase/migrations/20260518000000_app_private_dashboard.sql
 
 La migración:
 
-- agrega `profiles.avatar_url` si falta y asegura que acepte `null`;
-- agrega `dogs.photo_url` si falta y asegura que acepte `null`;
-- mantiene las columnas reales en español de `dogs` (`nombre`, `peso`, `edad`, `tamaño`, `actividad`, `estado_fisico`, `user_id`);
+- agrega `profiles.avatar_url` si falta;
+- agrega `dogs.photo_url` si falta;
+- mantiene las columnas reales en español de `dogs` (`nombre`, `peso`, `edad`, `tamano`, `actividad`, `estado_fisico`, `user_id`);
 - agrega columnas mínimas para guardar `food_calculations` con gramos diarios y mensuales;
 - activa RLS y políticas por usuario autenticado;
 - deja `comments` y `comment_likes` listos como base social.

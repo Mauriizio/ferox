@@ -16,15 +16,16 @@ import {
   toggleCommentLike,
   type CommentWithMeta,
 } from "@/lib/services/comment-service";
+import {
+  getSupabaseErrorMessage,
+  logSupabaseError,
+} from "@/lib/services/supabase-error";
 
 const backendSteps = [
   "Usuarios autenticados pueden comentar",
   "Comentarios guardados en Supabase",
   "Likes protegidos contra duplicados",
 ];
-
-const getFriendlyError = (error: unknown) =>
-  error instanceof Error ? error.message : "Ocurrió un error inesperado.";
 
 const formatCommentDate = (createdAt: string | null) => {
   if (!createdAt) return "Ahora";
@@ -47,6 +48,11 @@ export function CommentsSection() {
   const user = session?.user ?? null;
 
   const refreshComments = useCallback(async (currentUserId?: string) => {
+    if (!currentUserId) {
+      setComments([]);
+      return;
+    }
+
     const nextComments = await listRecentComments(12, currentUserId);
     setComments(nextComments);
   }, []);
@@ -63,7 +69,8 @@ export function CommentsSection() {
         setSession(data.session);
         await refreshComments(data.session?.user.id);
       } catch (error) {
-        setMessage(getFriendlyError(error));
+        logSupabaseError("Cargar comentarios", error);
+        setMessage(getSupabaseErrorMessage(error));
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -74,9 +81,10 @@ export function CommentsSection() {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, nextSession) => {
         setSession(nextSession);
-        refreshComments(nextSession?.user.id).catch((error) =>
-          setMessage(getFriendlyError(error)),
-        );
+        refreshComments(nextSession?.user.id).catch((error) => {
+          logSupabaseError("Refrescar comentarios después de auth", error);
+          setMessage(getSupabaseErrorMessage(error));
+        });
       },
     );
 
@@ -109,7 +117,8 @@ export function CommentsSection() {
       setCommentBody("");
       setMessage("Comentario publicado correctamente.");
     } catch (error) {
-      setMessage(getFriendlyError(error));
+      logSupabaseError("Crear comentario", error);
+      setMessage(getSupabaseErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -140,7 +149,8 @@ export function CommentsSection() {
         ),
       );
     } catch (error) {
-      setMessage(getFriendlyError(error));
+      logSupabaseError("Cambiar like de comentario", error);
+      setMessage(getSupabaseErrorMessage(error));
     }
   };
 

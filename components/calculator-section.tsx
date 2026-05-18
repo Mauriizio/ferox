@@ -21,7 +21,16 @@ import {
 import { getCurrentSession } from "@/lib/services/auth-service";
 import { getDogsByUser } from "@/lib/services/dog-service";
 import { saveFoodCalculation } from "@/lib/services/food-calculation-service";
-import { calcularRacionBarf, type Actividad, type Edad, type EstadoFisico } from "@/lib/domain/feeding";
+import {
+  getSupabaseErrorMessage,
+  logSupabaseError,
+} from "@/lib/services/supabase-error";
+import {
+  calcularRacionBarf,
+  type Actividad,
+  type Edad,
+  type EstadoFisico,
+} from "@/lib/domain/feeding";
 import { supabase } from "@/lib/supabase/client";
 import type { Dog } from "@/lib/supabase/database.types";
 
@@ -29,7 +38,7 @@ type Estado = EstadoFisico;
 
 const PHONE = "56927973379"; // FEROX BARF WhatsApp number
 
-const edadOptions: {
+const etapaVidaOptions: {
   v: Edad;
   l: string;
   icon: LucideIcon;
@@ -53,7 +62,7 @@ const estadoOptions: { v: Estado; l: string }[] = [
 
 export function CalculatorSection() {
   const [peso, setPeso] = useState<string>("10");
-  const [edad, setEdad] = useState<Edad>("adulto");
+  const [etapaVida, setEtapaVida] = useState<Edad>("adulto");
   const [actividad, setActividad] = useState<Actividad>("moderada");
   const [estado, setEstado] = useState<Estado>("normal");
   const [userId, setUserId] = useState<string | null>(null);
@@ -67,11 +76,11 @@ export function CalculatorSection() {
   const { gramosDia, gramosMes, porcentaje } = useMemo(() => {
     return calcularRacionBarf({
       peso: Number.parseFloat(peso),
-      edad,
+      edad: etapaVida,
       actividad,
       estadoFisico: estado,
     });
-  }, [peso, edad, actividad, estado]);
+  }, [peso, etapaVida, actividad, estado]);
 
   const selectedDog = dogs.find((dog) => dog.id === selectedDogId) ?? null;
 
@@ -92,7 +101,8 @@ export function CalculatorSection() {
           setDogs(userDogs);
         }
       } catch (error) {
-        setSaveMessage(error instanceof Error ? error.message : "No pudimos cargar tus perros.");
+        logSupabaseError("Cargar perros en calculadora", error);
+        setSaveMessage(getSupabaseErrorMessage(error));
       }
     }
 
@@ -110,9 +120,10 @@ export function CalculatorSection() {
 
       getDogsByUser(nextUserId)
         .then(setDogs)
-        .catch((error) =>
-          setSaveMessage(error instanceof Error ? error.message : "No pudimos cargar tus perros."),
-        );
+        .catch((error) => {
+          logSupabaseError("Refrescar perros en calculadora", error);
+          setSaveMessage(getSupabaseErrorMessage(error));
+        });
     });
 
     return () => {
@@ -125,19 +136,31 @@ export function CalculatorSection() {
     if (!selectedDog) return;
 
     if (selectedDog.peso) setPeso(String(selectedDog.peso));
-    if (selectedDog.edad === "cachorro" || selectedDog.edad === "adulto" || selectedDog.edad === "senior") {
-      setEdad(selectedDog.edad);
+    if (
+      selectedDog.etapa_vida === "cachorro" ||
+      selectedDog.etapa_vida === "adulto" ||
+      selectedDog.etapa_vida === "senior"
+    ) {
+      setEtapaVida(selectedDog.etapa_vida);
     }
-    if (selectedDog.actividad === "baja" || selectedDog.actividad === "moderada" || selectedDog.actividad === "alta") {
+    if (
+      selectedDog.actividad === "baja" ||
+      selectedDog.actividad === "moderada" ||
+      selectedDog.actividad === "alta"
+    ) {
       setActividad(selectedDog.actividad);
     }
-    if (selectedDog.estado_fisico === "normal" || selectedDog.estado_fisico === "esterilizado" || selectedDog.estado_fisico === "sobrepeso") {
+    if (
+      selectedDog.estado_fisico === "normal" ||
+      selectedDog.estado_fisico === "esterilizado" ||
+      selectedDog.estado_fisico === "sobrepeso"
+    ) {
       setEstado(selectedDog.estado_fisico);
     }
   }, [selectedDog]);
 
   const whatsappMessage = encodeURIComponent(
-    `Hola FEROX BARF! Quiero pedir info para mi perro:\n• Peso: ${peso} kg\n• Edad: ${edad}\n• Actividad: ${actividad}\n• Estado: ${estado}\n• Porción diaria: ${gramosDia} g (${(gramosMes / 1000).toFixed(1)} kg al mes)`,
+    `Hola FEROX BARF! Quiero pedir info para mi perro:\n• Peso: ${peso} kg\n• Etapa de vida: ${etapaVida}\n• Actividad: ${actividad}\n• Estado: ${estado}\n• Porción diaria: ${gramosDia} g (${(gramosMes / 1000).toFixed(1)} kg al mes)`,
   );
 
   const updatePeso = (nextPeso: number) => {
@@ -152,7 +175,9 @@ export function CalculatorSection() {
     }
 
     if (!selectedDog) {
-      setSaveMessage("Selecciona un perro registrado para guardar este cálculo.");
+      setSaveMessage(
+        "Selecciona un perro registrado para guardar este cálculo.",
+      );
       return;
     }
 
@@ -166,14 +191,16 @@ export function CalculatorSection() {
         gramosDiarios: gramosDia,
         gramosMensuales: gramosMes,
         peso: pesoNumber || null,
-        edad,
+        edad: selectedDog.edad,
+        etapaVida,
         actividad,
         estadoFisico: estado,
       });
       window.dispatchEvent(new CustomEvent("ferox:food-calculation-saved"));
       setSaveMessage(`Cálculo guardado para ${selectedDog.nombre}.`);
     } catch (error) {
-      setSaveMessage(error instanceof Error ? error.message : "No pudimos guardar el cálculo.");
+      logSupabaseError("Guardar cálculo", error);
+      setSaveMessage(getSupabaseErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -274,8 +301,8 @@ export function CalculatorSection() {
               Ver productos
             </a>
             <p className="text-center text-[11px] leading-relaxed text-background/55">
-              Recomendación orientativa. Ajusta con un profesional si tu
-              perro tiene una condición específica.
+              Recomendación orientativa. Ajusta con un profesional si tu perro
+              tiene una condición específica.
             </p>
           </div>
         </div>
@@ -300,16 +327,14 @@ export function CalculatorSection() {
             Descubre cuánta comida necesita tu perro
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Selecciona el peso arriba y revisa el resultado justo debajo. Luego afina edad, actividad y condición.
+            Selecciona el peso arriba y revisa el resultado justo debajo. Luego
+            afina edad, actividad y condición.
           </p>
         </div>
 
         <div className="mt-5 grid gap-3 lg:mt-7 lg:grid-cols-5 lg:gap-4">
           <div className="rounded-[1.5rem] border border-white/70 bg-background/85 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.07)] backdrop-blur sm:p-4 lg:col-span-3 lg:p-5">
-            <form
-              className="space-y-3"
-              onSubmit={(e) => e.preventDefault()}
-            >
+            <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
               {userId ? (
                 <label className="block text-sm font-semibold text-foreground">
                   Usar perro guardado
@@ -328,7 +353,8 @@ export function CalculatorSection() {
                 </label>
               ) : (
                 <div className="rounded-2xl border border-border bg-white/70 p-3 text-sm text-muted-foreground">
-                  Puedes calcular libremente. Inicia sesión en “Cuenta” para guardar perros y resultados.
+                  Puedes calcular libremente. Inicia sesión en “Cuenta” para
+                  guardar perros y resultados.
                 </div>
               )}
 
@@ -393,19 +419,19 @@ export function CalculatorSection() {
                   Etapa de vida
                 </span>
                 <div className="mt-2 grid grid-cols-3 gap-1.5">
-                  {edadOptions.map((opt) => {
+                  {etapaVidaOptions.map((opt) => {
                     const Icon = opt.icon;
                     return (
                       <button
                         key={opt.v}
                         type="button"
-                        onClick={() => setEdad(opt.v)}
+                        onClick={() => setEtapaVida(opt.v)}
                         className={`flex items-center justify-center gap-1.5 rounded-2xl border px-2 py-2 text-sm font-bold transition-all sm:px-3 ${
-                          edad === opt.v
+                          etapaVida === opt.v
                             ? "border-foreground bg-foreground text-background shadow-lg shadow-foreground/15"
                             : "border-border bg-white/75 text-foreground hover:-translate-y-0.5 hover:bg-white"
                         }`}
-                        aria-pressed={edad === opt.v}
+                        aria-pressed={etapaVida === opt.v}
                       >
                         <Icon className="h-4 w-4" />
                         {opt.l}
@@ -427,25 +453,25 @@ export function CalculatorSection() {
                         key={opt.v}
                         type="button"
                         onClick={() => setActividad(opt.v)}
-                        disabled={edad !== "adulto"}
+                        disabled={etapaVida !== "adulto"}
                         className={`inline-flex min-h-10 items-center justify-center rounded-2xl border px-2 text-center text-xs font-semibold transition-colors sm:text-sm ${
-                          actividad === opt.v && edad === "adulto"
+                          actividad === opt.v && etapaVida === "adulto"
                             ? "border-foreground bg-foreground text-background"
                             : "border-transparent bg-background text-foreground hover:bg-muted"
-                        } ${edad !== "adulto" ? "cursor-not-allowed opacity-45" : ""}`}
+                        } ${etapaVida !== "adulto" ? "cursor-not-allowed opacity-45" : ""}`}
                         aria-pressed={actividad === opt.v}
                       >
                         <span>
                           <span className="block font-semibold">{opt.l}</span>
                           <span className="text-xs opacity-65">{opt.hint}</span>
                         </span>
-                        {actividad === opt.v && edad === "adulto" ? (
+                        {actividad === opt.v && etapaVida === "adulto" ? (
                           <CheckCircle2 className="h-4 w-4" />
                         ) : null}
                       </button>
                     ))}
                   </div>
-                  {edad !== "adulto" ? (
+                  {etapaVida !== "adulto" ? (
                     <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                       Usamos una base por etapa de vida.
                     </p>

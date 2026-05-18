@@ -6,98 +6,67 @@ export type DogFormData = {
   nombre: string;
   peso: number | null;
   edad: string;
-  tamaño: string;
+  tamano: string;
   actividad: string;
   estado_fisico: string;
   photo_url?: string | null;
 };
 
-const DOG_SELECT =
-  "id, created_at, nombre, peso, edad, tamaño, actividad, estado_fisico, user_id, photo_url";
-const DOG_FALLBACK_SELECT =
-  "id, created_at, nombre, peso, edad, tamaño, actividad, estado_fisico, user_id";
-
-const optionalText = (value?: string | null) => {
-  const trimmedValue = value?.trim();
-  return trimmedValue ? trimmedValue : null;
+type DogRow = Partial<Dog> & {
+  id: string;
+  nombre: string;
+  user_id: string;
 };
 
-const normalizeDog = (dog: Partial<Dog> & { id: string }): Dog => ({
-  id: dog.id,
-  created_at: dog.created_at ?? null,
-  nombre: dog.nombre ?? "",
-  peso: dog.peso ?? null,
-  edad: dog.edad ?? null,
-  tamaño: dog.tamaño ?? null,
-  actividad: dog.actividad ?? null,
-  estado_fisico: dog.estado_fisico ?? null,
-  user_id: dog.user_id ?? "",
-  photo_url: dog.photo_url ?? null,
-});
+function normalizeDog(row: DogRow): Dog {
+  return {
+    id: row.id,
+    created_at: row.created_at ?? null,
+    nombre: row.nombre,
+    peso: row.peso ?? null,
+    edad: row.edad ?? null,
+    tamano: row.tamano ?? null,
+    actividad: row.actividad ?? null,
+    estado_fisico: row.estado_fisico ?? null,
+    user_id: row.user_id,
+    photo_url: row.photo_url ?? null,
+  };
+}
 
 export async function getDogsByUser(userId: string): Promise<Dog[]> {
   const { data, error } = await supabase
     .from("dogs")
-    .select(DOG_SELECT)
+    .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-  if (!error) return (data ?? []).map(normalizeDog);
-
-  if (!isMissingSchemaError(error, "photo_url")) {
-    throw error;
-  }
-
-  const { data: fallbackData, error: fallbackError } = await supabase
-    .from("dogs")
-    .select(DOG_FALLBACK_SELECT)
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-
-  if (fallbackError) throw fallbackError;
-  return (fallbackData ?? []).map(normalizeDog);
+  if (error) throw error;
+  return ((data ?? []) as DogRow[]).map(normalizeDog);
 }
 
-export async function createDog(userId: string, dog: DogFormData): Promise<Dog> {
-  const dogPayload = {
+export async function createDog(
+  userId: string,
+  dog: DogFormData,
+): Promise<Dog> {
+  const payload = {
     user_id: userId,
     nombre: dog.nombre.trim(),
     peso: dog.peso,
     edad: dog.edad,
-    tamaño: dog.tamaño,
+    tamano: dog.tamano,
     actividad: dog.actividad,
     estado_fisico: dog.estado_fisico,
-    photo_url: optionalText(dog.photo_url),
+    photo_url: dog.photo_url?.trim() || null,
   };
 
   const { data, error } = await supabase
     .from("dogs")
-    .insert(dogPayload)
-    .select(DOG_SELECT)
+    .insert(payload)
+    .select("*")
     .single();
 
-  if (!error) return normalizeDog(data);
-
-  if (!isMissingSchemaError(error, "photo_url")) {
-    throw error;
-  }
-
-  const { data: fallbackData, error: fallbackError } = await supabase
-    .from("dogs")
-    .insert({
-      user_id: dogPayload.user_id,
-      nombre: dogPayload.nombre,
-      peso: dogPayload.peso,
-      edad: dogPayload.edad,
-      tamaño: dogPayload.tamaño,
-      actividad: dogPayload.actividad,
-      estado_fisico: dogPayload.estado_fisico,
-    })
-    .select(DOG_FALLBACK_SELECT)
-    .single();
-
-  if (fallbackError) throw fallbackError;
-  return normalizeDog(fallbackData);
+  if (error) throw error;
+  return normalizeDog(data as DogRow);
 }
 
 export async function deleteDog(userId: string, dogId: string): Promise<void> {

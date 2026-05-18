@@ -13,35 +13,38 @@ export type SaveFoodCalculationInput = {
   estadoFisico: string | null;
 };
 
-const FOOD_CALCULATION_SELECT =
-  "id, created_at, user_id, dog_id, gramos_diarios, gramos_mensuales, peso, edad, actividad, estado_fisico";
-const FOOD_CALCULATION_COLUMNS = [
-  "user_id",
-  "dog_id",
-  "gramos_diarios",
-  "gramos_mensuales",
-  "peso",
-  "edad",
-  "actividad",
-  "estado_fisico",
-];
+type FoodCalculationRow = Partial<FoodCalculation> & {
+  id: string;
+  user_id: string;
+  dog_id: string;
+};
+
+function normalizeFoodCalculation(row: FoodCalculationRow): FoodCalculation {
+  return {
+    id: row.id,
+    created_at: row.created_at ?? null,
+    user_id: row.user_id,
+    dog_id: row.dog_id,
+    gramos_diarios: row.gramos_diarios ?? 0,
+    gramos_mensuales: row.gramos_mensuales ?? 0,
+    peso: row.peso ?? null,
+    edad: row.edad ?? null,
+    actividad: row.actividad ?? null,
+    estado_fisico: row.estado_fisico ?? null,
+  };
+}
 
 export async function getFoodCalculationsByUser(
   userId: string,
 ): Promise<FoodCalculation[]> {
   const { data, error } = await supabase
     .from("food_calculations")
-    .select(FOOD_CALCULATION_SELECT)
+    .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-  if (!error) return data ?? [];
-
-  if (isMissingSchemaError(error, FOOD_CALCULATION_COLUMNS)) {
-    return [];
-  }
-
-  throw error;
+  if (error) throw error;
+  return ((data ?? []) as FoodCalculationRow[]).map(normalizeFoodCalculation);
 }
 
 export async function saveFoodCalculation({
@@ -66,9 +69,9 @@ export async function saveFoodCalculation({
       actividad,
       estado_fisico: estadoFisico,
     })
-    .select(FOOD_CALCULATION_SELECT)
+    .select("*")
     .single();
 
   if (error) throw error;
-  return data;
+  return normalizeFoodCalculation(data as FoodCalculationRow);
 }

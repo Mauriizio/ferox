@@ -42,6 +42,10 @@ import {
 import { getFoodCalculationsByUser } from "@/lib/services/food-calculation-service";
 import { calcularRacionBarf } from "@/lib/domain/feeding";
 import { uploadImageToMediaBucket } from "@/lib/services/storage-service";
+import {
+  getSupabaseErrorMessage,
+  logSupabaseError,
+} from "@/lib/services/supabase-error";
 import { supabase } from "@/lib/supabase/client";
 import type {
   Dog,
@@ -53,7 +57,7 @@ const emptyDogForm: DogFormData = {
   nombre: "",
   peso: null,
   edad: "adulto",
-  tamaño: "mediano",
+  tamano: "mediano",
   actividad: "moderada",
   estado_fisico: "normal",
   photo_url: null,
@@ -61,9 +65,6 @@ const emptyDogForm: DogFormData = {
 
 const imageInputClassName =
   "mt-2 block w-full cursor-pointer rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground file:mr-4 file:rounded-full file:border-0 file:bg-foreground file:px-4 file:py-2 file:text-sm file:font-semibold file:text-background outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10";
-
-const getFriendlyError = (error: unknown) =>
-  error instanceof Error ? error.message : "Ocurrió un error inesperado.";
 
 export function AccountPetsSection() {
   const [session, setSession] = useState<Session | null>(null);
@@ -116,7 +117,8 @@ export function AccountPetsSection() {
           await refreshDashboard(currentSession.user.id);
         }
       } catch (error) {
-        setMessage(getFriendlyError(error));
+        logSupabaseError("Cargar sesión inicial / dashboard", error);
+        setMessage(getSupabaseErrorMessage(error));
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -127,9 +129,10 @@ export function AccountPetsSection() {
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
       if (nextSession?.user) {
-        refreshDashboard(nextSession.user.id).catch((error) =>
-          setMessage(getFriendlyError(error)),
-        );
+        refreshDashboard(nextSession.user.id).catch((error) => {
+          logSupabaseError("Refrescar dashboard después de auth", error);
+          setMessage(getSupabaseErrorMessage(error));
+        });
       } else {
         setProfile(null);
         setDogs([]);
@@ -148,7 +151,8 @@ export function AccountPetsSection() {
           await refreshDashboard(userData.user.id);
         }
       } catch (error) {
-        setMessage(getFriendlyError(error));
+        logSupabaseError("Refrescar dashboard después de cálculo", error);
+        setMessage(getSupabaseErrorMessage(error));
       }
     };
 
@@ -206,7 +210,8 @@ export function AccountPetsSection() {
         setMessage("Sesión iniciada correctamente.");
       }
     } catch (error) {
-      setMessage(getFriendlyError(error));
+      logSupabaseError("Autenticación", error);
+      setMessage(getSupabaseErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -288,7 +293,8 @@ export function AccountPetsSection() {
       setProfile(nextProfile);
       setMessage("Perfil actualizado correctamente.");
     } catch (error) {
-      setMessage(getFriendlyError(error));
+      logSupabaseError("Guardar perfil", error);
+      setMessage(getSupabaseErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -336,7 +342,8 @@ export function AccountPetsSection() {
       clearDogPhotoSelection();
       setMessage(`${dog.nombre} quedó guardado correctamente.`);
     } catch (error) {
-      setMessage(getFriendlyError(error));
+      logSupabaseError("Crear perro", error);
+      setMessage(getSupabaseErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -353,7 +360,8 @@ export function AccountPetsSection() {
       setDogs((currentDogs) => currentDogs.filter((dog) => dog.id !== dogId));
       setMessage("Perro eliminado correctamente.");
     } catch (error) {
-      setMessage(getFriendlyError(error));
+      logSupabaseError("Eliminar perro", error);
+      setMessage(getSupabaseErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -369,7 +377,8 @@ export function AccountPetsSection() {
       setPassword("");
       setMessage("Sesión cerrada.");
     } catch (error) {
-      setMessage(getFriendlyError(error));
+      logSupabaseError("Cerrar sesión", error);
+      setMessage(getSupabaseErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -499,9 +508,10 @@ export function AccountPetsSection() {
               <button
                 type="button"
                 onClick={() =>
-                  signInWithGoogle().catch((error) =>
-                    setMessage(getFriendlyError(error)),
-                  )
+                  signInWithGoogle().catch((error) => {
+                    logSupabaseError("Google OAuth", error);
+                    setMessage(getSupabaseErrorMessage(error));
+                  })
                 }
                 className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-border px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted"
               >
@@ -677,7 +687,7 @@ export function AccountPetsSection() {
                     {(
                       [
                         ["edad", "Edad", ["cachorro", "adulto", "senior"]],
-                        ["tamaño", "Tamaño", ["pequeño", "mediano", "grande"]],
+                        ["tamano", "Talla", ["pequeño", "mediano", "grande"]],
                         [
                           "actividad",
                           "Actividad",
@@ -825,7 +835,7 @@ export function AccountPetsSection() {
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 {dog.peso ? `${dog.peso} kg · ` : ""}
-                                {dog.tamaño || "sin tamaño"}
+                                {dog.tamano || "sin talla"}
                               </p>
                             </div>
                             <button

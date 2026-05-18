@@ -11,22 +11,20 @@ export type ProfileForm = {
   avatarUrl?: string | null;
 };
 
-const PROFILE_SELECT = "id, username, full_name, avatar_url, created_at, updated_at";
-const PROFILE_FALLBACK_SELECT = "id, username, full_name";
+type ProfileRow = Partial<Profile> & { id: string };
 
-const optionalText = (value?: string | null) => {
-  const trimmedValue = value?.trim();
-  return trimmedValue ? trimmedValue : null;
-};
+function normalizeProfile(row: ProfileRow | null): Profile | null {
+  if (!row) return null;
 
-const normalizeProfile = (profile: Partial<Profile> & { id: string }): Profile => ({
-  id: profile.id,
-  username: profile.username ?? null,
-  full_name: profile.full_name ?? null,
-  avatar_url: profile.avatar_url ?? null,
-  created_at: profile.created_at ?? null,
-  updated_at: profile.updated_at ?? null,
-});
+  return {
+    id: row.id,
+    username: row.username ?? null,
+    full_name: row.full_name ?? null,
+    avatar_url: row.avatar_url ?? null,
+    created_at: row.created_at ?? null,
+    updated_at: row.updated_at ?? null,
+  };
+}
 
 export async function getCurrentSession(): Promise<Session | null> {
   const { data, error } = await supabase.auth.getSession();
@@ -98,24 +96,12 @@ export async function signOut() {
 export async function getProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select(PROFILE_SELECT)
+    .select("*")
     .eq("id", userId)
     .maybeSingle();
 
-  if (!error) return data ? normalizeProfile(data) : null;
-
-  if (!isMissingSchemaError(error, ["avatar_url", "updated_at", "created_at"])) {
-    throw error;
-  }
-
-  const { data: fallbackData, error: fallbackError } = await supabase
-    .from("profiles")
-    .select(PROFILE_FALLBACK_SELECT)
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (fallbackError) throw fallbackError;
-  return fallbackData ? normalizeProfile(fallbackData) : null;
+  if (error) throw error;
+  return normalizeProfile(data as ProfileRow | null);
 }
 
 export async function upsertProfile(
@@ -124,37 +110,22 @@ export async function upsertProfile(
 ): Promise<Profile> {
   const profilePayload = {
     id: user.id,
-    username: optionalText(profile.username),
-    full_name: optionalText(profile.fullName),
-    avatar_url: optionalText(profile.avatarUrl),
-    updated_at: new Date().toISOString(),
+    username: profile.username.trim() || null,
+    full_name: profile.fullName.trim() || null,
+    avatar_url: profile.avatarUrl?.trim() || null,
   };
 
   const { data, error } = await supabase
     .from("profiles")
     .upsert(profilePayload, { onConflict: "id" })
-    .select(PROFILE_SELECT)
+    .select("*")
     .single();
 
-  if (!error) return normalizeProfile(data);
+  if (error) throw error;
 
-  if (!isMissingSchemaError(error, ["avatar_url", "updated_at", "created_at"])) {
-    throw error;
-  }
+  const normalizedProfile = normalizeProfile(data as ProfileRow);
+  if (!normalizedProfile)
+    throw new Error("No se pudo leer el perfil actualizado.");
 
-  const { data: fallbackData, error: fallbackError } = await supabase
-    .from("profiles")
-    .upsert(
-      {
-        id: profilePayload.id,
-        username: profilePayload.username,
-        full_name: profilePayload.full_name,
-      },
-      { onConflict: "id" },
-    )
-    .select(PROFILE_FALLBACK_SELECT)
-    .single();
-
-  if (fallbackError) throw fallbackError;
-  return normalizeProfile(fallbackData);
+  return normalizedProfile;
 }

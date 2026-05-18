@@ -7,7 +7,34 @@ alter table public.profiles
 
 alter table public.dogs
   add column if not exists photo_url text,
-  alter column photo_url drop not null;
+  add column if not exists tamano text,
+  add column if not exists etapa_vida text;
+
+update public.dogs
+set etapa_vida = edad::text
+where etapa_vida is null
+  and edad::text in ('cachorro', 'adulto', 'senior');
+
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'dogs'
+      and column_name = 'edad'
+      and data_type not in ('integer', 'smallint', 'bigint')
+  ) then
+    alter table public.dogs
+      alter column edad type integer
+      using (
+        case
+          when edad::text ~ '^[0-9]+$' then edad::integer
+          else null
+        end
+      );
+  end if;
+end $$;
 
 do $$
 begin
@@ -32,9 +59,36 @@ alter table public.food_calculations
   add column if not exists gramos_diarios integer,
   add column if not exists gramos_mensuales integer,
   add column if not exists peso numeric,
-  add column if not exists edad text,
+  add column if not exists edad integer,
+  add column if not exists etapa_vida text,
   add column if not exists actividad text,
   add column if not exists estado_fisico text;
+
+update public.food_calculations
+set etapa_vida = edad::text
+where etapa_vida is null
+  and edad::text in ('cachorro', 'adulto', 'senior');
+
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'food_calculations'
+      and column_name = 'edad'
+      and data_type not in ('integer', 'smallint', 'bigint')
+  ) then
+    alter table public.food_calculations
+      alter column edad type integer
+      using (
+        case
+          when edad::text ~ '^[0-9]+$' then edad::integer
+          else null
+        end
+      );
+  end if;
+end $$;
 
 alter table public.comments
   add column if not exists user_id uuid references auth.users(id) on delete cascade,

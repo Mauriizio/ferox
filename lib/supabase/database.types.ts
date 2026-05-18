@@ -39,8 +39,9 @@ export type Database = {
           created_at: string | null;
           nombre: string;
           peso: number | null;
-          edad: string | null;
-          tamaño: string | null;
+          edad: number | null;
+          etapa_vida: string | null;
+          tamano: string | null;
           actividad: string | null;
           estado_fisico: string | null;
           user_id: string;
@@ -51,8 +52,9 @@ export type Database = {
           created_at?: string | null;
           nombre: string;
           peso?: number | null;
-          edad?: string | null;
-          tamaño?: string | null;
+          edad?: number | null;
+          etapa_vida?: string | null;
+          tamano?: string | null;
           actividad?: string | null;
           estado_fisico?: string | null;
           user_id: string;
@@ -61,8 +63,9 @@ export type Database = {
         Update: {
           nombre?: string;
           peso?: number | null;
-          edad?: string | null;
-          tamaño?: string | null;
+          edad?: number | null;
+          etapa_vida?: string | null;
+          tamano?: string | null;
           actividad?: string | null;
           estado_fisico?: string | null;
           photo_url?: string | null;
@@ -77,7 +80,8 @@ export type Database = {
           gramos_diarios: number;
           gramos_mensuales: number;
           peso: number | null;
-          edad: string | null;
+          edad: number | null;
+          etapa_vida: string | null;
           actividad: string | null;
           estado_fisico: string | null;
         };
@@ -89,7 +93,8 @@ export type Database = {
           gramos_diarios: number;
           gramos_mensuales: number;
           peso?: number | null;
-          edad?: string | null;
+          edad?: number | null;
+          etapa_vida?: string | null;
           actividad?: string | null;
           estado_fisico?: string | null;
         };
@@ -97,7 +102,8 @@ export type Database = {
           gramos_diarios?: number;
           gramos_mensuales?: number;
           peso?: number | null;
-          edad?: string | null;
+          edad?: number | null;
+          etapa_vida?: string | null;
           actividad?: string | null;
           estado_fisico?: string | null;
         };
@@ -140,4 +146,5 @@ export type Database = {
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Dog = Database["public"]["Tables"]["dogs"]["Row"];
-export type FoodCalculation = Database["public"]["Tables"]["food_calculations"]["Row"];
+export type FoodCalculation =
+  Database["public"]["Tables"]["food_calculations"]["Row"];

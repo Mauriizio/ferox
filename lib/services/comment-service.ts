@@ -13,32 +13,48 @@ export type CommentWithMeta = {
 
 type CommentRow = {
   id: string;
-  created_at: string | null;
+  created_at?: string | null;
   user_id: string;
-  body: string;
+  body?: string | null;
+  comment?: string | null;
 };
 
 type ProfileRow = {
   id: string;
-  username: string | null;
-  full_name: string | null;
-  avatar_url: string | null;
+  username?: string | null;
+  full_name?: string | null;
+  avatar_url?: string | null;
 };
+
+function normalizeComment(
+  row: CommentRow,
+): Omit<
+  CommentWithMeta,
+  "author_name" | "author_avatar_url" | "likes_count" | "liked_by_current_user"
+> {
+  return {
+    id: row.id,
+    created_at: row.created_at ?? null,
+    user_id: row.user_id,
+    body: row.body ?? row.comment ?? "",
+  };
+}
 
 async function getCommentMetadata(
   comments: CommentRow[],
   currentUserId?: string,
-) {
-  const commentIds = comments.map((comment) => comment.id);
+): Promise<CommentWithMeta[]> {
+  const normalizedComments = comments.map(normalizeComment);
+  const commentIds = normalizedComments.map((comment) => comment.id);
   const userIds = Array.from(
-    new Set(comments.map((comment) => comment.user_id)),
+    new Set(normalizedComments.map((comment) => comment.user_id)),
   );
 
   let profiles: ProfileRow[] = [];
   if (userIds.length) {
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, username, full_name, avatar_url")
+      .select("*")
       .in("id", userIds);
 
     if (error) throw error;
@@ -79,7 +95,7 @@ async function getCommentMetadata(
     currentUserLikes.map((like) => like.comment_id),
   );
 
-  return comments.map((comment) => {
+  return normalizedComments.map((comment) => {
     const profile = profilesById.get(comment.user_id);
 
     return {
@@ -98,7 +114,7 @@ export async function listRecentComments(
 ): Promise<CommentWithMeta[]> {
   const { data, error } = await supabase
     .from("comments")
-    .select("id, created_at, user_id, body")
+    .select("*")
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -118,10 +134,11 @@ export async function createComment(
   const { data, error } = await supabase
     .from("comments")
     .insert({ user_id: userId, body: cleanBody })
-    .select("id, created_at, user_id, body")
+    .select("*")
     .single();
 
   if (error) throw error;
+
   const [comment] = await getCommentMetadata([data as CommentRow], userId);
   return comment;
 }
