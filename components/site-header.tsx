@@ -19,6 +19,7 @@ const navLinks = [
   { href: "#tienda", label: "TIENDA" },
   { href: "#testimonios", label: "TESTIMONIOS" },
   { href: "#comentarios", label: "COMENTARIOS" },
+  { href: "#cuenta", label: "CUENTA" },
 ]
 
 export function SiteHeader() {
