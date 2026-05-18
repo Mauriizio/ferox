@@ -31,7 +31,10 @@ export function HeroSection() {
 
       <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-7xl items-start px-4 pb-24 pt-28 sm:px-6 sm:pt-32 md:items-center md:px-8 md:pb-20 md:pt-28">
         <div className="max-w-lg translate-y-2 md:-translate-y-2 text-center md:text-left flex flex-col items-center md:items-start">
-          <h1 className="mt-5 md:mt-6 font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-[0.98] tracking-tight text-white text-balance">
+          <h1
+            className="mt-5 md:mt-6 text-4xl sm:text-5xl md:text-6xl font-normal leading-[0.98] tracking-tight text-white text-balance"
+            style={{ fontFamily: '"Ferox", ui-sans-serif, system-ui, sans-serif' }}
+          >
             NUTRICIÓN REAL PREMIUM
           </h1>
 

@@ -108,7 +108,7 @@ export function AccountPetsSection() {
   const handleUserSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSavedUser(userForm);
-    setMessage("Cuenta guardada en este dispositivo.");
+    setMessage("Cuenta guardada correctamente.");
   };
 
   const handleDogSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -134,19 +134,19 @@ export function AccountPetsSection() {
 
     setDogs((currentDogs) => [dog, ...currentDogs]);
     setDogForm(emptyDog);
-    setMessage(`${dog.nombre} quedó guardado en este dispositivo.`);
+    setMessage(`${dog.nombre} quedó guardado correctamente.`);
   };
 
   const deleteDog = (dogId: string) => {
     setDogs((currentDogs) => currentDogs.filter((dog) => dog.id !== dogId));
-    setMessage("Registro eliminado de este dispositivo.");
+    setMessage("Registro eliminado.");
   };
 
   const clearLocalData = () => {
     setSavedUser(null);
     setUserForm(emptyUser);
     setDogs([]);
-    setMessage("Datos locales eliminados.");
+    setMessage("Datos eliminados.");
   };
 
   return (
@@ -159,15 +159,14 @@ export function AccountPetsSection() {
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground shadow-sm">
               <Smartphone className="h-3.5 w-3.5 text-foreground" />
-              Cuenta local
+              Mi perfil
             </span>
             <h2 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-balance sm:text-4xl md:text-5xl">
-              Registra tu perfil y tus perros en tu dispositivo
+              Registra tu perfil y tus perros
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              No se conecta a una base de datos: tus datos quedan guardados en
-              el navegador de este celular o computador para una experiencia
-              personal.
+              Registra tu información y la de tus perros para tener sus datos
+              a mano y calcular porciones de forma más rápida.
             </p>
           </div>
 
@@ -178,7 +177,7 @@ export function AccountPetsSection() {
               </span>
               <div>
                 <p className="text-sm font-semibold text-foreground">
-                  Resumen local
+                  Resumen
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {savedUser
@@ -238,7 +237,7 @@ export function AccountPetsSection() {
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <button className="inline-flex items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90">
-                  Guardar cuenta local
+                  Guardar cuenta
                 </button>
                 <p className="text-xs leading-relaxed text-muted-foreground">
                   Puedes editar y volver a guardar cuando quieras.
@@ -327,7 +326,7 @@ export function AccountPetsSection() {
 
               <button className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted">
                 <Plus className="h-4 w-4" />
-                Añadir perro local
+                Añadir perro
               </button>
             </form>
           </article>
@@ -341,7 +340,7 @@ export function AccountPetsSection() {
                   Perros guardados
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Estos registros viven solo en este navegador.
+                  Puedes modificar esta lista cuando lo necesites.
                 </p>
               </div>
               <button
