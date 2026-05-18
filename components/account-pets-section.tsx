@@ -1,152 +1,247 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import type { Session } from "@supabase/supabase-js";
 import {
+  Activity,
+  Camera,
   CheckCircle2,
-  Dog,
+  Dog as DogIcon,
+  History,
+  LogOut,
   PawPrint,
   Plus,
-  Smartphone,
+  ShieldCheck,
+  Sparkles,
   Trash2,
   UserRound,
 } from "lucide-react";
+import {
+  getCurrentSession,
+  getProfile,
+  signInWithGoogle,
+  signInWithPassword,
+  signOut,
+  signUpWithPassword,
+  upsertProfile,
+} from "@/lib/services/auth-service";
+import {
+  createDog,
+  deleteDog,
+  getDogsByUser,
+  type DogFormData,
+} from "@/lib/services/dog-service";
+import { getFoodCalculationsByUser } from "@/lib/services/food-calculation-service";
+import { calcularRacionBarf } from "@/lib/domain/feeding";
+import { supabase } from "@/lib/supabase/client";
+import type { Dog, FoodCalculation, Profile } from "@/lib/supabase/database.types";
 
-type UserProfile = {
-  nombre: string;
-  apellido: string;
-  correo: string;
-  telefono: string;
-};
-
-type DogProfile = {
-  id: string;
-  nombre: string;
-  peso: string;
-  edad: string;
-  tamano: string;
-  actividad: string;
-  estado: string;
-};
-
-type LocalAccountData = {
-  user: UserProfile | null;
-  dogs: DogProfile[];
-};
-
-const STORAGE_KEY = "ferox-local-account";
-
-const emptyUser: UserProfile = {
+const emptyDogForm: DogFormData = {
   nombre: "",
-  apellido: "",
-  correo: "",
-  telefono: "",
+  peso: null,
+  edad: "adulto",
+  tamaño: "mediano",
+  actividad: "moderada",
+  estado_fisico: "normal",
+  photo_url: "",
 };
 
-const emptyDog = {
-  nombre: "",
-  peso: "",
-  edad: "Adulto",
-  tamano: "Mediano",
-  actividad: "Moderada",
-  estado: "Normal",
-};
-
-type DogForm = typeof emptyDog;
-
-const loadLocalAccount = (): LocalAccountData => {
-  if (typeof window === "undefined") {
-    return { user: null, dogs: [] };
-  }
-
-  const storedData = window.localStorage.getItem(STORAGE_KEY);
-  if (!storedData) {
-    return { user: null, dogs: [] };
-  }
-
-  try {
-    const parsedData = JSON.parse(storedData) as Partial<LocalAccountData>;
-    return {
-      user: parsedData.user ?? null,
-      dogs: Array.isArray(parsedData.dogs) ? parsedData.dogs : [],
-    };
-  } catch {
-    window.localStorage.removeItem(STORAGE_KEY);
-    return { user: null, dogs: [] };
-  }
-};
+const getFriendlyError = (error: unknown) =>
+  error instanceof Error ? error.message : "Ocurrió un error inesperado.";
 
 export function AccountPetsSection() {
-  const [userForm, setUserForm] = useState<UserProfile>(emptyUser);
-  const [dogForm, setDogForm] = useState<DogForm>(emptyDog);
-  const [savedUser, setSavedUser] = useState<UserProfile | null>(null);
-  const [dogs, setDogs] = useState<DogProfile[]>([]);
-  const [message, setMessage] = useState<string>("");
-  const [hasHydrated, setHasHydrated] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [dogs, setDogs] = useState<Dog[]>([]);
+  const [calculations, setCalculations] = useState<FoodCalculation[]>([]);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [dogForm, setDogForm] = useState<DogFormData>(emptyDogForm);
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    const account = loadLocalAccount();
-    setSavedUser(account.user);
-    setDogs(account.dogs);
-    if (account.user) {
-      setUserForm(account.user);
-    }
-    setHasHydrated(true);
+  const user = session?.user ?? null;
+
+  const refreshDashboard = useCallback(async (userId: string) => {
+    const [profileData, userDogs, userCalculations] = await Promise.all([
+      getProfile(userId),
+      getDogsByUser(userId),
+      getFoodCalculationsByUser(userId),
+    ]);
+
+    setProfile(profileData);
+    setUsername(profileData?.username ?? "");
+    setFullName(profileData?.full_name ?? "");
+    setAvatarUrl(profileData?.avatar_url ?? "");
+    setDogs(userDogs);
+    setCalculations(userCalculations);
   }, []);
 
   useEffect(() => {
-    if (!hasHydrated) return;
+    let mounted = true;
 
-    const account: LocalAccountData = { user: savedUser, dogs };
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(account));
-  }, [dogs, hasHydrated, savedUser]);
+    async function loadInitialSession() {
+      try {
+        const currentSession = await getCurrentSession();
+        if (!mounted) return;
+        setSession(currentSession);
+        if (currentSession?.user) {
+          await refreshDashboard(currentSession.user.id);
+        }
+      } catch (error) {
+        setMessage(getFriendlyError(error));
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    }
 
-  const completedUserFields = useMemo(
-    () => Object.values(userForm).filter(Boolean).length,
-    [userForm],
-  );
+    loadInitialSession();
 
-  const handleUserSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+      if (nextSession?.user) {
+        refreshDashboard(nextSession.user.id).catch((error) =>
+          setMessage(getFriendlyError(error)),
+        );
+      } else {
+        setProfile(null);
+        setDogs([]);
+        setCalculations([]);
+      }
+    });
+
+    const refreshAfterCalculation = async () => {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          await refreshDashboard(userData.user.id);
+        }
+      } catch (error) {
+        setMessage(getFriendlyError(error));
+      }
+    };
+
+    window.addEventListener("ferox:food-calculation-saved", refreshAfterCalculation);
+
+    return () => {
+      mounted = false;
+      data.subscription.unsubscribe();
+      window.removeEventListener("ferox:food-calculation-saved", refreshAfterCalculation);
+    };
+  }, [refreshDashboard]);
+
+  const latestCalculationByDog = useMemo(() => {
+    return calculations.reduce<Record<string, FoodCalculation>>((acc, calculation) => {
+      if (!acc[calculation.dog_id]) {
+        acc[calculation.dog_id] = calculation;
+      }
+      return acc;
+    }, {});
+  }, [calculations]);
+
+  const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSavedUser(userForm);
-    setMessage("Cuenta guardada correctamente.");
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      if (authMode === "signup") {
+        await signUpWithPassword(email, password, fullName);
+        setMessage("Registro creado. Revisa tu correo si Supabase solicita confirmar la cuenta.");
+      } else {
+        await signInWithPassword(email, password);
+        setMessage("Sesión iniciada correctamente.");
+      }
+    } catch (error) {
+      setMessage(getFriendlyError(error));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDogSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!user) return;
+
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      const nextProfile = await upsertProfile(user, {
+        username,
+        fullName,
+        avatarUrl,
+      });
+      setProfile(nextProfile);
+      setMessage("Perfil actualizado correctamente.");
+    } catch (error) {
+      setMessage(getFriendlyError(error));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDogSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!user) return;
 
     if (!dogForm.nombre.trim()) {
       setMessage("Agrega al menos el nombre del perro para guardarlo.");
       return;
     }
 
-    const dog: DogProfile = {
-      id:
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      nombre: dogForm.nombre.trim(),
-      peso: dogForm.peso.trim(),
-      edad: dogForm.edad,
-      tamano: dogForm.tamano,
-      actividad: dogForm.actividad,
-      estado: dogForm.estado,
-    };
+    setIsSaving(true);
+    setMessage("");
 
-    setDogs((currentDogs) => [dog, ...currentDogs]);
-    setDogForm(emptyDog);
-    setMessage(`${dog.nombre} quedó guardado correctamente.`);
+    try {
+      const dog = await createDog(user.id, dogForm);
+      setDogs((currentDogs) => [dog, ...currentDogs]);
+      setDogForm(emptyDogForm);
+      setMessage(`${dog.nombre} quedó guardado correctamente.`);
+    } catch (error) {
+      setMessage(getFriendlyError(error));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const deleteDog = (dogId: string) => {
-    setDogs((currentDogs) => currentDogs.filter((dog) => dog.id !== dogId));
-    setMessage("Registro eliminado.");
+  const handleDeleteDog = async (dogId: string) => {
+    if (!user) return;
+
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      await deleteDog(user.id, dogId);
+      setDogs((currentDogs) => currentDogs.filter((dog) => dog.id !== dogId));
+      setMessage("Perro eliminado correctamente.");
+    } catch (error) {
+      setMessage(getFriendlyError(error));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const clearLocalData = () => {
-    setSavedUser(null);
-    setUserForm(emptyUser);
-    setDogs([]);
-    setMessage("Datos eliminados.");
+  const handleSignOut = async () => {
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      await signOut();
+      setEmail("");
+      setPassword("");
+      setMessage("Sesión cerrada.");
+    } catch (error) {
+      setMessage(getFriendlyError(error));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -158,15 +253,15 @@ export function AccountPetsSection() {
         <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr] lg:items-end">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground shadow-sm">
-              <Smartphone className="h-3.5 w-3.5 text-foreground" />
-              Mi perfil
+              <ShieldCheck className="h-3.5 w-3.5 text-foreground" />
+              Cuenta FEROX
             </span>
             <h2 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-balance sm:text-4xl md:text-5xl">
-              Registra tu perfil y tus perros
+              Tu perfil, tus perros y sus porciones en un solo lugar
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Registra tu información y la de tus perros para tener sus datos
-              a mano y calcular porciones de forma más rápida.
+              Crea una cuenta, registra tus perros y guarda los cálculos de la
+              calculadora BARF sin tocar la experiencia pública de la tienda.
             </p>
           </div>
 
@@ -177,222 +272,385 @@ export function AccountPetsSection() {
               </span>
               <div>
                 <p className="text-sm font-semibold text-foreground">
-                  Resumen
+                  {user ? "Dashboard privado" : "Acceso seguro"}
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {savedUser
-                    ? `${savedUser.nombre || "Usuario"} tiene ${dogs.length} perro${dogs.length === 1 ? "" : "s"} registrado${dogs.length === 1 ? "" : "s"}.`
-                    : `Completa el perfil y luego agrega tus perros.`}
+                  {user
+                    ? `${profile?.full_name || user.email || "Usuario"} tiene ${dogs.length} perro${dogs.length === 1 ? "" : "s"} registrado${dogs.length === 1 ? "" : "s"}.`
+                    : "Email y contraseña listo. Google OAuth queda preparado para activar en Supabase."}
                 </p>
               </div>
             </div>
             {message ? (
               <div className="mt-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
-                <CheckCircle2 className="h-4 w-4" />
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
                 {message}
               </div>
             ) : null}
           </div>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
-          <article className="rounded-[2rem] border border-border bg-background p-5 shadow-[0_20px_50px_rgba(0,0,0,0.06)] sm:p-6 lg:p-8">
-            <div className="flex items-center justify-between gap-3 text-foreground">
-              <div className="flex items-center gap-2">
+        {!user ? (
+          <div className="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
+            <article className="rounded-[2rem] border border-border bg-background p-5 shadow-[0_20px_50px_rgba(0,0,0,0.06)] sm:p-6 lg:p-8">
+              <div className="flex items-center gap-2 text-foreground">
                 <UserRound className="h-5 w-5" />
-                <h3 className="font-semibold">Registro de usuario</h3>
+                <h3 className="font-semibold">
+                  {authMode === "signup" ? "Crear cuenta" : "Iniciar sesión"}
+                </h3>
               </div>
-              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                {completedUserFields}/4
-              </span>
-            </div>
 
-            <form onSubmit={handleUserSubmit} className="mt-5 space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {(
-                  [
-                    ["nombre", "Nombre", "Tu nombre", "text"],
-                    ["apellido", "Apellido", "Tu apellido", "text"],
-                    ["correo", "Correo", "correo@ejemplo.com", "email"],
-                    ["telefono", "Teléfono", "+56 9 2797 3379", "tel"],
-                  ] as [keyof UserProfile, string, string, string][]
-                ).map(([field, label, placeholder, type]) => (
-                  <label key={field} className="text-sm font-medium text-foreground">
-                    {label}
+              <div className="mt-5 grid grid-cols-2 rounded-full bg-muted p-1 text-sm font-semibold">
+                {(["login", "signup"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setAuthMode(mode)}
+                    className={`rounded-full px-4 py-2 transition ${authMode === mode ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+                  >
+                    {mode === "login" ? "Entrar" : "Registrarme"}
+                  </button>
+                ))}
+              </div>
+
+              <form onSubmit={handleAuthSubmit} className="mt-5 space-y-4">
+                {authMode === "signup" ? (
+                  <label className="text-sm font-medium text-foreground">
+                    Nombre completo
                     <input
-                      type={type}
-                      value={userForm[field]}
-                      onChange={(event) =>
-                        setUserForm((currentForm) => ({
-                          ...currentForm,
-                          [field]: event.target.value,
-                        }))
-                      }
-                      placeholder={placeholder}
+                      type="text"
+                      value={fullName}
+                      onChange={(event) => setFullName(event.target.value)}
+                      placeholder="Tu nombre"
                       className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
                     />
                   </label>
-                ))}
-              </div>
+                ) : null}
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <button className="inline-flex items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90">
-                  Guardar cuenta
+                <label className="text-sm font-medium text-foreground">
+                  Email
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="correo@ejemplo.com"
+                    className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
+                  />
+                </label>
+
+                <label className="text-sm font-medium text-foreground">
+                  Contraseña
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                    className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={isSaving || isLoading}
+                  className="inline-flex w-full items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSaving ? "Procesando..." : authMode === "signup" ? "Crear cuenta" : "Entrar"}
                 </button>
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  Puedes editar y volver a guardar cuando quieras.
-                </p>
-              </div>
-            </form>
-          </article>
+              </form>
 
-          <article className="rounded-[2rem] border border-border bg-background p-5 shadow-[0_20px_50px_rgba(0,0,0,0.06)] sm:p-6 lg:p-8">
-            <div className="flex items-center justify-between gap-3 text-foreground">
-              <div className="flex items-center gap-2">
-                <Dog className="h-5 w-5" />
-                <h3 className="font-semibold">Registro de perros</h3>
-              </div>
-              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                {dogs.length} guardado{dogs.length === 1 ? "" : "s"}
-              </span>
-            </div>
-
-            <form onSubmit={handleDogSubmit} className="mt-5 space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <label className="text-sm font-medium text-foreground">
-                  Nombre
-                  <input
-                    type="text"
-                    value={dogForm.nombre}
-                    onChange={(event) =>
-                      setDogForm((currentForm) => ({
-                        ...currentForm,
-                        nombre: event.target.value,
-                      }))
-                    }
-                    placeholder="Ej: Rocco"
-                    className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                  />
-                </label>
-
-                <label className="text-sm font-medium text-foreground">
-                  Peso (kg)
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min="0"
-                    step="0.1"
-                    value={dogForm.peso}
-                    onChange={(event) =>
-                      setDogForm((currentForm) => ({
-                        ...currentForm,
-                        peso: event.target.value,
-                      }))
-                    }
-                    placeholder="Ej: 12.5"
-                    className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                  />
-                </label>
-
-                {(
-                  [
-                    ["edad", "Edad", ["Cachorro", "Adulto", "Senior"]],
-                    ["tamano", "Tamaño", ["Pequeño", "Mediano", "Grande"]],
-                    ["actividad", "Actividad", ["Baja", "Moderada", "Alta"]],
-                    ["estado", "Estado físico", ["Normal", "Esterilizado", "Sobrepeso"]],
-                  ] as [keyof DogForm, string, string[]][]
-                ).map(([field, label, options]) => (
-                  <label key={field} className="text-sm font-medium text-foreground">
-                    {label}
-                    <select
-                      value={dogForm[field]}
-                      onChange={(event) =>
-                        setDogForm((currentForm) => ({
-                          ...currentForm,
-                          [field]: event.target.value,
-                        }))
-                      }
-                      className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                    >
-                      {options.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                ))}
-              </div>
-
-              <button className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted">
-                <Plus className="h-4 w-4" />
-                Añadir perro
-              </button>
-            </form>
-          </article>
-        </div>
-
-        {dogs.length > 0 ? (
-          <div className="mt-6 rounded-[2rem] border border-border bg-background p-5 shadow-sm sm:p-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h3 className="font-serif text-2xl font-bold">
-                  Perros guardados
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Puedes modificar esta lista cuando lo necesites.
-                </p>
-              </div>
               <button
                 type="button"
-                onClick={clearLocalData}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-muted px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-accent"
+                onClick={() => signInWithGoogle().catch((error) => setMessage(getFriendlyError(error)))}
+                className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-border px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted"
               >
-                <Trash2 className="h-4 w-4" />
-                Borrar todo
+                Continuar con Google
               </button>
-            </div>
+            </article>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {dogs.map((dog) => (
-                <article
-                  key={dog.id}
-                  className="rounded-3xl border border-border bg-muted/35 p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-lg font-bold text-foreground">
-                        {dog.nombre}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {dog.peso ? `${dog.peso} kg · ` : ""}
-                        {dog.edad} · {dog.tamano}
-                      </p>
+            <article className="overflow-hidden rounded-[2rem] border border-border bg-foreground text-background shadow-[0_20px_55px_rgba(0,0,0,0.18)]">
+              <div className="relative p-6 sm:p-8">
+                <Image
+                  src="/icon.svg"
+                  alt="FEROX BARF"
+                  width={140}
+                  height={140}
+                  className="absolute -right-8 -top-8 h-32 w-32 opacity-10 invert"
+                />
+                <Sparkles className="h-6 w-6" />
+                <h3 className="mt-4 font-serif text-2xl font-bold">
+                  Base profesional para una app con comunidad
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-background/70">
+                  La capa privada queda separada de la landing: perfiles,
+                  perros, cálculos guardados y servicios listos para comentarios
+                  y likes con RLS por usuario.
+                </p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {["Perros privados", "Historial BARF", "Fotos por URL", "Base social"].map((item) => (
+                    <div key={item} className="rounded-2xl bg-background/10 p-4 text-sm font-semibold">
+                      {item}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => deleteDog(dog.id)}
-                      className="grid h-9 w-9 place-items-center rounded-full bg-background text-muted-foreground transition hover:text-foreground"
-                      aria-label={`Eliminar ${dog.nombre}`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                  ))}
+                </div>
+              </div>
+            </article>
+          </div>
+        ) : (
+          <div className="mt-10 space-y-6">
+            <div className="grid gap-6 lg:grid-cols-2">
+              <article className="rounded-[2rem] border border-border bg-background p-5 shadow-[0_20px_50px_rgba(0,0,0,0.06)] sm:p-6 lg:p-8">
+                <div className="flex items-center justify-between gap-3 text-foreground">
+                  <div className="flex items-center gap-2">
+                    <UserRound className="h-5 w-5" />
+                    <h3 className="font-semibold">Perfil de usuario</h3>
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {[dog.actividad, dog.estado].map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full bg-background px-3 py-1 text-xs font-medium text-muted-foreground"
-                      >
-                        {tag}
-                      </span>
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-accent"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    Salir
+                  </button>
+                </div>
+
+                <form onSubmit={handleProfileSubmit} className="mt-5 space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="text-sm font-medium text-foreground">
+                      Usuario
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={(event) => setUsername(event.target.value)}
+                        placeholder="feroxlover"
+                        className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
+                      />
+                    </label>
+                    <label className="text-sm font-medium text-foreground">
+                      Nombre completo
+                      <input
+                        type="text"
+                        value={fullName}
+                        onChange={(event) => setFullName(event.target.value)}
+                        placeholder="Tu nombre"
+                        className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
+                      />
+                    </label>
+                  </div>
+                  <label className="text-sm font-medium text-foreground">
+                    Avatar URL
+                    <input
+                      type="url"
+                      value={avatarUrl}
+                      onChange={(event) => setAvatarUrl(event.target.value)}
+                      placeholder="https://..."
+                      className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="inline-flex items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90 disabled:opacity-60"
+                  >
+                    Guardar perfil
+                  </button>
+                </form>
+              </article>
+
+              <article className="rounded-[2rem] border border-border bg-background p-5 shadow-[0_20px_50px_rgba(0,0,0,0.06)] sm:p-6 lg:p-8">
+                <div className="flex items-center justify-between gap-3 text-foreground">
+                  <div className="flex items-center gap-2">
+                    <DogIcon className="h-5 w-5" />
+                    <h3 className="font-semibold">Registro de perros</h3>
+                  </div>
+                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                    {dogs.length} guardado{dogs.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+
+                <form onSubmit={handleDogSubmit} className="mt-5 space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="text-sm font-medium text-foreground">
+                      Nombre
+                      <input
+                        type="text"
+                        value={dogForm.nombre}
+                        onChange={(event) => setDogForm((form) => ({ ...form, nombre: event.target.value }))}
+                        placeholder="Ej: Rocco"
+                        className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
+                      />
+                    </label>
+                    <label className="text-sm font-medium text-foreground">
+                      Peso (kg)
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="0.1"
+                        value={dogForm.peso ?? ""}
+                        onChange={(event) =>
+                          setDogForm((form) => ({
+                            ...form,
+                            peso: event.target.value ? Number(event.target.value) : null,
+                          }))
+                        }
+                        placeholder="Ej: 12.5"
+                        className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
+                      />
+                    </label>
+                    {(
+                      [
+                        ["edad", "Edad", ["cachorro", "adulto", "senior"]],
+                        ["tamaño", "Tamaño", ["pequeño", "mediano", "grande"]],
+                        ["actividad", "Actividad", ["baja", "moderada", "alta"]],
+                        ["estado_fisico", "Estado físico", ["normal", "esterilizado", "sobrepeso"]],
+                      ] as [keyof DogFormData, string, string[]][]
+                    ).map(([field, label, options]) => (
+                      <label key={field} className="text-sm font-medium text-foreground">
+                        {label}
+                        <select
+                          value={String(dogForm[field] ?? "")}
+                          onChange={(event) => setDogForm((form) => ({ ...form, [field]: event.target.value }))}
+                          className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
+                        >
+                          {options.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
                     ))}
                   </div>
-                </article>
-              ))}
+                  <label className="text-sm font-medium text-foreground">
+                    Foto URL del perro
+                    <input
+                      type="url"
+                      value={dogForm.photo_url ?? ""}
+                      onChange={(event) => setDogForm((form) => ({ ...form, photo_url: event.target.value }))}
+                      placeholder="https://..."
+                      className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Añadir perro
+                  </button>
+                </form>
+              </article>
+            </div>
+
+            <div className="rounded-[2rem] border border-border bg-background p-5 shadow-sm sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="font-serif text-2xl font-bold">Mini dashboard</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Datos privados del perro, último cálculo guardado e historial.
+                  </p>
+                </div>
+                <a
+                  href="#calculadora"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition hover:bg-foreground/90"
+                >
+                  <Activity className="h-4 w-4" />
+                  Ir a calculadora
+                </a>
+              </div>
+
+              {dogs.length > 0 ? (
+                <div className="mt-5 grid gap-4 lg:grid-cols-3">
+                  {dogs.map((dog) => {
+                    const latestCalculation = latestCalculationByDog[dog.id];
+                    const previewCalculation = dog.peso
+                      ? calcularRacionBarf({
+                          peso: dog.peso,
+                          edad: dog.edad === "cachorro" || dog.edad === "senior" ? dog.edad : "adulto",
+                          actividad:
+                            dog.actividad === "baja" || dog.actividad === "alta"
+                              ? dog.actividad
+                              : "moderada",
+                          estadoFisico:
+                            dog.estado_fisico === "esterilizado" || dog.estado_fisico === "sobrepeso"
+                              ? dog.estado_fisico
+                              : "normal",
+                        })
+                      : null;
+
+                    return (
+                      <article key={dog.id} className="overflow-hidden rounded-3xl border border-border bg-muted/30">
+                        <div className="relative h-36 bg-foreground/5">
+                          {dog.photo_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={dog.photo_url} alt={dog.nombre} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-muted-foreground">
+                              <Camera className="h-8 w-8" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xl font-bold text-foreground">{dog.nombre}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {dog.peso ? `${dog.peso} kg · ` : ""}
+                                {dog.tamaño || "sin tamaño"}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteDog(dog.id)}
+                              className="grid h-9 w-9 place-items-center rounded-full bg-background text-muted-foreground transition hover:text-foreground"
+                              aria-label={`Eliminar ${dog.nombre}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {[dog.edad, dog.actividad, dog.estado_fisico].filter(Boolean).map((tag) => (
+                              <span key={tag} className="rounded-full bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="mt-4 rounded-2xl bg-background p-4">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                              Cantidad calculada
+                            </p>
+                            <p className="mt-1 text-2xl font-bold text-foreground">
+                              {latestCalculation?.gramos_diarios ?? previewCalculation?.gramosDia ?? 0} g/día
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {((latestCalculation?.gramos_mensuales ?? previewCalculation?.gramosMes ?? 0) / 1000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} kg/mes
+                            </p>
+                          </div>
+
+                          <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                            <History className="h-3.5 w-3.5" />
+                            {calculations.filter((calculation) => calculation.dog_id === dog.id).length} cálculo(s) guardado(s)
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-5 rounded-3xl border border-dashed border-border bg-muted/25 p-8 text-center text-sm text-muted-foreground">
+                  Aún no tienes perros registrados. Agrega el primero para activar el dashboard.
+                </div>
+              )}
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     </section>
   );
