@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Heart, Send, UserRound } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
@@ -32,11 +32,12 @@ export function CommentsSection() {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const user = session?.user ?? null;
 
   const refreshComments = useCallback(async (currentUserId?: string) => {
-    const nextComments = await listRecentComments(12, currentUserId);
+    const nextComments = await listRecentComments(50, currentUserId);
     setComments(nextComments);
   }, []);
 
@@ -77,6 +78,19 @@ export function CommentsSection() {
     };
   }, [refreshComments]);
 
+
+
+  const commentsPerPage = 5;
+  const totalPages = Math.max(1, Math.ceil(comments.length / commentsPerPage));
+  const paginatedComments = useMemo(() => {
+    const startIndex = (currentPage - 1) * commentsPerPage;
+    return comments.slice(startIndex, startIndex + commentsPerPage);
+  }, [comments, currentPage]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
+
   const handleCommentSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!user) {
@@ -96,6 +110,7 @@ export function CommentsSection() {
 
       const newComment = await createComment(userData.user.id, commentBody);
       setComments((currentComments) => [newComment, ...currentComments]);
+      setCurrentPage(1);
       setCommentBody("");
       setMessage("Reseña publicada correctamente.");
     } catch (error) {
@@ -156,36 +171,12 @@ export function CommentsSection() {
           <h2 className="mt-2 font-serif text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">Lo que dice la comunidad FEROX</h2>
         </div>
 
-        <form className="mt-8 rounded-2xl border border-border bg-background p-4 sm:p-6" onSubmit={handleCommentSubmit}>
-          <label className="grid gap-2 text-sm font-semibold text-foreground">
-            Comparte tu experiencia
-            <textarea
-              disabled={!user || isSaving}
-              value={commentBody}
-              onChange={(event) => setCommentBody(event.target.value)}
-              placeholder={user ? "¿Cómo le fue a tu perro con FEROX BARF?" : "Inicia sesión para publicar"}
-              className="min-h-28 resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background"
-            />
-          </label>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <button
-              type="submit"
-              disabled={!user || isSaving}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition hover:bg-foreground/90 disabled:opacity-60"
-            >
-              <Send className="h-4 w-4" />
-              {isSaving ? "Publicando..." : "Publicar reseña"}
-            </button>
-            {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
-          </div>
-        </form>
-
-        <ul className="mt-10 grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 grid grid-cols-1 gap-4">
           {isLoading ? (
             <li className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Cargando reseñas...</li>
           ) : comments.length > 0 ? (
-            comments.map((comment) => (
-              <li key={comment.id} className="rounded-2xl border border-border bg-background p-5 sm:p-6 lg:p-8 transition-colors hover:border-foreground">
+            paginatedComments.map((comment) => (
+              <li key={comment.id} className="rounded-2xl border border-border bg-background p-6 sm:p-7 lg:p-8 transition-colors hover:border-foreground">
                 <blockquote className="text-base leading-relaxed text-foreground sm:text-lg">
                   &ldquo;{comment.body}&rdquo;
                 </blockquote>
@@ -222,6 +213,54 @@ export function CommentsSection() {
             <li className="rounded-2xl border border-dashed border-border bg-background p-6 text-sm text-muted-foreground">Aún no hay reseñas. Sé la primera persona en compartir su experiencia.</li>
           )}
         </ul>
+
+        {comments.length > commentsPerPage ? (
+          <nav className="mt-6 flex items-center justify-center gap-2" aria-label="Paginación de reseñas">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={currentPage === 1}
+              className="rounded-full border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground disabled:opacity-50"
+            >
+              Anterior
+            </button>
+            <span className="text-sm text-muted-foreground">
+              Página {currentPage} de {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-full border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground disabled:opacity-50"
+            >
+              Siguiente
+            </button>
+          </nav>
+        ) : null}
+
+        <form className="mt-8 rounded-2xl border border-border bg-background p-4 sm:p-5" onSubmit={handleCommentSubmit}>
+          <label className="grid gap-2 text-sm font-semibold text-foreground">
+            Comentar
+            <textarea
+              disabled={!user || isSaving}
+              value={commentBody}
+              onChange={(event) => setCommentBody(event.target.value)}
+              placeholder={user ? "Escribe tu reseña" : "Inicia sesión para publicar"}
+              className="min-h-20 resize-none rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background"
+            />
+          </label>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="submit"
+              disabled={!user || isSaving}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background transition hover:bg-foreground/90 disabled:opacity-60"
+            >
+              <Send className="h-4 w-4" />
+              {isSaving ? "Publicando..." : "Publicar reseña"}
+            </button>
+            {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+          </div>
+        </form>
       </div>
     </section>
   );
