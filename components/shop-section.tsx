@@ -49,8 +49,8 @@ export function ShopSection() {
 
   return (
     <section id="tienda" className="border-t border-border bg-background">
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-center px-3 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-8">
-        <div className="mx-auto max-w-3xl text-center">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-start px-3 py-3 sm:justify-center sm:px-6 sm:py-8 lg:px-8 lg:py-8">
+        <div className="mx-auto max-w-3xl text-center sm:text-center">
           <span className="inline-block text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Tienda FEROX
           </span>
@@ -59,7 +59,7 @@ export function ShopSection() {
           </h2>
         </div>
 
-        <div className="mx-auto mt-4 flex w-full max-w-5xl items-center justify-center gap-1 sm:mt-5 sm:gap-4">
+        <div className="mx-auto mt-3 flex w-full max-w-5xl items-center justify-center gap-1 sm:mt-5 sm:gap-4">
           <button
             type="button"
             onClick={() => setIndex((current) => (current - 1 + products.length) % products.length)}
@@ -69,26 +69,26 @@ export function ShopSection() {
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <article className="w-full max-w-2xl rounded-[1.75rem] border border-border bg-background p-3 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:p-4">
+          <article className="w-full max-w-2xl rounded-[1.75rem] border border-border bg-background p-2 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:p-4">
             <button
               type="button"
               onClick={() => setImageOpen(true)}
-              className="relative mx-auto block aspect-square w-full max-w-[96vw] overflow-hidden rounded-2xl bg-muted/20 shadow-[0_20px_50px_rgba(0,0,0,0.18)] sm:max-w-[420px] lg:max-w-[460px]"
+              className="relative mx-auto block h-[86svh] w-full max-w-[96vw] overflow-hidden rounded-2xl bg-muted/20 shadow-[0_20px_50px_rgba(0,0,0,0.18)] sm:h-auto sm:aspect-square sm:max-w-[420px] lg:max-w-[460px]"
               aria-label={`Ampliar imagen de ${product.name}`}
             >
               <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 96vw, (max-width: 1024px) 420px, 460px" className="object-cover object-center scale-[1.06]" />
             </button>
-            <h3 className="mt-3 font-serif text-[2rem] font-bold leading-none text-foreground sm:text-3xl">{product.name}</h3>
-            <p className="mx-auto mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground line-clamp-2 sm:text-base">
+            <h3 className="mt-2 font-serif text-[2rem] font-bold leading-none text-foreground sm:text-3xl">{product.name}</h3>
+            <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-muted-foreground line-clamp-2 sm:text-base">
               {product.description}
             </p>
-            <p className="mt-2 font-serif text-3xl font-bold text-foreground sm:text-4xl">{product.price}</p>
+            <p className="mt-1.5 font-serif text-3xl font-bold text-foreground sm:text-4xl">{product.price}</p>
  
             <a
               href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90"
+              className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90 sm:mt-3"
             >
               <MessageCircle className="h-4 w-4" />
               Pedir
