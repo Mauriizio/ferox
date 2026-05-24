@@ -511,44 +511,51 @@ export function AccountPetsSection() {
       className="border-t border-border bg-[linear-gradient(180deg,#f7f7f7_0%,#ffffff_100%)]"
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr] lg:items-end">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground shadow-sm">
-              <ShieldCheck className="h-3.5 w-3.5 text-foreground" />
-              Cuenta FEROX
-            </span>
-            <h2 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-balance sm:text-4xl md:text-5xl">
-              Tu perfil, tus perros y sus porciones en un solo lugar
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Crea una cuenta, registra tus perros y gestiona sus recomendaciones BARF desde tu dashboard privado.
-            </p>
-          </div>
-
-          <div className="rounded-[2rem] border border-border bg-background p-5 shadow-sm">
-            <div className="flex items-start gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-foreground text-background">
-                <PawPrint className="h-5 w-5" />
+        {!user ? (
+          <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr] lg:items-end">
+            <div className="max-w-3xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground shadow-sm">
+                <ShieldCheck className="h-3.5 w-3.5 text-foreground" />
+                Cuenta FEROX
               </span>
-              <div>
-                <p className="text-sm font-semibold text-foreground">
-                  {user ? "Tu espacio FEROX" : "Acceso seguro"}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {user
-                    ? `${profile?.full_name || user.email || "Usuario"} tiene ${dogs.length} perro${dogs.length === 1 ? "" : "s"} registrado${dogs.length === 1 ? "" : "s"}.`
-                    : "Email y contraseña listo. Google OAuth queda preparado para activar en Supabase."}
-                </p>
-              </div>
+              <h2 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-balance sm:text-4xl md:text-5xl">
+                Tu perfil, tus perros y sus porciones en un solo lugar
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                Crea una cuenta, registra tus perros y gestiona sus recomendaciones BARF desde tu dashboard privado.
+              </p>
             </div>
-            {message ? (
-              <div className="mt-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
-                <CheckCircle2 className="h-4 w-4 shrink-0" />
-                {message}
+
+            <div className="rounded-[2rem] border border-border bg-background p-5 shadow-sm">
+              <div className="flex items-start gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-foreground text-background">
+                  <PawPrint className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Acceso seguro
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Email y contraseña listo. Google OAuth queda preparado para activar en Supabase.
+                  </p>
+                </div>
               </div>
-            ) : null}
+              {message ? (
+                <div className="mt-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  {message}
+                </div>
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : (
+          message ? (
+            <div className="mb-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              {message}
+            </div>
+          ) : null
+        )}
 
         {!user ? (
           <div className="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
@@ -695,7 +702,7 @@ export function AccountPetsSection() {
               <div className="mt-4 flex items-center justify-between gap-2">
                 <button type="button" onClick={() => setIsProfileDialogOpen(true)} className="rounded-full border border-border px-3 py-2 text-xs font-semibold hover:bg-muted">Configurar cuenta</button>
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-foreground bg-foreground text-background"><Plus className="h-5 w-5" /></button>
+                  <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-3 py-2 text-xs font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
                   <button type="button" onClick={handleSignOut} className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-accent"><LogOut className="h-3.5 w-3.5" />Salir</button>
                 </div>
               </div>
