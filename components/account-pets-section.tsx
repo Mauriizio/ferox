@@ -21,7 +21,6 @@ import {
   Plus,
   ShieldCheck,
   Sparkles,
-  Trash2,
   UserRound,
 } from "lucide-react";
 import {
@@ -40,20 +39,18 @@ import {
   updateDog,
   type DogFormData,
 } from "@/lib/services/dog-service";
-import { calculateDogFood } from "@/lib/helpers/calculate-dog-food";
 import {
   deleteMediaFile,
   getMediaPathFromPublicUrl,
   uploadImageToMediaBucket,
 } from "@/lib/services/storage-service";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  DeleteDogDialog,
+} from "@/components/account-pets/delete-dog-dialog";
+import { DogCard } from "@/components/account-pets/dog-card";
+import { DogFormFields } from "@/components/account-pets/dog-form-fields";
+import { EditDogDialog } from "@/components/account-pets/edit-dog-dialog";
+import { imageInputClassName } from "@/components/account-pets/constants";
 import {
   getSupabaseErrorMessage,
   logSupabaseError,
@@ -75,8 +72,6 @@ const emptyDogForm: DogFormData = {
   photo_url: null,
 };
 
-const imageInputClassName =
-  "mt-2 block w-full cursor-pointer rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground file:mr-4 file:rounded-full file:border-0 file:bg-foreground file:px-4 file:py-2 file:text-sm file:font-semibold file:text-background outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10";
 
 export function AccountPetsSection() {
   const [session, setSession] = useState<Session | null>(null);
@@ -762,106 +757,7 @@ export function AccountPetsSection() {
                 </div>
 
                 <form onSubmit={handleDogSubmit} className="mt-5 space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Nombre
-                      <input
-                        type="text"
-                        value={dogForm.nombre}
-                        onChange={(event) =>
-                          setDogForm((form) => ({
-                            ...form,
-                            nombre: event.target.value,
-                          }))
-                        }
-                        placeholder="Ej: Rocco"
-                        className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                      />
-                    </label>
-                    <label className="text-sm font-medium text-foreground">
-                      Peso (kg)
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        min="0"
-                        step="0.1"
-                        value={dogForm.peso ?? ""}
-                        onChange={(event) =>
-                          setDogForm((form) => ({
-                            ...form,
-                            peso: event.target.value
-                              ? Number(event.target.value)
-                              : null,
-                          }))
-                        }
-                        placeholder="Ej: 12.5"
-                        className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                      />
-                    </label>
-                    <label className="text-sm font-medium text-foreground">
-                      Edad (años)
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min="0"
-                        step="1"
-                        value={dogForm.edad ?? ""}
-                        onChange={(event) =>
-                          setDogForm((form) => ({
-                            ...form,
-                            edad: event.target.value
-                              ? Number.parseInt(event.target.value, 10)
-                              : null,
-                          }))
-                        }
-                        placeholder="Ej: 3"
-                        className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                      />
-                    </label>
-                    {(
-                      [
-                        [
-                          "etapa_vida",
-                          "Etapa de vida",
-                          ["cachorro", "adulto", "senior"],
-                        ],
-                        ["tamano", "Talla", ["pequeño", "mediano", "grande"]],
-                        [
-                          "actividad",
-                          "Actividad",
-                          ["baja", "moderada", "alta"],
-                        ],
-                        [
-                          "estado_fisico",
-                          "Estado físico",
-                          ["normal", "esterilizado", "sobrepeso"],
-                        ],
-                      ] as [keyof DogFormData, string, string[]][]
-                    ).map(([field, label, options]) => (
-                      <label
-                        key={field}
-                        className="text-sm font-medium text-foreground"
-                      >
-                        {label}
-                        <select
-                          value={String(dogForm[field] ?? "")}
-                          onChange={(event) =>
-                            setDogForm((form) => ({
-                              ...form,
-                              [field]: event.target.value,
-                            }))
-                          }
-                          className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                        >
-                          {options.map((option) => (
-                            <option key={option} value={option}>
-                              {option}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    ))}
-                  </div>
+                  <DogFormFields form={dogForm} setForm={setDogForm} />
                   <div className="grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-center">
                     <div className="h-32 overflow-hidden rounded-3xl bg-muted">
                       {dogPhotoPreview ? (
@@ -924,102 +820,14 @@ export function AccountPetsSection() {
 
               {dogs.length > 0 ? (
                 <div className="mt-5 grid gap-4 lg:grid-cols-3">
-                  {dogs.map((dog) => {
-                    const recommendation = calculateDogFood(dog);
-
-                    return (
-                      <article
-                        key={dog.id}
-                        className="overflow-hidden rounded-3xl border border-border bg-muted/30"
-                      >
-                        <div className="relative h-36 bg-foreground/5">
-                          {dog.photo_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={dog.photo_url}
-                              alt={dog.nombre}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center text-muted-foreground">
-                              <Camera className="h-8 w-8" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="text-xl font-bold text-foreground">
-                                {dog.nombre}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {dog.peso ? `${dog.peso} kg · ` : ""}
-                                {dog.tamano || "sin talla"}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => openEditDogDialog(dog)}
-                                className="inline-flex h-9 items-center gap-1 rounded-full bg-background px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground"
-                                aria-label={`Editar ${dog.nombre}`}
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                                Editar
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDogToDelete(dog)}
-                                className="grid h-9 w-9 place-items-center rounded-full bg-background text-muted-foreground transition hover:text-foreground"
-                                aria-label={`Eliminar ${dog.nombre}`}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            {[
-                              dog.edad
-                                ? `${dog.edad} año${dog.edad === 1 ? "" : "s"}`
-                                : null,
-                              dog.etapa_vida,
-                              dog.actividad,
-                              dog.estado_fisico,
-                            ]
-                              .filter(Boolean)
-                              .map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="rounded-full bg-background px-3 py-1 text-xs font-medium text-muted-foreground"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                          </div>
-
-                          <div className="mt-4 rounded-2xl bg-background p-4">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                              Cantidad calculada
-                            </p>
-                            <p className="mt-1 text-2xl font-bold text-foreground">
-                              {recommendation.gramosDia}{" "}
-                              g/día
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {(recommendation.gramosMes / 1000).toLocaleString(
-                                "es-CL",
-                                {
-                                maximumFractionDigits: 1,
-                                },
-                              )}{" "}
-                              kg/mes
-                            </p>
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
+                  {dogs.map((dog) => (
+                    <DogCard
+                      key={dog.id}
+                      dog={dog}
+                      onEdit={openEditDogDialog}
+                      onDelete={setDogToDelete}
+                    />
+                  ))}
                 </div>
               ) : (
                 <div className="mt-5 rounded-3xl border border-dashed border-border bg-muted/25 p-8 text-center text-sm text-muted-foreground">
@@ -1031,63 +839,22 @@ export function AccountPetsSection() {
           </div>
         )}
       </div>
-      <Dialog open={Boolean(editingDog)} onOpenChange={(open) => !open && closeEditDogDialog()}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Editar perro</DialogTitle>
-            <DialogDescription>
-              Actualiza los datos del perro y su recomendación se recalcula automáticamente.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleUpdateDog} className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="text-sm font-medium text-foreground">Nombre
-                <input type="text" value={editDogForm.nombre} onChange={(event)=>setEditDogForm((form)=>({...form,nombre:event.target.value}))} className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10" />
-              </label>
-              <label className="text-sm font-medium text-foreground">Peso (kg)
-                <input type="number" inputMode="decimal" min="0" step="0.1" value={editDogForm.peso ?? ""} onChange={(event)=>setEditDogForm((form)=>({...form,peso:event.target.value?Number(event.target.value):null}))} className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10" />
-              </label>
-              <label className="text-sm font-medium text-foreground">Edad (años)
-                <input type="number" inputMode="numeric" min="0" step="1" value={editDogForm.edad ?? ""} onChange={(event)=>setEditDogForm((form)=>({...form,edad:event.target.value?Number.parseInt(event.target.value,10):null}))} className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10" />
-              </label>
-              {([["etapa_vida","Etapa de vida",["cachorro","adulto","senior"]],["tamano","Talla",["pequeño","mediano","grande"]],["actividad","Actividad",["baja","moderada","alta"]],["estado_fisico","Estado físico",["normal","esterilizado","sobrepeso"]]] as [keyof DogFormData, string, string[]][]).map(([field, label, options]) => (
-                <label key={field} className="text-sm font-medium text-foreground">{label}
-                  <select value={String(editDogForm[field] ?? "")} onChange={(event)=>setEditDogForm((form)=>({...form,[field]:event.target.value}))} className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10">
-                    {options.map((option)=><option key={option} value={option}>{option}</option>)}
-                  </select>
-                </label>
-              ))}
-            </div>
-            <div className="grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-center">
-              <div className="h-32 overflow-hidden rounded-3xl bg-muted">
-                {editDogPhotoPreview ? <img src={editDogPhotoPreview} alt="Vista previa del perro" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>}
-              </div>
-              <label className="text-sm font-medium text-foreground">Foto del perro
-                <input type="file" accept="image/*" onChange={handleEditDogPhotoFileChange} className={imageInputClassName} />
-              </label>
-            </div>
-            <DialogFooter>
-              <button type="button" onClick={closeEditDogDialog} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Cancelar</button>
-              <button type="submit" disabled={isSaving} className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-60">{isSaving ? "Guardando..." : "Guardar cambios"}</button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={Boolean(dogToDelete)} onOpenChange={(open) => !open && setDogToDelete(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>¿Seguro que deseas eliminar este perro?</DialogTitle>
-            <DialogDescription>
-              {dogToDelete ? `Vas a eliminar a ${dogToDelete.nombre}. Esta acción no se puede deshacer.` : ""}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <button type="button" onClick={() => setDogToDelete(null)} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Cancelar</button>
-            <button type="button" onClick={confirmDeleteDog} disabled={isSaving} className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-60">Confirmar eliminación</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EditDogDialog
+        dog={editingDog}
+        form={editDogForm}
+        setForm={setEditDogForm}
+        photoPreview={editDogPhotoPreview}
+        isSaving={isSaving}
+        onClose={closeEditDogDialog}
+        onSubmit={handleUpdateDog}
+        onPhotoChange={handleEditDogPhotoFileChange}
+      />
+      <DeleteDogDialog
+        dog={dogToDelete}
+        isSaving={isSaving}
+        onCancel={() => setDogToDelete(null)}
+        onConfirm={confirmDeleteDog}
+      />
     </section>
   );
 }
