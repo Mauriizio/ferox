@@ -1,147 +1,124 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import Image from "next/image";
-import { ArrowUpRight, ShoppingCart, ReceiptText } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
+const PHONE = "56927973379";
 
 const products = [
   {
     name: "Fórmula Vacuno",
-    weight: "1 kg",
+    subtitle: "Proteína principal de vacuno",
+    description:
+      "Receta BARF completa con carne, órganos y vegetales frescos para una nutrición diaria equilibrada.",
     price: "$ 5.990",
-    portion: "Ideal para rotación proteica",
-    badge: "Vacuno",
     image: "/product/product1.png",
   },
   {
-    name: "Mix de proteína",
-    weight: "1 kg",
+    name: "Mix de Proteína",
+    subtitle: "Combinación balanceada",
+    description:
+      "Blend de proteínas pensado para rotación nutricional y mayor variedad en la alimentación del perro.",
     price: "$ 6.490",
-    portion: "Combinación balanceada",
-    badge: "Más vendido",
-    featured: true,
     image: "/product/product2.png",
   },
   {
-    name: "Snack de pollo",
-    weight: "15 kg",
+    name: "Snack de Pollo",
+    subtitle: "Premio natural",
+    description:
+      "Snack funcional ideal para reforzar entrenamiento o complementar su rutina con una opción natural.",
     price: "$ 15.990",
-    portion: "Patitas de pollo deshidratadas",
-    badge: "Pack",
     image: "/product/product3.png",
   },
 ];
 
 export function ShopSection() {
+  const [index, setIndex] = useState(0);
+  const [imageOpen, setImageOpen] = useState(false);
+  const product = products[index];
+
+  const whatsappMessage = useMemo(
+    () =>
+      encodeURIComponent(
+        `Hola FEROX BARF, quiero pedir ${product.name} (${product.price}).`,
+      ),
+    [product.name, product.price],
+  );
+
   return (
-    <section
-      id="tienda"
-      className="bg-background border-t border-border"
-    >
-      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-6">
-          <div className="max-w-2xl">
-           
-            <span className="mt-1 sm:mt-3 md:mt-4 inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
-              Tienda
-            </span>
-            <h2 className="mt-2 sm:mt-3 font-serif text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
-              Compra fácil, rápida y directa
-            </h2>
-            <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
-              Agrega productos BARF al carrito, confirma el pedido y coordina
-              pago por transferencia o efectivo contra entrega.
-            </p>
-          </div>
+    <section id="tienda" className="border-t border-border bg-background">
+      <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-3 py-3 sm:min-h-[100svh] sm:px-6 sm:py-5 lg:px-8 lg:py-5">
+        <div className="mx-auto max-w-3xl text-center sm:text-center">
+          <span className="inline-block text-xs font-medium uppercase tracking-widest text-muted-foreground">
+            Tienda FEROX
+          </span>
+          <h2 className="mt-1.5 font-serif text-[2rem] font-bold tracking-tight sm:text-3xl md:text-4xl">
+            Pasa de producto a producto y pide directo
+          </h2>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
-          {products.map((product) => (
-            <article
-              key={product.name}
-              className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all ${
-                product.featured
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-background hover:border-foreground"
-              }`}
+        <div className="mx-auto mt-2 flex w-full max-w-5xl items-center justify-center gap-1 sm:mt-3 sm:gap-4">
+          <button
+            type="button"
+            onClick={() => setIndex((current) => (current - 1 + products.length) % products.length)}
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border bg-background text-foreground transition hover:bg-muted sm:h-11 sm:w-11"
+            aria-label="Producto anterior"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          <article className="w-full max-w-xl rounded-[1.5rem] border border-border bg-background p-2 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:max-w-2xl sm:p-3">
+            <button
+              type="button"
+              onClick={() => setImageOpen(true)}
+              className="relative mx-auto block aspect-square w-full max-w-[92vw] overflow-hidden rounded-xl bg-muted/20 shadow-[0_20px_50px_rgba(0,0,0,0.18)] sm:max-w-[420px] lg:max-w-[420px]"
+              aria-label={`Ampliar imagen de ${product.name}`}
             >
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-                <Image
-                  src={product.image}
-                  alt={`${product.name} FEROX BARF`}
-                  fill
-                  sizes="(min-width: 768px) 33vw, 100vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute left-2 top-2 md:left-4 md:top-4">
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] md:px-3 md:py-1 md:text-xs font-medium ${
-                      product.featured
-                        ? "bg-background text-foreground"
-                        : "bg-foreground text-background"
-                    }`}
-                  >
-                    {product.badge}
-                  </span>
-                </div>
-              </div>
+              <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 92vw, 420px" className="object-cover object-center scale-[1.04]" />
+            </button>
+            <h3 className="mt-2 font-serif text-[1.9rem] font-bold leading-none text-foreground sm:text-3xl">{product.name}</h3>
+            <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-muted-foreground line-clamp-2 sm:text-base">
+              {product.description}
+            </p>
+            <p className="mt-1 font-serif text-3xl font-bold text-foreground sm:text-4xl">{product.price}</p>
+ 
+            <a
+              href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90 sm:mt-3"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Pedir
+            </a>
+          </article>
 
-              <div className="flex-1 p-5 sm:p-6 flex flex-col">
-                <h3 className="font-serif text-2xl font-bold">
-                  {product.name}
-                </h3>
-                <p
-                  className={`mt-1 text-sm ${product.featured ? "text-background/70" : "text-muted-foreground"}`}
-                >
-                  {product.weight}
-                </p>
-
-                <div className="mt-5 flex items-baseline gap-2">
-                  <span className="font-serif text-3xl font-bold">
-                    {product.price}
-                  </span>
-                </div>
-                <p
-                  className={`mt-2 text-sm ${product.featured ? "text-background/70" : "text-muted-foreground"}`}
-                >
-                  {product.portion}
-                </p>
-
-                <a
-                  href={`https://wa.me/56927973379?text=${encodeURIComponent(
-                    `Hola, quiero comprar ${product.name} de FEROX BARF`,
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`mt-6 inline-flex items-center justify-between gap-2 rounded-full px-5 py-3 text-sm font-medium transition-colors ${
-                    product.featured
-                      ? "bg-background text-foreground hover:bg-background/90"
-                      : "bg-foreground text-background hover:bg-foreground/90"
-                  }`}
-                >
-                  Comprar ahora
-                  <ArrowUpRight className="h-4 w-4" />
-                </a>
-              </div>
-            </article>
-          ))}
+          <button
+            type="button"
+            onClick={() => setIndex((current) => (current + 1) % products.length)}
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border bg-background text-foreground transition hover:bg-muted sm:h-11 sm:w-11"
+            aria-label="Producto siguiente"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
         </div>
-
-        <div className="mt-8 hidden grid-cols-1 md:grid md:grid-cols-2 gap-4">
-          <div className="rounded-xl border border-border p-4 text-sm text-muted-foreground flex items-start gap-3">
-            <ShoppingCart className="h-4 w-4 mt-0.5 text-foreground" />
-            Carrito de compra activo: agrega productos y confirma cantidades
-            para cerrar tu pedido.
-          </div>
-          <div className="rounded-xl border border-border p-4 text-sm text-muted-foreground flex items-start gap-3">
-            <ReceiptText className="h-4 w-4 mt-0.5 text-foreground" />
-            Finalización: confirmamos por WhatsApp y enviamos mensaje automático
-            de pedido recibido.
-          </div>
-        </div>
-
-        <p className="mt-8 text-center text-sm text-muted-foreground">
-          Métodos de pago: Transferencia bancaria · Efectivo contra entrega.
-          Seguimiento manual vía WhatsApp.
-        </p>
       </div>
+
+      <Dialog open={imageOpen} onOpenChange={setImageOpen}>
+        <DialogContent className="max-w-4xl border-0 bg-black/95 p-2 sm:p-4">
+          <div className="overflow-auto rounded-xl">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={product.image}
+              alt={product.name}
+              className="mx-auto h-auto w-full max-w-4xl object-contain"
+              style={{ touchAction: "pinch-zoom" }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

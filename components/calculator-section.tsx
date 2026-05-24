@@ -77,10 +77,9 @@ export function CalculatorSection() {
     setPeso(Number(boundedPeso.toFixed(1)).toString());
   };
 
-  const renderResultCard = (className: string) => (
-    <div className={className}>
-      <div className="sticky top-6 overflow-hidden rounded-[1.5rem] bg-foreground text-background shadow-[0_20px_55px_rgba(0,0,0,0.18)]">
-        <div className="relative p-4 sm:p-5">
+  const renderResultCard = () => (
+      <div className="overflow-hidden rounded-[1.25rem] bg-foreground text-background shadow-[0_14px_38px_rgba(0,0,0,0.16)]">
+        <div className="relative p-3.5 sm:p-4">
           <Image
             src="/icon.svg"
             alt="FEROX BARF"
@@ -90,53 +89,53 @@ export function CalculatorSection() {
           />
 
           <div className="relative flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-2xl bg-background/10">
+            <span className="grid h-8 w-8 place-items-center rounded-xl bg-background/10">
               <Calculator className="h-4 w-4" />
             </span>
             <div>
               <span className="text-[11px] uppercase tracking-[0.2em] text-background/55">
                 Resultado
               </span>
-              <h3 className="font-serif text-lg font-bold sm:text-xl">
+              <h3 className="font-serif text-base font-bold sm:text-lg">
                 Tu porción BARF
               </h3>
             </div>
           </div>
 
-          <div className="relative mt-3 rounded-[1.25rem] bg-background p-4 text-foreground">
+          <div className="relative mt-2.5 rounded-xl bg-background p-3 text-foreground">
             <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Por día
             </div>
             <div className="mt-1 flex items-end gap-2">
-              <span className="font-serif text-4xl font-bold leading-none sm:text-5xl">
+              <span className="font-serif text-3xl font-bold leading-none sm:text-4xl">
                 {gramosDia.toLocaleString("es-CL")}
               </span>
               <span className="pb-1 text-base font-semibold text-muted-foreground">
                 g
               </span>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-1.5 text-xs text-muted-foreground sm:text-sm">
               Divide esta cantidad en 1 o 2 comidas, según su rutina.
             </p>
           </div>
 
-          <div className="relative mt-3 grid grid-cols-2 gap-2">
-            <div className="rounded-2xl bg-background/10 p-3">
+          <div className="relative mt-2.5 grid grid-cols-2 gap-2">
+            <div className="rounded-xl bg-background/10 p-2.5">
               <div className="text-[10px] uppercase tracking-widest text-background/50">
                 Por mes
               </div>
-              <div className="mt-1 text-xl font-bold">
+              <div className="mt-1 text-lg font-bold sm:text-xl">
                 {(gramosMes / 1000).toLocaleString("es-CL", {
                   maximumFractionDigits: 1,
                 })}
                 <span className="ml-1 text-xs text-background/60">kg</span>
               </div>
             </div>
-            <div className="rounded-2xl bg-background/10 p-3">
+            <div className="rounded-xl bg-background/10 p-2.5">
               <div className="text-[10px] uppercase tracking-widest text-background/50">
                 Fórmula
               </div>
-              <div className="mt-1 text-xl font-bold">
+              <div className="mt-1 text-lg font-bold sm:text-xl">
                 {(porcentaje * 100).toLocaleString("es-CL", {
                   maximumFractionDigits: 2,
                 })}
@@ -145,19 +144,19 @@ export function CalculatorSection() {
             </div>
           </div>
 
-          <div className="relative mt-3 grid gap-2">
+          <div className="relative mt-2.5 grid gap-2">
             <a
               href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2.5 text-sm font-semibold text-background transition-colors hover:bg-background/10"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2 text-sm font-semibold text-background transition-colors hover:bg-background/10"
             >
               <MessageCircle className="h-4 w-4" />
               Pedir asesoría
             </a>
             <a
               href="#productos"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2.5 text-sm font-semibold text-background transition-colors hover:bg-background/10"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2 text-sm font-semibold text-background transition-colors hover:bg-background/10"
             >
               <ShoppingBag className="h-4 w-4" />
               Ver productos
@@ -169,7 +168,6 @@ export function CalculatorSection() {
           </div>
         </div>
       </div>
-    </div>
   );
 
   return (
@@ -179,26 +177,25 @@ export function CalculatorSection() {
     >
       <div className="pointer-events-none absolute left-1/2 top-10 h-52 w-52 -translate-x-1/2 rounded-full bg-foreground/5 blur-3xl sm:hidden" />
 
-      <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
+      <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground shadow-sm sm:px-4 sm:py-2 sm:text-xs">
             <Sparkles className="h-3.5 w-3.5 text-foreground" />
             Calculadora BARF
           </span>
-          <h2 className="mt-3 font-serif text-3xl font-bold leading-tight tracking-tight text-balance sm:mt-4 sm:text-4xl md:text-5xl">
+          <h2 className="mt-3 font-serif text-2xl font-bold leading-tight tracking-tight text-balance sm:mt-4 sm:text-3xl md:text-4xl">
             Descubre cuánta comida necesita tu perro
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Selecciona el peso arriba y revisa el resultado justo debajo. Luego
-            afina edad, actividad y condición.
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Primero completa los datos de tu perro. Al final verás la porción
+            diaria y mensual recomendada.
           </p>
         </div>
 
-        <div className="mt-5 grid gap-3 lg:mt-7 lg:grid-cols-5 lg:gap-4">
-          <div className="rounded-[1.5rem] border border-white/70 bg-background/85 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.07)] backdrop-blur sm:p-4 lg:col-span-3 lg:p-5">
-            <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+        <div className="mx-auto mt-4 w-full max-w-3xl rounded-[1.25rem] border border-white/70 bg-background/85 p-3 shadow-[0_12px_36px_rgba(0,0,0,0.06)] backdrop-blur sm:p-3.5 lg:mt-5 lg:p-4">
+            <form className="space-y-2.5" onSubmit={(e) => e.preventDefault()}>
               
-              <div className="rounded-[1.25rem] bg-foreground p-3 text-background shadow-lg">
+              <div className="rounded-[1rem] bg-foreground p-2.5 text-background shadow-lg">
                 <div className="flex items-center justify-between gap-3">
                   <label
                     htmlFor="peso"
@@ -214,11 +211,11 @@ export function CalculatorSection() {
                   </div>
                 </div>
 
-                <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-2">
+                <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => updatePeso((pesoNumber || 1) - 0.5)}
-                    className="grid h-10 w-10 place-items-center rounded-full bg-background/10 text-background transition hover:bg-background/20"
+                    className="grid h-9 w-9 place-items-center rounded-full bg-background/10 text-background transition hover:bg-background/20"
                     aria-label="Disminuir peso"
                   >
                     <Minus className="h-4 w-4" />
@@ -232,13 +229,13 @@ export function CalculatorSection() {
                     step="0.5"
                     value={peso}
                     onChange={(e) => setPeso(e.target.value)}
-                    className="h-11 w-full rounded-2xl border border-background/10 bg-background px-4 text-center text-2xl font-bold text-foreground shadow-inner outline-none focus:ring-2 focus:ring-background/50 sm:h-12 sm:text-3xl"
+                    className="h-10 w-full rounded-xl border border-background/10 bg-background px-3 text-center text-xl font-bold text-foreground shadow-inner outline-none focus:ring-2 focus:ring-background/50 sm:h-11 sm:text-2xl"
                     placeholder="12"
                   />
                   <button
                     type="button"
                     onClick={() => updatePeso((pesoNumber || 0) + 0.5)}
-                    className="grid h-10 w-10 place-items-center rounded-full bg-background/10 text-background transition hover:bg-background/20"
+                    className="grid h-9 w-9 place-items-center rounded-full bg-background/10 text-background transition hover:bg-background/20"
                     aria-label="Aumentar peso"
                   >
                     <Plus className="h-4 w-4" />
@@ -246,13 +243,11 @@ export function CalculatorSection() {
                 </div>
               </div>
 
-              {renderResultCard("lg:hidden")}
-
               <div>
                 <span className="block text-sm font-semibold text-foreground">
                   Etapa de vida
                 </span>
-                <div className="mt-2 grid grid-cols-3 gap-1.5">
+                <div className="mt-1.5 grid grid-cols-3 gap-1.5">
                   {etapaVidaOptions.map((opt) => {
                     const Icon = opt.icon;
                     return (
@@ -260,7 +255,7 @@ export function CalculatorSection() {
                         key={opt.v}
                         type="button"
                         onClick={() => setEtapaVida(opt.v)}
-                        className={`flex items-center justify-center gap-1.5 rounded-2xl border px-2 py-2 text-sm font-bold transition-all sm:px-3 ${
+                        className={`flex items-center justify-center gap-1 rounded-xl border px-1.5 py-1.5 text-xs font-bold transition-all sm:px-2.5 sm:text-sm ${
                           etapaVida === opt.v
                             ? "border-foreground bg-foreground text-background shadow-lg shadow-foreground/15"
                             : "border-border bg-white/75 text-foreground hover:-translate-y-0.5 hover:bg-white"
@@ -276,19 +271,19 @@ export function CalculatorSection() {
               </div>
 
               <div className="grid gap-2 sm:grid-cols-2">
-                <div className="rounded-2xl border border-border bg-white/65 p-3">
+                <div className="rounded-xl border border-border bg-white/65 p-2.5">
                   <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <Activity className="h-4 w-4" />
                     Actividad
                   </span>
-                  <div className="mt-2 grid grid-cols-3 gap-1.5">
+                  <div className="mt-1.5 grid grid-cols-3 gap-1">
                     {actividadOptions.map((opt) => (
                       <button
                         key={opt.v}
                         type="button"
                         onClick={() => setActividad(opt.v)}
                         disabled={etapaVida !== "adulto"}
-                        className={`inline-flex min-h-10 items-center justify-center rounded-2xl border px-2 text-center text-xs font-semibold transition-colors sm:text-sm ${
+                        className={`inline-flex min-h-9 items-center justify-center rounded-xl border px-1.5 text-center text-[11px] font-semibold transition-colors sm:text-xs ${
                           actividad === opt.v && etapaVida === "adulto"
                             ? "border-foreground bg-foreground text-background"
                             : "border-transparent bg-background text-foreground hover:bg-muted"
@@ -312,18 +307,18 @@ export function CalculatorSection() {
                   ) : null}
                 </div>
 
-                <div className="rounded-2xl border border-border bg-white/65 p-3">
+                <div className="rounded-xl border border-border bg-white/65 p-2.5">
                   <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <ShieldCheck className="h-4 w-4" />
                     Condición
                   </span>
-                  <div className="mt-2 grid grid-cols-3 gap-1.5">
+                  <div className="mt-1.5 grid grid-cols-3 gap-1">
                     {estadoOptions.map((opt) => (
                       <button
                         key={opt.v}
                         type="button"
                         onClick={() => setEstado(opt.v)}
-                        className={`inline-flex min-h-10 items-center justify-center rounded-2xl border px-2 text-center text-xs font-semibold transition-colors sm:text-sm ${
+                        className={`inline-flex min-h-9 items-center justify-center rounded-xl border px-1.5 text-center text-[11px] font-semibold transition-colors sm:text-xs ${
                           estado === opt.v
                             ? "border-foreground bg-foreground text-background"
                             : "border-transparent bg-background text-foreground hover:bg-muted"
@@ -336,10 +331,14 @@ export function CalculatorSection() {
                   </div>
                 </div>
               </div>
-            </form>
-          </div>
 
-          {renderResultCard("hidden lg:block lg:col-span-2")}
+              <div className="pt-2">
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  Resultado final
+                </div>
+                {renderResultCard()}
+              </div>
+            </form>
         </div>
       </div>
     </section>

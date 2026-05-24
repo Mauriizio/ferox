@@ -11,12 +11,9 @@ import {
 import Image from "next/image";
 import type { Session } from "@supabase/supabase-js";
 import {
-  Activity,
   Camera,
   CheckCircle2,
-  Dog as DogIcon,
-  Pencil,
-  LogOut,
+  MessageCircle,
   PawPrint,
   Plus,
   ShieldCheck,
@@ -47,6 +44,14 @@ import {
 import {
   DeleteDogDialog,
 } from "@/components/account-pets/delete-dog-dialog";
+import { calculateDogFood } from "@/lib/helpers/calculate-dog-food";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { DogCard } from "@/components/account-pets/dog-card";
 import { DogFormFields } from "@/components/account-pets/dog-form-fields";
 import { EditDogDialog } from "@/components/account-pets/edit-dog-dialog";
@@ -93,6 +98,7 @@ export function AccountPetsSection() {
   const [editDogPhotoFile, setEditDogPhotoFile] = useState<File | null>(null);
   const [editDogPhotoPreview, setEditDogPhotoPreview] = useState("");
   const [dogToDelete, setDogToDelete] = useState<Dog | null>(null);
+  const [isAddDogDialogOpen, setIsAddDogDialogOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -501,44 +507,51 @@ export function AccountPetsSection() {
       className="border-t border-border bg-[linear-gradient(180deg,#f7f7f7_0%,#ffffff_100%)]"
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr] lg:items-end">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground shadow-sm">
-              <ShieldCheck className="h-3.5 w-3.5 text-foreground" />
-              Cuenta FEROX
-            </span>
-            <h2 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-balance sm:text-4xl md:text-5xl">
-              Tu perfil, tus perros y sus porciones en un solo lugar
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Crea una cuenta, registra tus perros y gestiona sus recomendaciones BARF desde tu dashboard privado.
-            </p>
-          </div>
-
-          <div className="rounded-[2rem] border border-border bg-background p-5 shadow-sm">
-            <div className="flex items-start gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-foreground text-background">
-                <PawPrint className="h-5 w-5" />
+        {!user ? (
+          <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr] lg:items-end">
+            <div className="max-w-3xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground shadow-sm">
+                <ShieldCheck className="h-3.5 w-3.5 text-foreground" />
+                Cuenta FEROX
               </span>
-              <div>
-                <p className="text-sm font-semibold text-foreground">
-                  {user ? "Dashboard privado" : "Acceso seguro"}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {user
-                    ? `${profile?.full_name || user.email || "Usuario"} tiene ${dogs.length} perro${dogs.length === 1 ? "" : "s"} registrado${dogs.length === 1 ? "" : "s"}.`
-                    : "Email y contraseña listo. Google OAuth queda preparado para activar en Supabase."}
-                </p>
-              </div>
+              <h2 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-balance sm:text-4xl md:text-5xl">
+                Tu perfil, tus perros y sus porciones en un solo lugar
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                Crea una cuenta, registra tus perros y gestiona sus recomendaciones BARF desde tu dashboard privado.
+              </p>
             </div>
-            {message ? (
-              <div className="mt-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
-                <CheckCircle2 className="h-4 w-4 shrink-0" />
-                {message}
+
+            <div className="rounded-[2rem] border border-border bg-background p-5 shadow-sm">
+              <div className="flex items-start gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-foreground text-background">
+                  <PawPrint className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Acceso seguro
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Email y contraseña listo. Google OAuth queda preparado para activar en Supabase.
+                  </p>
+                </div>
               </div>
-            ) : null}
+              {message ? (
+                <div className="mt-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  {message}
+                </div>
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : (
+          message ? (
+            <div className="mb-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              {message}
+            </div>
+          ) : null
+        )}
 
         {!user ? (
           <div className="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
@@ -665,180 +678,83 @@ export function AccountPetsSection() {
             </article>
           </div>
         ) : (
-          <div className="mt-10 space-y-6">
-            <div className="grid gap-6 lg:grid-cols-2">
-              <article className="rounded-[2rem] border border-border bg-background p-5 shadow-[0_20px_50px_rgba(0,0,0,0.06)] sm:p-6 lg:p-8">
-                <div className="flex items-center justify-between gap-3 text-foreground">
-                  <div className="flex items-center gap-2">
-                    <UserRound className="h-5 w-5" />
-                    <h3 className="font-semibold">Perfil de usuario</h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleSignOut}
-                    className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-accent"
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                    Salir
-                  </button>
-                </div>
-
-                <form onSubmit={handleProfileSubmit} className="mt-5 space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Usuario
-                      <input
-                        type="text"
-                        value={username}
-                        onChange={(event) => setUsername(event.target.value)}
-                        placeholder="feroxlover"
-                        className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                      />
-                    </label>
-                    <label className="text-sm font-medium text-foreground">
-                      Nombre completo
-                      <input
-                        type="text"
-                        value={fullName}
-                        onChange={(event) => setFullName(event.target.value)}
-                        placeholder="Tu nombre"
-                        className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                      />
-                    </label>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
-                    <div className="h-20 w-20 overflow-hidden rounded-full bg-muted">
-                      {avatarPreview || profile?.avatar_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={avatarPreview || profile?.avatar_url || ""}
-                          alt="Vista previa del avatar"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-muted-foreground">
-                          <UserRound className="h-7 w-7" />
-                        </div>
-                      )}
-                    </div>
-                    <label className="text-sm font-medium text-foreground">
-                      Avatar
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAvatarFileChange}
-                        className={imageInputClassName}
-                      />
-                      <span className="mt-2 block text-xs font-normal text-muted-foreground">
-                        Selecciona una imagen desde tu dispositivo. Si no eliges
-                        una, se conserva el avatar actual o se usa placeholder.
-                      </span>
-                    </label>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="inline-flex items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90 disabled:opacity-60"
-                  >
-                    Guardar perfil
-                  </button>
-                </form>
-              </article>
-
-              <article className="rounded-[2rem] border border-border bg-background p-5 shadow-[0_20px_50px_rgba(0,0,0,0.06)] sm:p-6 lg:p-8">
-                <div className="flex items-center justify-between gap-3 text-foreground">
-                  <div className="flex items-center gap-2">
-                    <DogIcon className="h-5 w-5" />
-                    <h3 className="font-semibold">Registro de perros</h3>
-                  </div>
-                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                    {dogs.length} guardado{dogs.length === 1 ? "" : "s"}
-                  </span>
-                </div>
-
-                <form onSubmit={handleDogSubmit} className="mt-5 space-y-4">
-                  <DogFormFields form={dogForm} setForm={setDogForm} />
-                  <div className="grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-center">
-                    <div className="h-32 overflow-hidden rounded-3xl bg-muted">
-                      {dogPhotoPreview ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={dogPhotoPreview}
-                          alt="Vista previa del perro"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-muted-foreground">
-                          <Camera className="h-8 w-8" />
-                        </div>
-                      )}
-                    </div>
-                    <label className="text-sm font-medium text-foreground">
-                      Foto del perro
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleDogPhotoFileChange}
-                        className={imageInputClassName}
-                      />
-                      <span className="mt-2 block text-xs font-normal text-muted-foreground">
-                        Opcional. Puedes registrar el perro sin foto y agregarla
-                        más adelante.
-                      </span>
-                    </label>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60"
-                  >
-                    <Plus className="h-4 w-4" />
-                    {isSaving ? "Guardando..." : "Añadir perro"}
-                  </button>
-                </form>
-              </article>
+          <div className="mt-8 space-y-4">
+            <div className="flex items-center justify-end">
+              <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-3 py-2 text-xs font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
             </div>
-
-            <div className="rounded-[2rem] border border-border bg-background p-5 shadow-sm sm:p-6">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h3 className="font-serif text-2xl font-bold">
-                    Mini dashboard
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Datos privados del perro con recomendación automática diaria y mensual.
-                  </p>
-                </div>
-                <a
-                  href="#calculadora"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition hover:bg-foreground/90"
-                >
-                  <Activity className="h-4 w-4" />
-                  Ir a calculadora
-                </a>
+            {dogs.length > 0 ? (
+              <div className="grid grid-cols-1 gap-3">
+                {dogs.map((dog) => {
+                  const recommendation = calculateDogFood(dog);
+                  const dogOrderMessage = encodeURIComponent(
+                    `Hola FEROX BARF, quiero pedir comida para ${dog.nombre}. Recomendación diaria: ${recommendation.gramosDia}g.`,
+                  );
+                  return (
+                    <article key={dog.id} className="rounded-3xl border border-border bg-background p-3 shadow-sm">
+                      <div className="mx-auto h-20 w-20 overflow-hidden rounded-full bg-muted">
+                        {dog.photo_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={dog.photo_url} alt={dog.nombre} className="h-full w-full object-cover" />
+                        ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-6 w-6" /></div>}
+                      </div>
+                      <p className="mt-2 text-center text-lg font-semibold">{dog.nombre}</p>
+                      <div className="mt-1 flex items-center justify-between text-sm text-muted-foreground">
+                        <span>{dog.peso ? `${dog.peso} kg` : "-- kg"}</span>
+                        <span>{dog.edad ? `${dog.edad} años` : "-- años"}</span>
+                      </div>
+                      <p className="mt-2 text-center text-3xl font-bold text-foreground">{recommendation.gramosDia}g</p>
+                      <p className="text-center text-xs text-muted-foreground">por día</p>
+                      <a
+                        href={`https://wa.me/56927973379?text=${dogOrderMessage}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-3 py-2 text-xs font-semibold text-background"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        Hacer pedido
+                      </a>
+                      <div className="mt-2 flex justify-center gap-2">
+                        <button type="button" onClick={() => openEditDogDialog(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Editar</button>
+                        <button type="button" onClick={() => setDogToDelete(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Borrar</button>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
-
-              {dogs.length > 0 ? (
-                <div className="mt-5 grid gap-4 lg:grid-cols-3">
-                  {dogs.map((dog) => (
-                    <DogCard
-                      key={dog.id}
-                      dog={dog}
-                      onEdit={openEditDogDialog}
-                      onDelete={setDogToDelete}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="mt-5 rounded-3xl border border-dashed border-border bg-muted/25 p-8 text-center text-sm text-muted-foreground">
-                  Aún no tienes perros registrados. Agrega el primero para
-                  activar el dashboard.
-                </div>
-              )}
-            </div>
+            ) : (
+              <div className="rounded-3xl border border-dashed border-border bg-muted/25 p-8 text-center text-sm text-muted-foreground">
+                No tienes perros aún. Toca + para agregar el primero.
+              </div>
+            )}
           </div>
         )}
       </div>
+      <Dialog open={isAddDogDialogOpen} onOpenChange={setIsAddDogDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Agregar nuevo perro</DialogTitle>
+            <DialogDescription>Completa los datos para registrar un perro nuevo.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleDogSubmit} className="space-y-4">
+            <DogFormFields form={dogForm} setForm={setDogForm} />
+            <div className="grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-center">
+              <div className="h-32 overflow-hidden rounded-3xl bg-muted">
+                {dogPhotoPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={dogPhotoPreview} alt="Vista previa del perro" className="h-full w-full object-cover" />
+                ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>}
+              </div>
+              <label className="text-sm font-medium text-foreground">Foto del perro
+                <input type="file" accept="image/*" onChange={handleDogPhotoFileChange} className={imageInputClassName} />
+              </label>
+            </div>
+            <button type="submit" disabled={isSaving} className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60">
+              <Plus className="h-4 w-4" />
+              {isSaving ? "Guardando..." : "Añadir perro"}
+            </button>
+          </form>
+        </DialogContent>
+      </Dialog>
       <EditDogDialog
         dog={editingDog}
         form={editDogForm}
