@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, ShoppingCart, UserRound, X } from "lucide-react";
+import { LogOut, Menu, ShoppingCart, UserRound, X } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
-import { getProfile } from "@/lib/services/auth-service";
+import {
+  getProfile,
+  signInWithGoogle,
+  signInWithPassword,
+  signOut,
+  signUpWithPassword,
+} from "@/lib/services/auth-service";
 import type { Profile } from "@/lib/supabase/database.types";
 import { cn } from "@/lib/utils";
 
@@ -17,13 +23,23 @@ const navLinks = [
   { href: "#comentarios", label: "Reseñas" },
 ];
 
-export function SiteHeader() {
+type Props = { onSessionChange?: (session: Session | null) => void };
+
+export function SiteHeader({ onSessionChange }: Props) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState("");
 
   const user = session?.user ?? null;
+  const onHero = !scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -39,6 +55,7 @@ export function SiteHeader() {
       const { data, error } = await supabase.auth.getSession();
       if (error || !mounted) return;
       setSession(data.session);
+      onSessionChange?.(data.session);
       if (data.session?.user) {
         const userProfile = await getProfile(data.session.user.id);
         if (mounted) setProfile(userProfile);
@@ -50,6 +67,7 @@ export function SiteHeader() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, nextSession) => {
         setSession(nextSession);
+        onSessionChange?.(nextSession);
         if (nextSession?.user) {
           const userProfile = await getProfile(nextSession.user.id);
           setProfile(userProfile);
@@ -65,11 +83,32 @@ export function SiteHeader() {
     };
   }, []);
 
+  const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSaving(true);
+    setMessage("");
+    try {
+      if (mode === "signup") {
+        await signUpWithPassword(email, password, fullName);
+        setMessage("Cuenta creada. Revisa tu correo para confirmar.");
+      } else {
+        await signInWithPassword(email, password);
+        setAuthOpen(false);
+      }
+    } catch {
+      setMessage("No se pudo iniciar sesión. Verifica tus datos.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 border-b transition-colors",
-        scrolled ? "border-border bg-background/95 backdrop-blur" : "border-transparent bg-background/80",
+        "fixed inset-x-0 top-0 z-50 border-b transition-all duration-300",
+        onHero
+          ? "border-white/15 bg-black/30 backdrop-blur-[2px]"
+          : "border-border bg-background/92 backdrop-blur-md shadow-[0_10px_26px_rgba(0,0,0,0.1)]",
       )}
     >
       <div className="relative hidden overflow-hidden border-b border-white/10 bg-black text-white/85 md:block">
@@ -93,7 +132,14 @@ export function SiteHeader() {
 
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Navegación principal">
           {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="text-sm font-medium text-foreground/80 transition hover:text-foreground">
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "text-sm font-medium transition",
+                onHero ? "text-white/90 hover:text-white" : "text-foreground/80 hover:text-foreground",
+              )}
+            >
               {link.label}
             </Link>
           ))}
@@ -102,32 +148,70 @@ export function SiteHeader() {
         <div className="hidden items-center gap-3 lg:flex">
           {user ? (
             <>
-              <a href="#cuenta" className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted">
-                Dashboard
+              <button
+                type="button"
+                onClick={() => signOut()}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
+                  onHero ? "border border-white/30 text-white hover:bg-white/10" : "border border-border text-foreground hover:bg-muted",
+                )}
+              >
+                <LogOut className="h-4 w-4" />
+                Salir
+              </button>
+              <a href="/" className={cn("rounded-full px-4 py-2 text-sm font-semibold", onHero ? "text-white" : "text-foreground")}>
+                Mi cuenta
               </a>
-              <a href="#cuenta" className="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-border bg-muted" aria-label="Ir a tu cuenta">
+              <span className={cn("grid h-10 w-10 place-items-center overflow-hidden rounded-full", onHero ? "border border-white/30 bg-white/10" : "border border-border bg-muted")} aria-label="Tu avatar">
                 {profile?.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
                 ) : (
                   <UserRound className="h-5 w-5 text-muted-foreground" />
                 )}
-              </a>
+              </span>
             </>
           ) : (
-            <a href="#cuenta" className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background hover:bg-foreground/90">
+            <button
+              type="button"
+              onClick={() => setAuthOpen((value) => !value)}
+              className={cn(
+                "rounded-full px-4 py-2 text-sm font-semibold transition",
+                onHero ? "bg-white text-black hover:bg-white/90" : "bg-foreground text-background hover:bg-foreground/90",
+              )}
+            >
               Iniciar sesión
-            </a>
+            </button>
           )}
-          <a href="#tienda" className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-muted" aria-label="Ir a tienda">
+          <a href="#tienda" className={cn("inline-flex h-10 w-10 items-center justify-center rounded-full border transition", onHero ? "border-white/25 text-white hover:bg-white/10" : "border-border text-foreground hover:bg-muted")} aria-label="Ir a tienda">
             <ShoppingCart className="h-4 w-4" />
           </a>
         </div>
 
-        <button type="button" onClick={() => setOpen((v) => !v)} className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border text-foreground lg:hidden" aria-label="Abrir menú">
+        <button type="button" onClick={() => setOpen((v) => !v)} className={cn("inline-flex h-10 w-10 items-center justify-center rounded-md border lg:hidden", onHero ? "border-white/25 text-white" : "border-border text-foreground")} aria-label="Abrir menú">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
+      {authOpen && !user ? (
+        <div className="border-t border-border bg-background/95 px-4 py-4 backdrop-blur-md">
+          <div className="mx-auto w-full max-w-7xl">
+            <div className="max-w-md rounded-2xl border border-border bg-background p-4 shadow-lg">
+              <div className="mb-3 flex gap-2 text-sm font-semibold">
+                <button type="button" onClick={() => setMode("login")} className={cn("rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
+                <button type="button" onClick={() => setMode("signup")} className={cn("rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
+              </div>
+              <form onSubmit={handleAuthSubmit} className="space-y-2">
+                {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
+                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+                <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
+              </form>
+              <button type="button" onClick={() => signInWithGoogle()} className="mt-2 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
+              {message ? <p className="mt-2 text-xs text-muted-foreground">{message}</p> : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {open ? (
         <div className="border-t border-border bg-background lg:hidden">
