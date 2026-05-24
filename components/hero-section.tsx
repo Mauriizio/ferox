@@ -2,16 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, PawPrint, UserRound } from "lucide-react";
+import { ArrowRight, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import { getDogsByUser } from "@/lib/services/dog-service";
 import { getProfile } from "@/lib/services/auth-service";
+const PHONE = "56927973379";
 export function HeroSection() {
   const [session, setSession] = useState<Session | null>(null);
   const [dogsCount, setDogsCount] = useState(0);
   const [fullName, setFullName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const user = session?.user ?? null;
 
   useEffect(() => {
@@ -28,6 +30,7 @@ export function HeroSection() {
         if (!mounted) return;
         setDogsCount(dogs.length);
         setFullName(profile?.full_name ?? "");
+        setAvatarUrl(profile?.avatar_url ?? "");
       }
     }
     load();
@@ -79,6 +82,16 @@ export function HeroSection() {
           >
             {user ? "BIENVENIDO A TU ESPACIO FEROX" : "NUTRICIÓN REAL PREMIUM"}
           </h1>
+          {user ? (
+            <div className="mt-3 h-20 w-20 overflow-hidden rounded-full border border-white/30 bg-white/10">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt="Avatar usuario" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center text-white"><UserRound className="h-8 w-8" /></div>
+              )}
+            </div>
+          ) : null}
 
           <p
             className="mt-7 md:mt-5 text-base sm:text-lg md:text-xl text-white/85 leading-relaxed text-pretty max-w-lg mx-auto md:mx-0"
@@ -90,10 +103,12 @@ export function HeroSection() {
 
           <div className="mt-10 md:mt-8 flex flex-col sm:flex-row gap-2.5 sm:gap-3 sm:items-center">
             <Link
-              href={user ? "#cuenta" : "#tienda"}
+              href={user ? `https://wa.me/${PHONE}` : "#tienda"}
+              target={user ? "_blank" : undefined}
+              rel={user ? "noopener noreferrer" : undefined}
               className="group inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full bg-white px-4 sm:px-6 py-2.5 sm:py-4 text-sm sm:text-base font-semibold text-black text-center hover:bg-white/90 transition-all shadow-xl shadow-black/35"
             >
-              {user ? "Ir a mi dashboard" : "Comprar ahora"}
+              {user ? "Hacer pedido" : "Comprar ahora"}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
 
@@ -101,21 +116,10 @@ export function HeroSection() {
               href={user ? "#cuenta" : "#calculadora"}
               className="inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full border border-white/40 bg-black/20 px-4 sm:px-6 py-2.5 sm:py-4 text-sm sm:text-base font-medium text-white text-center hover:bg-black/35 transition-colors"
             >
-              {user ? "Gestionar mis perros" : "Calcular ración"}
+              {user ? "Mis perros" : "Calcular ración"}
             </Link>
           </div>
-          {user ? (
-            <div className="mt-6 grid w-full max-w-md grid-cols-2 gap-2 rounded-2xl border border-white/20 bg-black/30 p-3 backdrop-blur-sm">
-              <div className="rounded-xl bg-white/10 p-3">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-white/70">Cuenta</p>
-                <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-white"><UserRound className="h-4 w-4" />{welcome}</p>
-              </div>
-              <div className="rounded-xl bg-white/10 p-3">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-white/70">Perros</p>
-                <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-white"><PawPrint className="h-4 w-4" />{dogsCount} registrado{dogsCount === 1 ? "" : "s"}</p>
-              </div>
-            </div>
-          ) : null}
+          {user ? <p className="mt-2 text-sm text-white/80">Hola {welcome}. Tienes {dogsCount} perro{dogsCount === 1 ? "" : "s"}.</p> : null}
 
           <div className="mt-10 md:mt-9 flex flex-wrap items-center justify-center md:justify-start gap-2">
             <span className="rounded-full border border-white/25 bg-black/20 px-3 py-1 text-[11px] sm:text-xs tracking-[0.04em] text-white/90">

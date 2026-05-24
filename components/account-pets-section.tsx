@@ -11,12 +11,8 @@ import {
 import Image from "next/image";
 import type { Session } from "@supabase/supabase-js";
 import {
-  Activity,
   Camera,
   CheckCircle2,
-  Dog as DogIcon,
-  Pencil,
-  LogOut,
   PawPrint,
   Plus,
   ShieldCheck,
@@ -101,7 +97,6 @@ export function AccountPetsSection() {
   const [editDogPhotoFile, setEditDogPhotoFile] = useState<File | null>(null);
   const [editDogPhotoPreview, setEditDogPhotoPreview] = useState("");
   const [dogToDelete, setDogToDelete] = useState<Dog | null>(null);
-  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [isAddDogDialogOpen, setIsAddDogDialogOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -683,32 +678,11 @@ export function AccountPetsSection() {
           </div>
         ) : (
           <div className="mt-8 space-y-4">
-            <div className="rounded-3xl border border-border bg-background p-4 shadow-sm sm:p-5">
-              <div className="flex items-center gap-3">
-                <div className="h-11 w-11 overflow-hidden rounded-full bg-muted">
-                  {avatarPreview || profile?.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={avatarPreview || profile?.avatar_url || ""} alt="Avatar" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-muted-foreground"><UserRound className="h-5 w-5" /></div>
-                  )}
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Dashboard</p>
-                  <p className="text-lg font-semibold text-foreground">Hola {fullName || username || "FEROX"}</p>
-                  <p className="text-xs text-muted-foreground">Tienes {dogs.length} perro{dogs.length === 1 ? "" : "s"} registrado{dogs.length === 1 ? "" : "s"}.</p>
-                </div>
-              </div>
-              <div className="mt-4 flex items-center justify-between gap-2">
-                <button type="button" onClick={() => setIsProfileDialogOpen(true)} className="rounded-full border border-border px-3 py-2 text-xs font-semibold hover:bg-muted">Configurar cuenta</button>
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-3 py-2 text-xs font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
-                  <button type="button" onClick={handleSignOut} className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-accent"><LogOut className="h-3.5 w-3.5" />Salir</button>
-                </div>
-              </div>
+            <div className="flex items-center justify-end">
+              <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-3 py-2 text-xs font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
             </div>
             {dogs.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3">
                 {dogs.map((dog) => {
                   const recommendation = calculateDogFood(dog);
                   return (
@@ -765,36 +739,6 @@ export function AccountPetsSection() {
               <Plus className="h-4 w-4" />
               {isSaving ? "Guardando..." : "Añadir perro"}
             </button>
-          </form>
-        </DialogContent>
-      </Dialog>
-      <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Editar perfil</DialogTitle>
-            <DialogDescription>Actualiza nombre, usuario y avatar.</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleProfileSubmit} className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="text-sm font-medium text-foreground">Usuario
-                <input type="text" value={username} onChange={(event) => setUsername(event.target.value)} placeholder="feroxlover" className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none" />
-              </label>
-              <label className="text-sm font-medium text-foreground">Nombre completo
-                <input type="text" value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Tu nombre" className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none" />
-              </label>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
-              <div className="h-20 w-20 overflow-hidden rounded-full bg-muted">
-                {avatarPreview || profile?.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarPreview || profile?.avatar_url || ""} alt="Vista previa del avatar" className="h-full w-full object-cover" />
-                ) : <div className="flex h-full items-center justify-center text-muted-foreground"><UserRound className="h-7 w-7" /></div>}
-              </div>
-              <label className="text-sm font-medium text-foreground">Avatar
-                <input type="file" accept="image/*" onChange={handleAvatarFileChange} className={imageInputClassName} />
-              </label>
-            </div>
-            <button type="submit" disabled={isSaving} className="inline-flex items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90 disabled:opacity-60">Guardar perfil</button>
           </form>
         </DialogContent>
       </Dialog>
