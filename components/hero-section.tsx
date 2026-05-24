@@ -83,7 +83,7 @@ export function HeroSection() {
             {user ? "BIENVENIDO A TU ESPACIO FEROX" : "NUTRICIÓN REAL PREMIUM"}
           </h1>
           {user ? (
-            <div className="mt-3 h-20 w-20 overflow-hidden rounded-full border border-white/30 bg-white/10">
+            <div className="mt-3 h-20 w-20 overflow-hidden rounded-full border border-white/30 bg-white/10 md:hidden">
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={avatarUrl} alt="Avatar usuario" className="h-full w-full object-cover" />

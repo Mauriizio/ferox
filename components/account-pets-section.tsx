@@ -13,6 +13,7 @@ import type { Session } from "@supabase/supabase-js";
 import {
   Camera,
   CheckCircle2,
+  MessageCircle,
   PawPrint,
   Plus,
   ShieldCheck,
@@ -685,6 +686,9 @@ export function AccountPetsSection() {
               <div className="grid grid-cols-1 gap-3">
                 {dogs.map((dog) => {
                   const recommendation = calculateDogFood(dog);
+                  const dogOrderMessage = encodeURIComponent(
+                    `Hola FEROX BARF, quiero pedir comida para ${dog.nombre}. Recomendación diaria: ${recommendation.gramosDia}g.`,
+                  );
                   return (
                     <article key={dog.id} className="rounded-3xl border border-border bg-background p-3 shadow-sm">
                       <div className="mx-auto h-20 w-20 overflow-hidden rounded-full bg-muted">
@@ -700,6 +704,15 @@ export function AccountPetsSection() {
                       </div>
                       <p className="mt-2 text-center text-3xl font-bold text-foreground">{recommendation.gramosDia}g</p>
                       <p className="text-center text-xs text-muted-foreground">por día</p>
+                      <a
+                        href={`https://wa.me/56927973379?text=${dogOrderMessage}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-3 py-2 text-xs font-semibold text-background"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        Hacer pedido
+                      </a>
                       <div className="mt-2 flex justify-center gap-2">
                         <button type="button" onClick={() => openEditDogDialog(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Editar</button>
                         <button type="button" onClick={() => setDogToDelete(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Borrar</button>
