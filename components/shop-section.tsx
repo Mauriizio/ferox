@@ -67,11 +67,11 @@ export function ShopSection() {
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <article className="w-full max-w-xl rounded-[1.75rem] border border-border bg-background p-5 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:p-7">
-            <div className="relative mx-auto aspect-square w-full max-w-[260px] overflow-hidden rounded-2xl bg-muted/30">
-              <Image src={product.image} alt={product.name} fill sizes="260px" className="object-cover" />
+          <article className="w-full max-w-xl rounded-[1.75rem] border border-border bg-background p-4 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:p-6">
+            <div className="relative mx-auto aspect-[1/1] w-full max-w-[340px] overflow-hidden rounded-2xl bg-muted/20 shadow-[0_18px_45px_rgba(0,0,0,0.16)]">
+              <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 85vw, 340px" className="object-cover object-center scale-[1.04]" />
             </div>
-            <h3 className="mt-5 font-serif text-2xl font-bold text-foreground sm:text-3xl">{product.name}</h3>
+            <h3 className="mt-4 font-serif text-2xl font-bold text-foreground sm:text-3xl">{product.name}</h3>
             <p className="mt-1 text-sm font-medium text-muted-foreground">{product.subtitle}</p>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
               {product.description}
