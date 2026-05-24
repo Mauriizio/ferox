@@ -176,7 +176,7 @@ export function CommentsSection() {
             <li className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Cargando reseñas...</li>
           ) : comments.length > 0 ? (
             paginatedComments.map((comment) => (
-              <li key={comment.id} className="rounded-2xl border border-border bg-background p-6 sm:p-7 lg:p-8 transition-colors hover:border-foreground">
+              <li key={comment.id} className="rounded-2xl border border-border bg-gradient-to-br from-background to-muted/25 p-6 sm:p-7 lg:p-8 shadow-sm transition-colors hover:border-foreground">
                 <blockquote className="text-base leading-relaxed text-foreground sm:text-lg">
                   &ldquo;{comment.body}&rdquo;
                 </blockquote>
@@ -186,13 +186,13 @@ export function CommentsSection() {
                       <span className="grid h-8 w-8 overflow-hidden rounded-full bg-muted">
                         {comment.author_avatar_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={comment.author_avatar_url} alt={comment.author_name ?? "Usuario FEROX"} className="h-full w-full object-cover" />
+                          <img src={comment.author_avatar_url} alt={comment.author_name ?? "Miembro FEROX"} className="h-full w-full object-cover" />
                         ) : (
                           <span className="grid h-full w-full place-items-center text-muted-foreground"><UserRound className="h-4 w-4" /></span>
                         )}
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-foreground">{comment.author_name ?? "Usuario FEROX"}</p>
+                        <p className="text-sm font-semibold text-foreground">{comment.author_name ?? "Miembro FEROX"}</p>
                         <p className="text-xs text-muted-foreground">{formatCommentDate(comment.created_at)}</p>
                       </div>
                     </div>
