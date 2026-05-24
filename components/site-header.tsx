@@ -212,9 +212,9 @@ export function SiteHeader({ onSessionChange }: Props) {
         </button>
       </div>
       {authOpen && !user ? (
-        <div className="hidden border-t border-border bg-background/95 px-4 py-4 backdrop-blur-md lg:block">
-          <div className="mx-auto w-full max-w-7xl">
-            <div className="w-full max-w-md rounded-2xl border border-border bg-background p-4 shadow-lg">
+        <div className="pointer-events-none absolute inset-x-0 top-full z-50 hidden lg:block">
+          <div className="mx-auto flex w-full max-w-7xl justify-end px-4 sm:px-6 lg:px-8">
+            <div className="pointer-events-auto mt-3 w-full max-w-sm rounded-2xl border border-border bg-background p-4 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
               <div className="mb-3 flex gap-2 text-sm font-semibold">
                 <button type="button" onClick={() => setMode("login")} className={cn("rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
                 <button type="button" onClick={() => setMode("signup")} className={cn("rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
