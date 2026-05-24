@@ -1,217 +1,131 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { ShoppingCart } from "lucide-react"
-import { cn } from "@/lib/utils"
-import Image from "next/image"
-import localFont from "next/font/local"
-
-const feroxSecondary = localFont({
-  src: "../styles/fonts/ferox-font/ferox2.ttf",
-  display: "swap",
-})
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Menu, UserRound, X } from "lucide-react";
+import type { Session } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase/client";
+import { getProfile } from "@/lib/services/auth-service";
+import type { Profile } from "@/lib/supabase/database.types";
+import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "#que-es-barf", label: "¿QUE ES BARF?" },
-  { href: "#beneficios", label: "BENEFICIOS" },
-  { href: "#calculadora", label: "CALCULADORA" },
-  { href: "#tienda", label: "TIENDA" },
-  { href: "#testimonios", label: "TESTIMONIOS" },
-  { href: "#comentarios", label: "COMENTARIOS" },
-  { href: "#cuenta", label: "CUENTA" },
-]
+  { href: "#calculadora", label: "Calculadora" },
+  { href: "#beneficios", label: "Beneficios" },
+  { href: "#comunidad", label: "Comunidad" },
+  { href: "#comentarios", label: "Reseñas" },
+];
 
 export function SiteHeader() {
-  const [open, setOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const onHero = !scrolled
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  const user = session?.user ?? null;
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12)
-    onScroll()
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [])
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadSession() {
+      const { data, error } = await supabase.auth.getSession();
+      if (error || !mounted) return;
+      setSession(data.session);
+      if (data.session?.user) {
+        const userProfile = await getProfile(data.session.user.id);
+        if (mounted) setProfile(userProfile);
+      }
+    }
+
+    loadSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      async (_event, nextSession) => {
+        setSession(nextSession);
+        if (nextSession?.user) {
+          const userProfile = await getProfile(nextSession.user.id);
+          setProfile(userProfile);
+        } else {
+          setProfile(null);
+        }
+      },
+    );
+
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled
-          ? "bg-background/88 backdrop-blur-md border-b border-black/8 shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
-          : "bg-black/22 backdrop-blur-[2px]",
+        "fixed inset-x-0 top-0 z-50 border-b transition-colors",
+        scrolled ? "border-border bg-background/95 backdrop-blur" : "border-transparent bg-background/80",
       )}
     >
-      <div className="relative bg-black text-white/85 border-b border-white/10 overflow-hidden">
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-black to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-black to-transparent" />
-        <div className="ticker-track py-1 text-[9px] sm:text-[10px] font-medium tracking-[0.16em] uppercase">
-          <div className="ticker-group">
-            <span className="ticker-item">FEROX BARF PREMIUM · NUTRICIÓN NATURAL PARA PERROS</span>
-            <span className="ticker-item">CARNE REAL · ÓRGANOS · VEGETALES FRESCOS</span>
-            <span className="ticker-item">SIN QUÍMICOS · SIN RELLENOS · SIN ULTRAPROCESADOS</span>
-            <span className="ticker-item">MÁS ENERGÍA · MEJOR DIGESTIÓN · PELO MÁS BRILLANTE</span>
-            <span className="ticker-item">ALIMENTACIÓN BIOLÓGICAMENTE APROPIADA</span>
-            <span className="ticker-item">FRESCO · NATURAL · FUNCIONAL</span>
-            <span className="ticker-item">NUTRICIÓN QUE SE NOTA EN SU CUERPO</span>
-          </div>
-          <div className="ticker-group" aria-hidden="true">
-            <span className="ticker-item">FEROX BARF PREMIUM · NUTRICIÓN NATURAL PARA PERROS</span>
-            <span className="ticker-item">CARNE REAL · ÓRGANOS · VEGETALES FRESCOS</span>
-            <span className="ticker-item">SIN QUÍMICOS · SIN RELLENOS · SIN ULTRAPROCESADOS</span>
-            <span className="ticker-item">MÁS ENERGÍA · MEJOR DIGESTIÓN · PELO MÁS BRILLANTE</span>
-            <span className="ticker-item">ALIMENTACIÓN BIOLÓGICAMENTE APROPIADA</span>
-            <span className="ticker-item">FRESCO · NATURAL · FUNCIONAL</span>
-            <span className="ticker-item">NUTRICIÓN QUE SE NOTA EN SU CUERPO</span>
-          </div>
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-18 lg:px-8">
+        <Link href="/" className="flex items-center" aria-label="Inicio FEROX">
+          <Image src="/logo.png" alt="FEROX" width={170} height={48} className="h-10 w-auto" priority />
+        </Link>
+
+        <nav className="hidden items-center gap-6 lg:flex" aria-label="Navegación principal">
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="text-sm font-medium text-foreground/80 transition hover:text-foreground">
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="hidden items-center gap-3 lg:flex">
+          {user ? (
+            <>
+              <a href="#cuenta" className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted">
+                Dashboard
+              </a>
+              <a href="#cuenta" className="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-border bg-muted" aria-label="Ir a tu cuenta">
+                {profile?.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  <UserRound className="h-5 w-5 text-muted-foreground" />
+                )}
+              </a>
+            </>
+          ) : (
+            <a href="#cuenta" className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background hover:bg-foreground/90">
+              Iniciar sesión
+            </a>
+          )}
         </div>
+
+        <button type="button" onClick={() => setOpen((v) => !v)} className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border text-foreground lg:hidden" aria-label="Abrir menú">
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex md:hidden w-full items-center justify-between">
-            <button
-              type="button"
-              className={cn(
-                "inline-flex h-10 w-10 items-center justify-center transition-all",
-                onHero
-                  ? "text-white/95 hover:text-white"
-                  : "text-foreground/90 hover:text-foreground",
-              )}
-              onClick={() => setOpen((v) => !v)}
-              aria-label="Abrir menú"
-              aria-expanded={open}
-            >
-              <span className="relative h-[16px] w-[22px]">
-                <span
-                  className={cn(
-                    "absolute left-0 top-0 h-[2.6px] w-[22px] rounded-full bg-current transition-all duration-300 ease-out",
-                    open && "top-[6.8px] rotate-45",
-                  )}
-                />
-                <span
-                  className={cn(
-                    "absolute left-0 top-[6.8px] h-[2.6px] w-[22px] rounded-full bg-current transition-all duration-300 ease-out",
-                    open && "opacity-0",
-                  )}
-                />
-                <span
-                  className={cn(
-                    "absolute left-0 top-[13.6px] h-[2.6px] w-[22px] rounded-full bg-current transition-all duration-300 ease-out",
-                    open && "top-[6.8px] -rotate-45",
-                  )}
-                />
-              </span>
-            </button>
-
-            <Link href="/" className="flex items-center" aria-label="FEROX BARF inicio">
-              <Image
-                src={onHero ? "/logoblanco.png" : "/logo.png"}
-                alt="FEROX Nutrición BARF Premium"
-                width={220}
-                height={64}
-                priority
-                className="h-12 w-auto transition-all"
-              />
-            </Link>
-
-            <Link
-              href="#tienda"
-              aria-label="Ir al carrito de compras"
-              className={cn(
-                "inline-flex h-10 w-10 items-center justify-center rounded-md transition-colors",
-                onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-black/5",
-              )}
-            >
-              <ShoppingCart className="h-5 w-5" />
-            </Link>
-          </div>
-
-          <Link href="/" className="hidden md:flex items-center" aria-label="FEROX BARF inicio">
-            <Image
-              src={onHero ? "/logoblanco.png" : "/logo.png"}
-              alt="FEROX Nutrición BARF Premium"
-              width={300}
-              height={90}
-              priority
-              className="h-12 w-auto lg:h-16 transition-all"
-            />
-          </Link>
-
-          <nav
-            className={cn(
-              "hidden md:flex items-center gap-8",
-              onHero && "rounded-full bg-black/35 border border-white/15 px-5 py-2 backdrop-blur-sm",
-            )}
-            aria-label="Navegación principal"
-          >
+      {open ? (
+        <div className="border-t border-border bg-background lg:hidden">
+          <div className="mx-auto flex w-full max-w-7xl flex-col gap-1 px-4 py-3 sm:px-6">
             {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "text-sm transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:transition-all hover:after:w-full",
-                  onHero
-                    ? "text-white/95 hover:text-white after:bg-white [text-shadow:0_1px_8px_rgba(0,0,0,0.65)]"
-                    : "text-foreground/80 hover:text-foreground after:bg-primary",
-                )}
-              >
+              <Link key={link.href} href={link.href} onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">
                 {link.label}
               </Link>
             ))}
-          </nav>
-
-          <div className="hidden md:block">
-            <Link
-              href="#tienda"
-              className={cn(
-                "inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-medium transition-all",
-                onHero
-                  ? "bg-white text-black hover:bg-white/90 shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
-                  : "bg-primary text-primary-foreground hover:brightness-95 shadow-lg shadow-primary/30",
-              )}
-            >
-              Comprar ahora
-            </Link>
+            <a href="#cuenta" onClick={() => setOpen(false)} className="mt-2 rounded-full bg-foreground px-4 py-2 text-center text-sm font-semibold text-background">
+              {user ? "Ir al dashboard" : "Iniciar sesión"}
+            </a>
           </div>
         </div>
-
-        {open && (
-          <div className="md:hidden relative overflow-hidden border-t border-white/20 py-5">
-            <div className="pointer-events-none absolute inset-0 bg-black/88 backdrop-blur-xl supports-[backdrop-filter]:bg-black/78" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/35" />
-            <nav
-              className="relative mx-auto flex w-full max-w-sm flex-col items-center justify-center gap-2 px-3 text-center"
-              aria-label="Navegación móvil"
-            >
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    feroxSecondary.className,
-                    "inline-flex w-full items-center justify-center rounded-md px-4 py-3 text-[1.15rem] leading-none tracking-[0.02em] text-white/95 transition-colors hover:bg-white/10 hover:text-white",
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <Link
-                href="#tienda"
-                onClick={() => setOpen(false)}
-                className={cn(
-                  feroxSecondary.className,
-                  "mt-3 inline-flex w-full items-center justify-center rounded-full border border-white/35 bg-white/95 px-5 py-3 text-base leading-none tracking-[0.03em] text-black shadow-[0_10px_24px_rgba(0,0,0,0.35)] transition-colors hover:bg-white",
-                )}
-              >
-                Comprar ahora
-              </Link>
-            </nav>
-          </div>
-        )}
-      </div>
+      ) : null}
     </header>
-  )
+  );
 }
