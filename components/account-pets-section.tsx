@@ -15,7 +15,7 @@ import {
   Camera,
   CheckCircle2,
   Dog as DogIcon,
-  History,
+  Pencil,
   LogOut,
   PawPrint,
   Plus,
@@ -37,11 +37,23 @@ import {
   createDog,
   deleteDog,
   getDogsByUser,
+  updateDog,
   type DogFormData,
 } from "@/lib/services/dog-service";
-import { getFoodCalculationsByUser } from "@/lib/services/food-calculation-service";
-import { calcularRacionBarf } from "@/lib/domain/feeding";
-import { uploadImageToMediaBucket } from "@/lib/services/storage-service";
+import { calculateDogFood } from "@/lib/helpers/calculate-dog-food";
+import {
+  deleteMediaFile,
+  getMediaPathFromPublicUrl,
+  uploadImageToMediaBucket,
+} from "@/lib/services/storage-service";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   getSupabaseErrorMessage,
   logSupabaseError,
@@ -49,7 +61,6 @@ import {
 import { supabase } from "@/lib/supabase/client";
 import type {
   Dog,
-  FoodCalculation,
   Profile,
 } from "@/lib/supabase/database.types";
 
@@ -71,7 +82,6 @@ export function AccountPetsSection() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [dogs, setDogs] = useState<Dog[]>([]);
-  const [calculations, setCalculations] = useState<FoodCalculation[]>([]);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -83,6 +93,11 @@ export function AccountPetsSection() {
   const [dogForm, setDogForm] = useState<DogFormData>(emptyDogForm);
   const [dogPhotoFile, setDogPhotoFile] = useState<File | null>(null);
   const [dogPhotoPreview, setDogPhotoPreview] = useState("");
+  const [editingDog, setEditingDog] = useState<Dog | null>(null);
+  const [editDogForm, setEditDogForm] = useState<DogFormData>(emptyDogForm);
+  const [editDogPhotoFile, setEditDogPhotoFile] = useState<File | null>(null);
+  const [editDogPhotoPreview, setEditDogPhotoPreview] = useState("");
+  const [dogToDelete, setDogToDelete] = useState<Dog | null>(null);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -90,10 +105,9 @@ export function AccountPetsSection() {
   const user = session?.user ?? null;
 
   const refreshDashboard = useCallback(async (userId: string) => {
-    const [profileData, userDogs, userCalculations] = await Promise.all([
+    const [profileData, userDogs] = await Promise.all([
       getProfile(userId),
       getDogsByUser(userId),
-      getFoodCalculationsByUser(userId),
     ]);
 
     setProfile(profileData);
@@ -103,7 +117,6 @@ export function AccountPetsSection() {
     setAvatarFile(null);
     setAvatarPreview(profileData?.avatar_url ?? "");
     setDogs(userDogs);
-    setCalculations(userCalculations);
   }, []);
 
   useEffect(() => {
@@ -137,7 +150,6 @@ export function AccountPetsSection() {
       } else {
         setProfile(null);
         setDogs([]);
-        setCalculations([]);
         setAvatarFile(null);
         setAvatarPreview("");
         setDogPhotoFile(null);
@@ -145,30 +157,9 @@ export function AccountPetsSection() {
       }
     });
 
-    const refreshAfterCalculation = async () => {
-      try {
-        const { data: userData } = await supabase.auth.getUser();
-        if (userData.user) {
-          await refreshDashboard(userData.user.id);
-        }
-      } catch (error) {
-        logSupabaseError("Refrescar dashboard después de cálculo", error);
-        setMessage(getSupabaseErrorMessage(error));
-      }
-    };
-
-    window.addEventListener(
-      "ferox:food-calculation-saved",
-      refreshAfterCalculation,
-    );
-
     return () => {
       mounted = false;
       data.subscription.unsubscribe();
-      window.removeEventListener(
-        "ferox:food-calculation-saved",
-        refreshAfterCalculation,
-      );
     };
   }, [refreshDashboard]);
 
@@ -180,20 +171,11 @@ export function AccountPetsSection() {
       if (dogPhotoPreview.startsWith("blob:")) {
         URL.revokeObjectURL(dogPhotoPreview);
       }
+      if (editDogPhotoPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(editDogPhotoPreview);
+      }
     };
-  }, [avatarPreview, dogPhotoPreview]);
-
-  const latestCalculationByDog = useMemo(() => {
-    return calculations.reduce<Record<string, FoodCalculation>>(
-      (acc, calculation) => {
-        if (!acc[calculation.dog_id]) {
-          acc[calculation.dog_id] = calculation;
-        }
-        return acc;
-      },
-      {},
-    );
-  }, [calculations]);
+  }, [avatarPreview, dogPhotoPreview, editDogPhotoPreview]);
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -261,6 +243,49 @@ export function AccountPetsSection() {
         URL.revokeObjectURL(currentPreview);
       }
       return "";
+    });
+  };
+
+  const openEditDogDialog = (dog: Dog) => {
+    setEditingDog(dog);
+    setEditDogForm({
+      nombre: dog.nombre ?? "",
+      peso: dog.peso ?? null,
+      edad: dog.edad ?? null,
+      etapa_vida: dog.etapa_vida ?? "adulto",
+      tamano: dog.tamano ?? "mediano",
+      actividad: dog.actividad ?? "moderada",
+      estado_fisico: dog.estado_fisico ?? "normal",
+      photo_url: dog.photo_url ?? null,
+    });
+    setEditDogPhotoFile(null);
+    setEditDogPhotoPreview(dog.photo_url ?? "");
+  };
+
+  const closeEditDogDialog = () => {
+    setEditingDog(null);
+    setEditDogForm(emptyDogForm);
+    setEditDogPhotoFile(null);
+    setEditDogPhotoPreview("");
+  };
+
+  const handleEditDogPhotoFileChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0] ?? null;
+    setEditDogPhotoFile(file);
+
+    if (!file) {
+      setEditDogPhotoPreview(editDogForm.photo_url ?? "");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setEditDogPhotoPreview((currentPreview) => {
+      if (currentPreview && currentPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(currentPreview);
+      }
+      return previewUrl;
     });
   };
 
@@ -358,15 +383,29 @@ export function AccountPetsSection() {
     }
   };
 
-  const handleDeleteDog = async (dogId: string) => {
+  const handleDeleteDog = async (dog: Dog) => {
     if (!user) return;
 
     setIsSaving(true);
     setMessage("");
 
     try {
-      await deleteDog(user.id, dogId);
-      setDogs((currentDogs) => currentDogs.filter((dog) => dog.id !== dogId));
+      const previousPhotoPath = getMediaPathFromPublicUrl(dog.photo_url);
+      if (previousPhotoPath) {
+        try {
+          await deleteMediaFile(previousPhotoPath);
+        } catch (error) {
+          console.warn(
+            "[FEROX storage] No se pudo eliminar la imagen del perro antes de borrar el registro",
+            { dogId: dog.id, previousPhotoPath, error },
+          );
+        }
+      }
+
+      await deleteDog(user.id, dog.id);
+      setDogs((currentDogs) =>
+        currentDogs.filter((currentDog) => currentDog.id !== dog.id),
+      );
       setMessage("Perro eliminado correctamente.");
     } catch (error) {
       logSupabaseError("Eliminar perro", error);
@@ -374,6 +413,74 @@ export function AccountPetsSection() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleUpdateDog = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!user || !editingDog) return;
+
+    if (!editDogForm.nombre.trim()) {
+      setMessage("El nombre del perro es obligatorio.");
+      return;
+    }
+
+    if (editDogForm.edad === null || !Number.isInteger(editDogForm.edad)) {
+      setMessage("Agrega la edad numérica del perro en años.");
+      return;
+    }
+
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      const nextPhotoUrl = editDogPhotoFile
+        ? await uploadImageToMediaBucket({
+            file: editDogPhotoFile,
+            userId: user.id,
+            folder: "dogs",
+          })
+        : editDogForm.photo_url ?? null;
+
+      const updatedDog = await updateDog(user.id, editingDog.id, {
+        ...editDogForm,
+        photo_url: nextPhotoUrl,
+      });
+
+      const previousPhotoPath = getMediaPathFromPublicUrl(editingDog.photo_url);
+      const nextPhotoPath = getMediaPathFromPublicUrl(updatedDog.photo_url);
+      const shouldDeletePreviousPhoto =
+        Boolean(editDogPhotoFile) &&
+        Boolean(previousPhotoPath) &&
+        previousPhotoPath !== nextPhotoPath;
+
+      if (shouldDeletePreviousPhoto && previousPhotoPath) {
+        try {
+          await deleteMediaFile(previousPhotoPath);
+        } catch (error) {
+          console.warn(
+            "[FEROX storage] No se pudo eliminar la imagen anterior del perro tras editar",
+            { dogId: editingDog.id, previousPhotoPath, error },
+          );
+        }
+      }
+
+      setDogs((currentDogs) =>
+        currentDogs.map((dog) => (dog.id === updatedDog.id ? updatedDog : dog)),
+      );
+      setMessage(`${updatedDog.nombre} actualizado correctamente.`);
+      closeEditDogDialog();
+    } catch (error) {
+      logSupabaseError("Editar perro", error);
+      setMessage(getSupabaseErrorMessage(error));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const confirmDeleteDog = async () => {
+    if (!dogToDelete) return;
+    await handleDeleteDog(dogToDelete);
+    setDogToDelete(null);
   };
 
   const handleSignOut = async () => {
@@ -409,8 +516,7 @@ export function AccountPetsSection() {
               Tu perfil, tus perros y sus porciones en un solo lugar
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Crea una cuenta, registra tus perros y guarda los cálculos de la
-              calculadora BARF sin tocar la experiencia pública de la tienda.
+              Crea una cuenta, registra tus perros y gestiona sus recomendaciones BARF desde tu dashboard privado.
             </p>
           </div>
 
@@ -543,13 +649,12 @@ export function AccountPetsSection() {
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-background/70">
                   La capa privada queda separada de la landing: perfiles,
-                  perros, cálculos guardados y servicios listos para comentarios
-                  y likes con RLS por usuario.
+                  perros y gestión completa con recomendaciones automáticas por perro.
                 </p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   {[
                     "Perros privados",
-                    "Historial BARF",
+                    "Recomendación automática",
                     "Fotos con upload",
                     "Base social",
                   ].map((item) => (
@@ -805,8 +910,7 @@ export function AccountPetsSection() {
                     Mini dashboard
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Datos privados del perro, último cálculo guardado e
-                    historial.
+                    Datos privados del perro con recomendación automática diaria y mensual.
                   </p>
                 </div>
                 <a
@@ -821,26 +925,7 @@ export function AccountPetsSection() {
               {dogs.length > 0 ? (
                 <div className="mt-5 grid gap-4 lg:grid-cols-3">
                   {dogs.map((dog) => {
-                    const latestCalculation = latestCalculationByDog[dog.id];
-                    const previewCalculation = dog.peso
-                      ? calcularRacionBarf({
-                          peso: dog.peso,
-                          edad:
-                            dog.etapa_vida === "cachorro" ||
-                            dog.etapa_vida === "senior"
-                              ? dog.etapa_vida
-                              : "adulto",
-                          actividad:
-                            dog.actividad === "baja" || dog.actividad === "alta"
-                              ? dog.actividad
-                              : "moderada",
-                          estadoFisico:
-                            dog.estado_fisico === "esterilizado" ||
-                            dog.estado_fisico === "sobrepeso"
-                              ? dog.estado_fisico
-                              : "normal",
-                        })
-                      : null;
+                    const recommendation = calculateDogFood(dog);
 
                     return (
                       <article
@@ -872,14 +957,25 @@ export function AccountPetsSection() {
                                 {dog.tamano || "sin talla"}
                               </p>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteDog(dog.id)}
-                              className="grid h-9 w-9 place-items-center rounded-full bg-background text-muted-foreground transition hover:text-foreground"
-                              aria-label={`Eliminar ${dog.nombre}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => openEditDogDialog(dog)}
+                                className="inline-flex h-9 items-center gap-1 rounded-full bg-background px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground"
+                                aria-label={`Editar ${dog.nombre}`}
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                                Editar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDogToDelete(dog)}
+                                className="grid h-9 w-9 place-items-center rounded-full bg-background text-muted-foreground transition hover:text-foreground"
+                                aria-label={`Eliminar ${dog.nombre}`}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
                           </div>
 
                           <div className="mt-4 flex flex-wrap gap-2">
@@ -907,31 +1003,18 @@ export function AccountPetsSection() {
                               Cantidad calculada
                             </p>
                             <p className="mt-1 text-2xl font-bold text-foreground">
-                              {latestCalculation?.gramos_diarios ??
-                                previewCalculation?.gramosDia ??
-                                0}{" "}
+                              {recommendation.gramosDia}{" "}
                               g/día
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {(
-                                (latestCalculation?.gramos_mensuales ??
-                                  previewCalculation?.gramosMes ??
-                                  0) / 1000
-                              ).toLocaleString("es-CL", {
+                              {(recommendation.gramosMes / 1000).toLocaleString(
+                                "es-CL",
+                                {
                                 maximumFractionDigits: 1,
-                              })}{" "}
+                                },
+                              )}{" "}
                               kg/mes
                             </p>
-                          </div>
-
-                          <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                            <History className="h-3.5 w-3.5" />
-                            {
-                              calculations.filter(
-                                (calculation) => calculation.dog_id === dog.id,
-                              ).length
-                            }{" "}
-                            cálculo(s) guardado(s)
                           </div>
                         </div>
                       </article>
@@ -948,6 +1031,63 @@ export function AccountPetsSection() {
           </div>
         )}
       </div>
+      <Dialog open={Boolean(editingDog)} onOpenChange={(open) => !open && closeEditDogDialog()}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Editar perro</DialogTitle>
+            <DialogDescription>
+              Actualiza los datos del perro y su recomendación se recalcula automáticamente.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateDog} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="text-sm font-medium text-foreground">Nombre
+                <input type="text" value={editDogForm.nombre} onChange={(event)=>setEditDogForm((form)=>({...form,nombre:event.target.value}))} className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10" />
+              </label>
+              <label className="text-sm font-medium text-foreground">Peso (kg)
+                <input type="number" inputMode="decimal" min="0" step="0.1" value={editDogForm.peso ?? ""} onChange={(event)=>setEditDogForm((form)=>({...form,peso:event.target.value?Number(event.target.value):null}))} className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10" />
+              </label>
+              <label className="text-sm font-medium text-foreground">Edad (años)
+                <input type="number" inputMode="numeric" min="0" step="1" value={editDogForm.edad ?? ""} onChange={(event)=>setEditDogForm((form)=>({...form,edad:event.target.value?Number.parseInt(event.target.value,10):null}))} className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10" />
+              </label>
+              {([["etapa_vida","Etapa de vida",["cachorro","adulto","senior"]],["tamano","Talla",["pequeño","mediano","grande"]],["actividad","Actividad",["baja","moderada","alta"]],["estado_fisico","Estado físico",["normal","esterilizado","sobrepeso"]]] as [keyof DogFormData, string, string[]][]).map(([field, label, options]) => (
+                <label key={field} className="text-sm font-medium text-foreground">{label}
+                  <select value={String(editDogForm[field] ?? "")} onChange={(event)=>setEditDogForm((form)=>({...form,[field]:event.target.value}))} className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10">
+                    {options.map((option)=><option key={option} value={option}>{option}</option>)}
+                  </select>
+                </label>
+              ))}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-center">
+              <div className="h-32 overflow-hidden rounded-3xl bg-muted">
+                {editDogPhotoPreview ? <img src={editDogPhotoPreview} alt="Vista previa del perro" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>}
+              </div>
+              <label className="text-sm font-medium text-foreground">Foto del perro
+                <input type="file" accept="image/*" onChange={handleEditDogPhotoFileChange} className={imageInputClassName} />
+              </label>
+            </div>
+            <DialogFooter>
+              <button type="button" onClick={closeEditDogDialog} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Cancelar</button>
+              <button type="submit" disabled={isSaving} className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-60">{isSaving ? "Guardando..." : "Guardar cambios"}</button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(dogToDelete)} onOpenChange={(open) => !open && setDogToDelete(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>¿Seguro que deseas eliminar este perro?</DialogTitle>
+            <DialogDescription>
+              {dogToDelete ? `Vas a eliminar a ${dogToDelete.nombre}. Esta acción no se puede deshacer.` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button type="button" onClick={() => setDogToDelete(null)} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Cancelar</button>
+            <button type="button" onClick={confirmDeleteDog} disabled={isSaving} className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-60">Confirmar eliminación</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

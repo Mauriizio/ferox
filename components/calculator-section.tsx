@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -18,21 +18,12 @@ import {
   ShoppingBag,
   Sparkles,
 } from "lucide-react";
-import { getCurrentSession } from "@/lib/services/auth-service";
-import { getDogsByUser } from "@/lib/services/dog-service";
-import { saveFoodCalculation } from "@/lib/services/food-calculation-service";
-import {
-  getSupabaseErrorMessage,
-  logSupabaseError,
-} from "@/lib/services/supabase-error";
 import {
   calcularRacionBarf,
   type Actividad,
   type Edad,
   type EstadoFisico,
 } from "@/lib/domain/feeding";
-import { supabase } from "@/lib/supabase/client";
-import type { Dog } from "@/lib/supabase/database.types";
 
 type Estado = EstadoFisico;
 
@@ -65,11 +56,6 @@ export function CalculatorSection() {
   const [etapaVida, setEtapaVida] = useState<Edad>("adulto");
   const [actividad, setActividad] = useState<Actividad>("moderada");
   const [estado, setEstado] = useState<Estado>("normal");
-  const [userId, setUserId] = useState<string | null>(null);
-  const [dogs, setDogs] = useState<Dog[]>([]);
-  const [selectedDogId, setSelectedDogId] = useState("");
-  const [saveMessage, setSaveMessage] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
 
   const pesoNumber = Number.parseFloat(peso);
 
@@ -82,83 +68,6 @@ export function CalculatorSection() {
     });
   }, [peso, etapaVida, actividad, estado]);
 
-  const selectedDog = dogs.find((dog) => dog.id === selectedDogId) ?? null;
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadUserDogs() {
-      try {
-        const session = await getCurrentSession();
-        if (!mounted) return;
-
-        const nextUserId = session?.user.id ?? null;
-        setUserId(nextUserId);
-
-        if (nextUserId) {
-          const userDogs = await getDogsByUser(nextUserId);
-          if (!mounted) return;
-          setDogs(userDogs);
-        }
-      } catch (error) {
-        logSupabaseError("Cargar perros en calculadora", error);
-        setSaveMessage(getSupabaseErrorMessage(error));
-      }
-    }
-
-    loadUserDogs();
-
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      const nextUserId = session?.user.id ?? null;
-      setUserId(nextUserId);
-      setSelectedDogId("");
-
-      if (!nextUserId) {
-        setDogs([]);
-        return;
-      }
-
-      getDogsByUser(nextUserId)
-        .then(setDogs)
-        .catch((error) => {
-          logSupabaseError("Refrescar perros en calculadora", error);
-          setSaveMessage(getSupabaseErrorMessage(error));
-        });
-    });
-
-    return () => {
-      mounted = false;
-      data.subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!selectedDog) return;
-
-    if (selectedDog.peso) setPeso(String(selectedDog.peso));
-    if (
-      selectedDog.etapa_vida === "cachorro" ||
-      selectedDog.etapa_vida === "adulto" ||
-      selectedDog.etapa_vida === "senior"
-    ) {
-      setEtapaVida(selectedDog.etapa_vida);
-    }
-    if (
-      selectedDog.actividad === "baja" ||
-      selectedDog.actividad === "moderada" ||
-      selectedDog.actividad === "alta"
-    ) {
-      setActividad(selectedDog.actividad);
-    }
-    if (
-      selectedDog.estado_fisico === "normal" ||
-      selectedDog.estado_fisico === "esterilizado" ||
-      selectedDog.estado_fisico === "sobrepeso"
-    ) {
-      setEstado(selectedDog.estado_fisico);
-    }
-  }, [selectedDog]);
-
   const whatsappMessage = encodeURIComponent(
     `Hola FEROX BARF! Quiero pedir info para mi perro:\n• Peso: ${peso} kg\n• Etapa de vida: ${etapaVida}\n• Actividad: ${actividad}\n• Estado: ${estado}\n• Porción diaria: ${gramosDia} g (${(gramosMes / 1000).toFixed(1)} kg al mes)`,
   );
@@ -166,44 +75,6 @@ export function CalculatorSection() {
   const updatePeso = (nextPeso: number) => {
     const boundedPeso = Math.min(100, Math.max(0.5, nextPeso));
     setPeso(Number(boundedPeso.toFixed(1)).toString());
-  };
-
-  const handleSaveCalculation = async () => {
-    if (!userId) {
-      setSaveMessage("Inicia sesión para guardar el cálculo en tu dashboard.");
-      return;
-    }
-
-    if (!selectedDog) {
-      setSaveMessage(
-        "Selecciona un perro registrado para guardar este cálculo.",
-      );
-      return;
-    }
-
-    setIsSaving(true);
-    setSaveMessage("");
-
-    try {
-      await saveFoodCalculation({
-        userId,
-        dogId: selectedDog.id,
-        gramosDiarios: gramosDia,
-        gramosMensuales: gramosMes,
-        peso: pesoNumber || null,
-        edad: selectedDog.edad,
-        etapaVida,
-        actividad,
-        estadoFisico: estado,
-      });
-      window.dispatchEvent(new CustomEvent("ferox:food-calculation-saved"));
-      setSaveMessage(`Cálculo guardado para ${selectedDog.nombre}.`);
-    } catch (error) {
-      logSupabaseError("Guardar cálculo", error);
-      setSaveMessage(getSupabaseErrorMessage(error));
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   const renderResultCard = (className: string) => (
@@ -275,15 +146,6 @@ export function CalculatorSection() {
           </div>
 
           <div className="relative mt-3 grid gap-2">
-            <button
-              type="button"
-              onClick={handleSaveCalculation}
-              disabled={isSaving || gramosDia <= 0}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              {isSaving ? "Guardando..." : "Guardar cálculo"}
-            </button>
             <a
               href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
               target="_blank"
@@ -335,35 +197,7 @@ export function CalculatorSection() {
         <div className="mt-5 grid gap-3 lg:mt-7 lg:grid-cols-5 lg:gap-4">
           <div className="rounded-[1.5rem] border border-white/70 bg-background/85 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.07)] backdrop-blur sm:p-4 lg:col-span-3 lg:p-5">
             <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
-              {userId ? (
-                <label className="block text-sm font-semibold text-foreground">
-                  Usar perro guardado
-                  <select
-                    value={selectedDogId}
-                    onChange={(event) => setSelectedDogId(event.target.value)}
-                    className="mt-2 block w-full rounded-2xl border border-border bg-white/75 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                  >
-                    <option value="">Cálculo manual</option>
-                    {dogs.map((dog) => (
-                      <option key={dog.id} value={dog.id}>
-                        {dog.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : (
-                <div className="rounded-2xl border border-border bg-white/70 p-3 text-sm text-muted-foreground">
-                  Puedes calcular libremente. Inicia sesión en “Cuenta” para
-                  guardar perros y resultados.
-                </div>
-              )}
-
-              {saveMessage ? (
-                <div className="rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
-                  {saveMessage}
-                </div>
-              ) : null}
-
+              
               <div className="rounded-[1.25rem] bg-foreground p-3 text-background shadow-lg">
                 <div className="flex items-center justify-between gap-3">
                   <label

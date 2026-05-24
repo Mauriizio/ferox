@@ -85,3 +85,23 @@ export async function uploadImageToMediaBucket({
   const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path);
   return data.publicUrl;
 }
+
+export function getMediaPathFromPublicUrl(publicUrl: string | null | undefined) {
+  if (!publicUrl) return null;
+
+  try {
+    const url = new URL(publicUrl);
+    const marker = `/storage/v1/object/public/${MEDIA_BUCKET}/`;
+    const markerIndex = url.pathname.indexOf(marker);
+    if (markerIndex === -1) return null;
+
+    return decodeURIComponent(url.pathname.slice(markerIndex + marker.length));
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteMediaFile(path: string) {
+  const { error } = await supabase.storage.from(MEDIA_BUCKET).remove([path]);
+  if (error) throw error;
+}

@@ -82,3 +82,31 @@ export async function deleteDog(userId: string, dogId: string): Promise<void> {
 
   if (error) throw error;
 }
+
+export async function updateDog(
+  userId: string,
+  dogId: string,
+  dog: DogFormData,
+): Promise<Dog> {
+  const payload = {
+    nombre: dog.nombre.trim(),
+    peso: dog.peso,
+    edad: dog.edad,
+    etapa_vida: dog.etapa_vida,
+    tamano: dog.tamano,
+    actividad: dog.actividad,
+    estado_fisico: dog.estado_fisico,
+    photo_url: dog.photo_url?.trim() || null,
+  };
+
+  const { data, error } = await supabase
+    .from("dogs")
+    .update(payload)
+    .eq("id", dogId)
+    .eq("user_id", userId)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return normalizeDog(data as DogRow);
+}
