@@ -49,7 +49,7 @@ export function ShopSection() {
 
   return (
     <section id="tienda" className="border-t border-border bg-background">
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl items-center px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-center px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-block text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Tienda FEROX
@@ -59,7 +59,7 @@ export function ShopSection() {
           </h2>
         </div>
 
-        <div className="mx-auto mt-7 flex max-w-5xl items-center justify-center gap-2 sm:gap-5">
+        <div className="mx-auto mt-7 flex w-full max-w-5xl items-center justify-center gap-2 sm:gap-5">
           <button
             type="button"
             onClick={() => setIndex((current) => (current - 1 + products.length) % products.length)}
@@ -69,14 +69,14 @@ export function ShopSection() {
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <article className="w-full max-w-xl rounded-[1.75rem] border border-border bg-background p-4 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:p-5">
+          <article className="w-full max-w-2xl rounded-[1.75rem] border border-border bg-background p-4 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:p-5">
             <button
               type="button"
               onClick={() => setImageOpen(true)}
-              className="relative mx-auto block aspect-square w-full max-w-[420px] overflow-hidden rounded-2xl bg-muted/20 shadow-[0_20px_50px_rgba(0,0,0,0.18)]"
+              className="relative mx-auto block aspect-square w-full max-w-[520px] overflow-hidden rounded-2xl bg-muted/20 shadow-[0_20px_50px_rgba(0,0,0,0.18)]"
               aria-label={`Ampliar imagen de ${product.name}`}
             >
-              <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 92vw, 420px" className="object-cover object-center scale-[1.08]" />
+              <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 92vw, 520px" className="object-cover object-center scale-[1.08]" />
             </button>
             <h3 className="mt-4 font-serif text-2xl font-bold text-foreground sm:text-3xl">{product.name}</h3>
             <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground line-clamp-2 sm:text-base">
