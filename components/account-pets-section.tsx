@@ -47,6 +47,7 @@ import {
 import {
   DeleteDogDialog,
 } from "@/components/account-pets/delete-dog-dialog";
+import { calculateDogFood } from "@/lib/helpers/calculate-dog-food";
 import {
   Dialog,
   DialogContent,
@@ -101,6 +102,7 @@ export function AccountPetsSection() {
   const [editDogPhotoPreview, setEditDogPhotoPreview] = useState("");
   const [dogToDelete, setDogToDelete] = useState<Dog | null>(null);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [isAddDogDialogOpen, setIsAddDogDialogOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -674,7 +676,7 @@ export function AccountPetsSection() {
           </div>
         ) : (
           <div className="mt-8 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-border bg-background px-4 py-3 shadow-sm">
+            <div className="rounded-3xl border border-border bg-background p-4 shadow-sm sm:p-5">
               <div className="flex items-center gap-3">
                 <div className="h-11 w-11 overflow-hidden rounded-full bg-muted">
                   {avatarPreview || profile?.avatar_url ? (
@@ -685,108 +687,80 @@ export function AccountPetsSection() {
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">{fullName || username || user.email}</p>
-                  <p className="text-xs text-muted-foreground">{dogs.length} perro{dogs.length === 1 ? "" : "s"} registrado{dogs.length === 1 ? "" : "s"}</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Dashboard</p>
+                  <p className="text-lg font-semibold text-foreground">Hola {fullName || username || "FEROX"}</p>
+                  <p className="text-xs text-muted-foreground">Tienes {dogs.length} perro{dogs.length === 1 ? "" : "s"} registrado{dogs.length === 1 ? "" : "s"}.</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button type="button" onClick={() => setIsProfileDialogOpen(true)} className="rounded-full border border-border px-3 py-2 text-xs font-semibold hover:bg-muted">Editar perfil</button>
-                <button type="button" onClick={handleSignOut} className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-accent"><LogOut className="h-3.5 w-3.5" />Salir</button>
+              <div className="mt-4 flex items-center justify-between gap-2">
+                <button type="button" onClick={() => setIsProfileDialogOpen(true)} className="rounded-full border border-border px-3 py-2 text-xs font-semibold hover:bg-muted">Configurar cuenta</button>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-foreground bg-foreground text-background"><Plus className="h-5 w-5" /></button>
+                  <button type="button" onClick={handleSignOut} className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-accent"><LogOut className="h-3.5 w-3.5" />Salir</button>
+                </div>
               </div>
             </div>
-            <article className="rounded-[2rem] border border-border bg-background p-5 shadow-[0_20px_50px_rgba(0,0,0,0.06)] sm:p-6 lg:p-7">
-                <div className="flex items-center justify-between gap-3 text-foreground">
-                  <div className="flex items-center gap-2">
-                    <DogIcon className="h-5 w-5" />
-                    <h3 className="font-semibold">Registro de perros</h3>
-                  </div>
-                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                    {dogs.length} guardado{dogs.length === 1 ? "" : "s"}
-                  </span>
-                </div>
-
-                <form onSubmit={handleDogSubmit} className="mt-5 space-y-4">
-                  <DogFormFields form={dogForm} setForm={setDogForm} />
-                  <div className="grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-center">
-                    <div className="h-32 overflow-hidden rounded-3xl bg-muted">
-                      {dogPhotoPreview ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={dogPhotoPreview}
-                          alt="Vista previa del perro"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-muted-foreground">
-                          <Camera className="h-8 w-8" />
-                        </div>
-                      )}
-                    </div>
-                    <label className="text-sm font-medium text-foreground">
-                      Foto del perro
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleDogPhotoFileChange}
-                        className={imageInputClassName}
-                      />
-                      <span className="mt-2 block text-xs font-normal text-muted-foreground">
-                        Opcional. Puedes registrar el perro sin foto y agregarla
-                        más adelante.
-                      </span>
-                    </label>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60"
-                  >
-                    <Plus className="h-4 w-4" />
-                    {isSaving ? "Guardando..." : "Añadir perro"}
-                  </button>
-                </form>
-              </article>
-
-            <div className="rounded-[2rem] border border-border bg-background p-5 shadow-sm sm:p-6">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h3 className="font-serif text-2xl font-bold">
-                    Mini dashboard
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Datos privados del perro con recomendación automática diaria y mensual.
-                  </p>
-                </div>
-                <a
-                  href="#calculadora"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition hover:bg-foreground/90"
-                >
-                  <Activity className="h-4 w-4" />
-                  Ir a calculadora
-                </a>
+            {dogs.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                {dogs.map((dog) => {
+                  const recommendation = calculateDogFood(dog);
+                  return (
+                    <article key={dog.id} className="rounded-3xl border border-border bg-background p-3 shadow-sm">
+                      <div className="mx-auto h-20 w-20 overflow-hidden rounded-full bg-muted">
+                        {dog.photo_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={dog.photo_url} alt={dog.nombre} className="h-full w-full object-cover" />
+                        ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-6 w-6" /></div>}
+                      </div>
+                      <p className="mt-2 text-center text-lg font-semibold">{dog.nombre}</p>
+                      <div className="mt-1 flex items-center justify-between text-sm text-muted-foreground">
+                        <span>{dog.peso ? `${dog.peso} kg` : "-- kg"}</span>
+                        <span>{dog.edad ? `${dog.edad} años` : "-- años"}</span>
+                      </div>
+                      <p className="mt-2 text-center text-3xl font-bold text-foreground">{recommendation.gramosDia}g</p>
+                      <p className="text-center text-xs text-muted-foreground">por día</p>
+                      <div className="mt-2 flex justify-center gap-2">
+                        <button type="button" onClick={() => openEditDogDialog(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Editar</button>
+                        <button type="button" onClick={() => setDogToDelete(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Borrar</button>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
-
-              {dogs.length > 0 ? (
-                <div className="mt-5 grid gap-4 lg:grid-cols-3">
-                  {dogs.map((dog) => (
-                    <DogCard
-                      key={dog.id}
-                      dog={dog}
-                      onEdit={openEditDogDialog}
-                      onDelete={setDogToDelete}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="mt-5 rounded-3xl border border-dashed border-border bg-muted/25 p-8 text-center text-sm text-muted-foreground">
-                  Aún no tienes perros registrados. Agrega el primero para
-                  activar el dashboard.
-                </div>
-              )}
-            </div>
+            ) : (
+              <div className="rounded-3xl border border-dashed border-border bg-muted/25 p-8 text-center text-sm text-muted-foreground">
+                No tienes perros aún. Toca + para agregar el primero.
+              </div>
+            )}
           </div>
         )}
       </div>
+      <Dialog open={isAddDogDialogOpen} onOpenChange={setIsAddDogDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Agregar nuevo perro</DialogTitle>
+            <DialogDescription>Completa los datos para registrar un perro nuevo.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleDogSubmit} className="space-y-4">
+            <DogFormFields form={dogForm} setForm={setDogForm} />
+            <div className="grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-center">
+              <div className="h-32 overflow-hidden rounded-3xl bg-muted">
+                {dogPhotoPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={dogPhotoPreview} alt="Vista previa del perro" className="h-full w-full object-cover" />
+                ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>}
+              </div>
+              <label className="text-sm font-medium text-foreground">Foto del perro
+                <input type="file" accept="image/*" onChange={handleDogPhotoFileChange} className={imageInputClassName} />
+              </label>
+            </div>
+            <button type="submit" disabled={isSaving} className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60">
+              <Plus className="h-4 w-4" />
+              {isSaving ? "Guardando..." : "Añadir perro"}
+            </button>
+          </form>
+        </DialogContent>
+      </Dialog>
       <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
