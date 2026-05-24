@@ -49,7 +49,7 @@ export function ShopSection() {
 
   return (
     <section id="tienda" className="border-t border-border bg-background">
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-center px-3 py-3 sm:px-6 sm:py-5 lg:px-8 lg:py-5">
+      <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-3 py-3 sm:min-h-[100svh] sm:px-6 sm:py-5 lg:px-8 lg:py-5">
         <div className="mx-auto max-w-3xl text-center sm:text-center">
           <span className="inline-block text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Tienda FEROX
