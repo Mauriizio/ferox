@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { HeroSection } from "@/components/hero-section";
 import { BenefitsSection } from "@/components/benefits-section";
 import { CalculatorSection } from "@/components/calculator-section";
+import { BarfMethodSection } from "@/components/barf-method-section";
 import { ShopSection } from "@/components/shop-section";
 import { SocialProofGallerySection } from "@/components/social-proof-gallery-section";
 import { CommentsSection } from "@/components/comments-section";
@@ -27,6 +28,7 @@ export default function HomePage() {
         <ShopSection />
         <BenefitsSection />
         <CalculatorSection />
+        <BarfMethodSection />
         <SocialProofGallerySection />
         <CommentsSection />
         <CtaSection />

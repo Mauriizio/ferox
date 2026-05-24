@@ -103,8 +103,14 @@ export function SiteHeader({ onSessionChange }: Props) {
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    setOpen(false);
+    try {
+      await signOut();
+      setAuthOpen(false);
+      setOpen(false);
+      setMessage("");
+    } catch {
+      setMessage("No se pudo cerrar sesión. Intenta nuevamente.");
+    }
   };
 
   return (
@@ -169,7 +175,7 @@ export function SiteHeader({ onSessionChange }: Props) {
             <>
               <button
                 type="button"
-                onClick={() => signOut()}
+                onClick={handleSignOut}
                 className={cn(
                   "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
                   onHero ? "border border-white/30 text-white hover:bg-white/10" : "border border-border text-foreground hover:bg-muted",
