@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const PHONE = "56927973379";
 
@@ -35,6 +36,7 @@ const products = [
 
 export function ShopSection() {
   const [index, setIndex] = useState(0);
+  const [imageOpen, setImageOpen] = useState(false);
   const product = products[index];
 
   const whatsappMessage = useMemo(
@@ -47,7 +49,7 @@ export function ShopSection() {
 
   return (
     <section id="tienda" className="border-t border-border bg-background">
-      <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-7xl items-center px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-block text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Tienda FEROX
@@ -57,7 +59,7 @@ export function ShopSection() {
           </h2>
         </div>
 
-        <div className="mx-auto mt-8 flex max-w-4xl items-center justify-center gap-3 sm:gap-6">
+        <div className="mx-auto mt-7 flex max-w-5xl items-center justify-center gap-2 sm:gap-5">
           <button
             type="button"
             onClick={() => setIndex((current) => (current - 1 + products.length) % products.length)}
@@ -67,17 +69,21 @@ export function ShopSection() {
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <article className="w-full max-w-xl rounded-[1.75rem] border border-border bg-background p-4 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:p-6">
-            <div className="relative mx-auto aspect-[1/1] w-full max-w-[340px] overflow-hidden rounded-2xl bg-muted/20 shadow-[0_18px_45px_rgba(0,0,0,0.16)]">
-              <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 85vw, 340px" className="object-cover object-center scale-[1.04]" />
-            </div>
+          <article className="w-full max-w-xl rounded-[1.75rem] border border-border bg-background p-4 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:p-5">
+            <button
+              type="button"
+              onClick={() => setImageOpen(true)}
+              className="relative mx-auto block aspect-square w-full max-w-[420px] overflow-hidden rounded-2xl bg-muted/20 shadow-[0_20px_50px_rgba(0,0,0,0.18)]"
+              aria-label={`Ampliar imagen de ${product.name}`}
+            >
+              <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 92vw, 420px" className="object-cover object-center scale-[1.08]" />
+            </button>
             <h3 className="mt-4 font-serif text-2xl font-bold text-foreground sm:text-3xl">{product.name}</h3>
-            <p className="mt-1 text-sm font-medium text-muted-foreground">{product.subtitle}</p>
-            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground line-clamp-2 sm:text-base">
               {product.description}
             </p>
             <p className="mt-4 font-serif text-3xl font-bold text-foreground sm:text-4xl">{product.price}</p>
-
+ 
             <a
               href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
               target="_blank"
@@ -99,6 +105,20 @@ export function ShopSection() {
           </button>
         </div>
       </div>
+
+      <Dialog open={imageOpen} onOpenChange={setImageOpen}>
+        <DialogContent className="max-w-4xl border-0 bg-black/95 p-2 sm:p-4">
+          <div className="overflow-auto rounded-xl">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={product.image}
+              alt={product.name}
+              className="mx-auto h-auto w-full max-w-4xl object-contain"
+              style={{ touchAction: "pinch-zoom" }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
