@@ -1,13 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import {
-  Heart,
-  MessageSquareHeart,
-  Send,
-  ShieldCheck,
-  UserRound,
-} from "lucide-react";
+import { Heart, Send, UserRound } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import {
@@ -22,15 +16,8 @@ import {
   logSupabaseError,
 } from "@/lib/services/supabase-error";
 
-const backendSteps = [
-  "Usuarios autenticados pueden comentar",
-  "Comentarios guardados en Supabase",
-  "Likes protegidos contra duplicados",
-];
-
 const formatCommentDate = (createdAt: string | null) => {
   if (!createdAt) return "Ahora";
-
   return new Intl.DateTimeFormat("es-CL", {
     day: "2-digit",
     month: "short",
@@ -93,7 +80,7 @@ export function CommentsSection() {
   const handleCommentSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!user) {
-      setMessage("Inicia sesión en Cuenta FEROX para comentar.");
+      setMessage("Inicia sesión para publicar tu reseña.");
       return;
     }
 
@@ -101,8 +88,7 @@ export function CommentsSection() {
     setMessage("");
 
     try {
-      const { data: userData, error: userError } =
-        await supabase.auth.getUser();
+      const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
       if (!userData.user || userData.user.id !== user.id) {
         throw new Error("No hay una sesión autenticada válida para comentar.");
@@ -111,7 +97,7 @@ export function CommentsSection() {
       const newComment = await createComment(userData.user.id, commentBody);
       setComments((currentComments) => [newComment, ...currentComments]);
       setCommentBody("");
-      setMessage("Comentario publicado correctamente.");
+      setMessage("Reseña publicada correctamente.");
     } catch (error) {
       logSupabaseError("Crear comentario", error);
       setMessage(getSupabaseErrorMessage(error));
@@ -125,9 +111,7 @@ export function CommentsSection() {
       setMessage("Inicia sesión para dar like.");
       return;
     }
-
     setMessage("");
-
     try {
       const { liked } = await toggleCommentLike(user.id, commentId);
       setComments((currentComments) =>
@@ -136,10 +120,7 @@ export function CommentsSection() {
             ? {
                 ...comment,
                 liked_by_current_user: liked,
-                likes_count: Math.max(
-                  0,
-                  comment.likes_count + (liked ? 1 : -1),
-                ),
+                likes_count: Math.max(0, comment.likes_count + (liked ? 1 : -1)),
               }
             : comment,
         ),
@@ -157,10 +138,8 @@ export function CommentsSection() {
 
     try {
       await deleteComment(user.id, commentId);
-      setComments((currentComments) =>
-        currentComments.filter((comment) => comment.id !== commentId),
-      );
-      setMessage("Comentario eliminado.");
+      setComments((currentComments) => currentComments.filter((comment) => comment.id !== commentId));
+      setMessage("Reseña eliminada.");
     } catch (error) {
       logSupabaseError("Eliminar comentario", error);
       setMessage(getSupabaseErrorMessage(error));
@@ -171,172 +150,78 @@ export function CommentsSection() {
 
   return (
     <section id="comentarios" className="border-t border-border bg-background">
-      <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-muted/40 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              <MessageSquareHeart
-                className="h-4 w-4 text-foreground"
-                aria-hidden="true"
-              />
-              Reseñas de comunidad
-            </span>
-            <h2 className="mt-3 font-serif text-3xl font-bold leading-tight tracking-tight text-foreground text-balance sm:text-4xl md:text-5xl">
-              Experiencias reales de la comunidad FEROX
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Inicia sesión en Cuenta FEROX, comparte tu experiencia con BARF y
-              apoya otros comentarios con likes únicos por usuario.
-            </p>
-
-            <ul className="mt-6 grid gap-3">
-              {backendSteps.map((step) => (
-                <li
-                  key={step}
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-background p-3 text-sm font-semibold text-foreground shadow-sm"
-                >
-                  <ShieldCheck
-                    className="h-4 w-4 flex-none"
-                    aria-hidden="true"
-                  />
-                  {step}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="rounded-[1.75rem] border border-border bg-background p-4 shadow-[0_18px_50px_rgba(0,0,0,0.07)] sm:p-5 lg:p-6">
-            <div className="flex items-center justify-between gap-3 border-b border-border pb-4">
-              <div>
-                <h3 className="font-serif text-2xl font-bold text-foreground">
-                  Deja tu comentario
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {user
-                    ? `Publicando como ${user.email ?? "usuario autenticado"}.`
-                    : "Inicia sesión en Cuenta FEROX para publicar y dar like."}
-                </p>
-              </div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-foreground px-3 py-1.5 text-xs font-semibold text-background">
-                <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                Activo
-              </span>
-            </div>
-
-            {message ? (
-              <div className="mt-4 rounded-2xl bg-muted px-4 py-3 text-sm font-medium text-foreground">
-                {message}
-              </div>
-            ) : null}
-
-            <form
-              className="mt-5 grid gap-3"
-              aria-label="Formulario de comentarios"
-              onSubmit={handleCommentSubmit}
-            >
-              <label className="grid gap-1.5 text-sm font-semibold text-foreground">
-                Comentario
-                <textarea
-                  disabled={!user || isSaving}
-                  value={commentBody}
-                  onChange={(event) => setCommentBody(event.target.value)}
-                  placeholder={
-                    user
-                      ? "Cuéntanos cómo le fue con FEROX BARF"
-                      : "Inicia sesión para comentar"
-                  }
-                  className="min-h-28 resize-none rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10 disabled:cursor-not-allowed disabled:opacity-70"
-                />
-              </label>
-              <button
-                type="submit"
-                disabled={!user || isSaving}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <Send className="h-4 w-4" aria-hidden="true" />
-                {isSaving ? "Publicando..." : "Publicar comentario"}
-              </button>
-            </form>
-
-            <div className="mt-6 grid gap-3">
-              {isLoading ? (
-                <div className="rounded-2xl border border-border bg-muted/45 p-4 text-sm text-muted-foreground">
-                  Cargando comentarios...
-                </div>
-              ) : comments.length > 0 ? (
-                comments.map((comment) => (
-                  <article
-                    key={comment.id}
-                    className="rounded-2xl border border-border bg-muted/35 p-4 transition hover:border-foreground/30"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <span className="grid h-10 w-10 overflow-hidden rounded-full bg-foreground text-background">
-                          {comment.author_avatar_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={comment.author_avatar_url}
-                              alt={comment.author_name ?? "Usuario FEROX"}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <span className="grid h-full w-full place-items-center">
-                              <UserRound
-                                className="h-5 w-5"
-                                aria-hidden="true"
-                              />
-                            </span>
-                          )}
-                        </span>
-                        <div>
-                          <h4 className="font-semibold text-foreground">
-                            {comment.author_name ?? "Usuario FEROX"}
-                          </h4>
-                          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                            {formatCommentDate(comment.created_at)}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleToggleLike(comment.id)}
-                        disabled={!user}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-background px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
-                        aria-label="Dar like al comentario"
-                      >
-                        <Heart
-                          className={`h-4 w-4 ${comment.liked_by_current_user ? "fill-current text-red-500" : ""}`}
-                          aria-hidden="true"
-                        />
-                        {comment.likes_count}
-                      </button>
-                    </div>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                      {comment.body}
-                    </p>
-                    {user?.id === comment.user_id ? (
-                      <div className="mt-3">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteComment(comment.id)}
-                          disabled={isSaving}
-                          className="text-xs font-semibold text-muted-foreground underline-offset-2 transition hover:text-foreground hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          Eliminar comentario
-                        </button>
-                      </div>
-                    ) : null}
-                  </article>
-                ))
-              ) : (
-                <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-                  Aún no hay comentarios. Sé la primera persona en compartir tu
-                  experiencia.
-                </div>
-              )}
-            </div>
-          </div>
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+        <div className="max-w-3xl">
+          <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">Reseñas reales</span>
+          <h2 className="mt-2 font-serif text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">Lo que dice la comunidad FEROX</h2>
         </div>
+
+        <form className="mt-8 rounded-2xl border border-border bg-background p-4 sm:p-6" onSubmit={handleCommentSubmit}>
+          <label className="grid gap-2 text-sm font-semibold text-foreground">
+            Comparte tu experiencia
+            <textarea
+              disabled={!user || isSaving}
+              value={commentBody}
+              onChange={(event) => setCommentBody(event.target.value)}
+              placeholder={user ? "¿Cómo le fue a tu perro con FEROX BARF?" : "Inicia sesión para publicar"}
+              className="min-h-28 resize-none rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background"
+            />
+          </label>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="submit"
+              disabled={!user || isSaving}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition hover:bg-foreground/90 disabled:opacity-60"
+            >
+              <Send className="h-4 w-4" />
+              {isSaving ? "Publicando..." : "Publicar reseña"}
+            </button>
+            {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+          </div>
+        </form>
+
+        <ul className="mt-10 grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {isLoading ? (
+            <li className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Cargando reseñas...</li>
+          ) : comments.length > 0 ? (
+            comments.map((comment) => (
+              <li key={comment.id} className="rounded-2xl border border-border bg-background p-5 sm:p-6 lg:p-8 transition-colors hover:border-foreground">
+                <blockquote className="text-base leading-relaxed text-foreground sm:text-lg">
+                  &ldquo;{comment.body}&rdquo;
+                </blockquote>
+                <div className="mt-6 border-t border-border pt-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="grid h-8 w-8 overflow-hidden rounded-full bg-muted">
+                        {comment.author_avatar_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={comment.author_avatar_url} alt={comment.author_name ?? "Usuario FEROX"} className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="grid h-full w-full place-items-center text-muted-foreground"><UserRound className="h-4 w-4" /></span>
+                        )}
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{comment.author_name ?? "Usuario FEROX"}</p>
+                        <p className="text-xs text-muted-foreground">{formatCommentDate(comment.created_at)}</p>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => handleToggleLike(comment.id)} disabled={!user} className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground disabled:opacity-60">
+                      <Heart className={`h-3.5 w-3.5 ${comment.liked_by_current_user ? "fill-current text-red-500" : ""}`} />
+                      {comment.likes_count}
+                    </button>
+                  </div>
+                  {user?.id === comment.user_id ? (
+                    <button type="button" onClick={() => handleDeleteComment(comment.id)} disabled={isSaving} className="mt-3 text-xs font-semibold text-muted-foreground hover:text-foreground">
+                      Eliminar reseña
+                    </button>
+                  ) : null}
+                </div>
+              </li>
+            ))
+          ) : (
+            <li className="rounded-2xl border border-dashed border-border bg-background p-6 text-sm text-muted-foreground">Aún no hay reseñas. Sé la primera persona en compartir su experiencia.</li>
+          )}
+        </ul>
       </div>
     </section>
   );

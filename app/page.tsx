@@ -7,7 +7,6 @@ import { HeroSection } from "@/components/hero-section";
 import { BenefitsSection } from "@/components/benefits-section";
 import { CalculatorSection } from "@/components/calculator-section";
 import { SocialProofGallerySection } from "@/components/social-proof-gallery-section";
-import { TestimonialsSection } from "@/components/testimonials-section";
 import { CommentsSection } from "@/components/comments-section";
 import { AccountPetsSection } from "@/components/account-pets-section";
 import { CtaSection } from "@/components/cta-section";
@@ -22,22 +21,13 @@ export default function HomePage() {
     <>
       <SiteHeader onSessionChange={setSession} />
       <main>
-        {isAuthenticated ? (
-          <>
-            <AccountPetsSection />
-            <CommentsSection />
-          </>
-        ) : (
-          <>
-            <HeroSection />
-            <CalculatorSection />
-            <BenefitsSection />
-            <SocialProofGallerySection />
-            <TestimonialsSection />
-            <CommentsSection />
-            <CtaSection />
-          </>
-        )}
+        <HeroSection />
+        {isAuthenticated ? <AccountPetsSection /> : null}
+        <CalculatorSection />
+        <BenefitsSection />
+        <SocialProofGallerySection />
+        <CommentsSection />
+        <CtaSection />
       </main>
       <SiteFooter />
       <WhatsappFloat />

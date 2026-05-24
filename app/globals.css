@@ -216,7 +216,7 @@
     display: flex;
     width: max-content;
     white-space: nowrap;
-    animation: ferox-ticker 50s linear infinite;
+    animation: ferox-ticker 28s linear infinite;
     will-change: transform;
   }
 

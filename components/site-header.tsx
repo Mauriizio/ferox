@@ -102,6 +102,11 @@ export function SiteHeader({ onSessionChange }: Props) {
     }
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    setOpen(false);
+  };
+
   return (
     <header
       className={cn(
@@ -195,7 +200,7 @@ export function SiteHeader({ onSessionChange }: Props) {
       {authOpen && !user ? (
         <div className="border-t border-border bg-background/95 px-4 py-4 backdrop-blur-md">
           <div className="mx-auto w-full max-w-7xl">
-            <div className="max-w-md rounded-2xl border border-border bg-background p-4 shadow-lg">
+            <div className="w-full max-w-md rounded-2xl border border-border bg-background p-4 shadow-lg">
               <div className="mb-3 flex gap-2 text-sm font-semibold">
                 <button type="button" onClick={() => setMode("login")} className={cn("rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
                 <button type="button" onClick={() => setMode("signup")} className={cn("rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
@@ -214,16 +219,38 @@ export function SiteHeader({ onSessionChange }: Props) {
       ) : null}
 
       {open ? (
-        <div className="border-t border-border bg-background lg:hidden">
+        <div className={cn("border-t lg:hidden", onHero ? "border-white/15 bg-black/85 text-white backdrop-blur-xl" : "border-border bg-background")}>
           <div className="mx-auto flex w-full max-w-7xl flex-col gap-1 px-4 py-3 sm:px-6">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">
+              <Link key={link.href} href={link.href} onClick={() => setOpen(false)} className={cn("rounded-lg px-3 py-2 text-sm font-medium", onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted")}>
                 {link.label}
               </Link>
             ))}
-            <a href="#cuenta" onClick={() => setOpen(false)} className="mt-2 rounded-full bg-foreground px-4 py-2 text-center text-sm font-semibold text-background">
-              {user ? "Ir al dashboard" : "Iniciar sesión"}
-            </a>
+            {user ? (
+              <>
+                <a href="#cuenta" onClick={() => setOpen(false)} className={cn("mt-2 rounded-full px-4 py-2 text-center text-sm font-semibold", onHero ? "bg-white text-black" : "bg-foreground text-background")}>
+                  Dashboard
+                </a>
+                <button type="button" onClick={handleSignOut} className={cn("rounded-full px-4 py-2 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <div className="mt-2 grid gap-2 rounded-2xl border border-border/60 bg-background/95 p-3 text-foreground">
+                <div className="flex gap-2 text-xs font-semibold">
+                  <button type="button" onClick={() => setMode("login")} className={cn("rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Iniciar sesión</button>
+                  <button type="button" onClick={() => setMode("signup")} className={cn("rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Registrarse</button>
+                </div>
+                <form onSubmit={handleAuthSubmit} className="grid gap-2">
+                  {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
+                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+                  <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+                  <button type="submit" disabled={isSaving} className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
+                </form>
+                <button type="button" onClick={() => signInWithGoogle()} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
+                {message ? <p className="text-xs text-muted-foreground">{message}</p> : null}
+              </div>
+            )}
           </div>
         </div>
       ) : null}
