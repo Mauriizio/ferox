@@ -77,9 +77,8 @@ export function CalculatorSection() {
     setPeso(Number(boundedPeso.toFixed(1)).toString());
   };
 
-  const renderResultCard = (className: string) => (
-    <div className={className}>
-      <div className="sticky top-6 overflow-hidden rounded-[1.5rem] bg-foreground text-background shadow-[0_20px_55px_rgba(0,0,0,0.18)]">
+  const renderResultCard = () => (
+      <div className="overflow-hidden rounded-[1.5rem] bg-foreground text-background shadow-[0_20px_55px_rgba(0,0,0,0.18)]">
         <div className="relative p-4 sm:p-5">
           <Image
             src="/icon.svg"
@@ -169,7 +168,6 @@ export function CalculatorSection() {
           </div>
         </div>
       </div>
-    </div>
   );
 
   return (
@@ -189,13 +187,12 @@ export function CalculatorSection() {
             Descubre cuánta comida necesita tu perro
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Selecciona el peso arriba y revisa el resultado justo debajo. Luego
-            afina edad, actividad y condición.
+            Primero completa los datos de tu perro. Al final verás la porción
+            diaria y mensual recomendada.
           </p>
         </div>
 
-        <div className="mt-5 grid gap-3 lg:mt-7 lg:grid-cols-5 lg:gap-4">
-          <div className="rounded-[1.5rem] border border-white/70 bg-background/85 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.07)] backdrop-blur sm:p-4 lg:col-span-3 lg:p-5">
+        <div className="mx-auto mt-5 w-full max-w-4xl rounded-[1.5rem] border border-white/70 bg-background/85 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.07)] backdrop-blur sm:p-4 lg:mt-7 lg:p-5">
             <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
               
               <div className="rounded-[1.25rem] bg-foreground p-3 text-background shadow-lg">
@@ -245,8 +242,6 @@ export function CalculatorSection() {
                   </button>
                 </div>
               </div>
-
-              {renderResultCard("lg:hidden")}
 
               <div>
                 <span className="block text-sm font-semibold text-foreground">
@@ -336,10 +331,14 @@ export function CalculatorSection() {
                   </div>
                 </div>
               </div>
-            </form>
-          </div>
 
-          {renderResultCard("hidden lg:block lg:col-span-2")}
+              <div className="pt-2">
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  Resultado final
+                </div>
+                {renderResultCard()}
+              </div>
+            </form>
         </div>
       </div>
     </section>
