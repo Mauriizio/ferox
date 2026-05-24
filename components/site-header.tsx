@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, UserRound, X } from "lucide-react";
+import { Menu, ShoppingCart, UserRound, X } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import { getProfile } from "@/lib/services/auth-service";
@@ -72,9 +72,23 @@ export function SiteHeader() {
         scrolled ? "border-border bg-background/95 backdrop-blur" : "border-transparent bg-background/80",
       )}
     >
+      <div className="relative hidden overflow-hidden border-b border-white/10 bg-black text-white/85 md:block">
+        <div className="ticker-track py-1 text-[10px] font-medium uppercase tracking-[0.16em]">
+          <div className="ticker-group">
+            <span className="ticker-item">FEROX BARF · nutrición real para perros</span>
+            <span className="ticker-item">carne real · órganos · vegetales frescos</span>
+            <span className="ticker-item">más energía · mejor digestión · pelaje brillante</span>
+          </div>
+          <div className="ticker-group" aria-hidden="true">
+            <span className="ticker-item">FEROX BARF · nutrición real para perros</span>
+            <span className="ticker-item">carne real · órganos · vegetales frescos</span>
+            <span className="ticker-item">más energía · mejor digestión · pelaje brillante</span>
+          </div>
+        </div>
+      </div>
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-18 lg:px-8">
         <Link href="/" className="flex items-center" aria-label="Inicio FEROX">
-          <Image src="/logo.png" alt="FEROX" width={170} height={48} className="h-10 w-auto" priority />
+          <Image src={scrolled ? "/logo.png" : "/logoblanco.png"} alt="FEROX" width={170} height={48} className="h-10 w-auto transition-all" priority />
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Navegación principal">
@@ -105,6 +119,9 @@ export function SiteHeader() {
               Iniciar sesión
             </a>
           )}
+          <a href="#tienda" className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-muted" aria-label="Ir a tienda">
+            <ShoppingCart className="h-4 w-4" />
+          </a>
         </div>
 
         <button type="button" onClick={() => setOpen((v) => !v)} className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border text-foreground lg:hidden" aria-label="Abrir menú">

@@ -170,19 +170,19 @@ export function CommentsSection() {
   };
 
   return (
-    <section id="comentarios" className="border-t border-border bg-muted/30">
+    <section id="comentarios" className="border-t border-border bg-background">
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-muted/40 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               <MessageSquareHeart
                 className="h-4 w-4 text-foreground"
                 aria-hidden="true"
               />
-              Comentarios
+              Reseñas de comunidad
             </span>
             <h2 className="mt-3 font-serif text-3xl font-bold leading-tight tracking-tight text-foreground text-balance sm:text-4xl md:text-5xl">
-              La comunidad FEROX ya puede contar su experiencia.
+              Experiencias reales de la comunidad FEROX
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
               Inicia sesión en Cuenta FEROX, comparte tu experiencia con BARF y
@@ -267,7 +267,7 @@ export function CommentsSection() {
                 comments.map((comment) => (
                   <article
                     key={comment.id}
-                    className="rounded-2xl border border-border bg-muted/45 p-4"
+                    className="rounded-2xl border border-border bg-muted/35 p-4 transition hover:border-foreground/30"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
