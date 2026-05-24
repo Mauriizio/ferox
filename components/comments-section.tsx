@@ -12,6 +12,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import {
   createComment,
+  deleteComment,
   listRecentComments,
   toggleCommentLike,
   type CommentWithMeta,
@@ -48,11 +49,6 @@ export function CommentsSection() {
   const user = session?.user ?? null;
 
   const refreshComments = useCallback(async (currentUserId?: string) => {
-    if (!currentUserId) {
-      setComments([]);
-      return;
-    }
-
     const nextComments = await listRecentComments(12, currentUserId);
     setComments(nextComments);
   }, []);
@@ -151,6 +147,25 @@ export function CommentsSection() {
     } catch (error) {
       logSupabaseError("Cambiar like de comentario", error);
       setMessage(getSupabaseErrorMessage(error));
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!user) return;
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      await deleteComment(user.id, commentId);
+      setComments((currentComments) =>
+        currentComments.filter((comment) => comment.id !== commentId),
+      );
+      setMessage("Comentario eliminado.");
+    } catch (error) {
+      logSupabaseError("Eliminar comentario", error);
+      setMessage(getSupabaseErrorMessage(error));
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -299,6 +314,18 @@ export function CommentsSection() {
                     <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                       {comment.body}
                     </p>
+                    {user?.id === comment.user_id ? (
+                      <div className="mt-3">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteComment(comment.id)}
+                          disabled={isSaving}
+                          className="text-xs font-semibold text-muted-foreground underline-offset-2 transition hover:text-foreground hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Eliminar comentario
+                        </button>
+                      </div>
+                    ) : null}
                   </article>
                 ))
               ) : (

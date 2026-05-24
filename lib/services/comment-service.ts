@@ -15,6 +15,7 @@ type CommentRow = {
   id: string;
   created_at?: string | null;
   user_id: string;
+  content?: string | null;
   body?: string | null;
   comment?: string | null;
 };
@@ -36,7 +37,7 @@ function normalizeComment(
     id: row.id,
     created_at: row.created_at ?? null,
     user_id: row.user_id,
-    body: row.body ?? row.comment ?? "",
+    body: row.content ?? row.body ?? row.comment ?? "",
   };
 }
 
@@ -131,19 +132,40 @@ export async function createComment(
     throw new Error("Escribe un comentario antes de publicarlo.");
   }
 
-  const payload = { user_id: userId, body: cleanBody };
-  console.info("[FEROX comments] create payload", payload);
+  const contentPayload = { user_id: userId, content: cleanBody };
+  const bodyPayload = { user_id: userId, body: cleanBody };
+  let data: unknown;
 
-  const { data, error } = await supabase
+  const contentInsert = await supabase
     .from("comments")
-    .insert(payload)
+    .insert(contentPayload as never)
     .select("*")
     .single();
 
-  if (error) throw error;
+  if (contentInsert.error) {
+    const bodyInsert = await supabase
+      .from("comments")
+      .insert(bodyPayload)
+      .select("*")
+      .single();
+    if (bodyInsert.error) throw bodyInsert.error;
+    data = bodyInsert.data;
+  } else {
+    data = contentInsert.data;
+  }
 
   const [comment] = await getCommentMetadata([data as CommentRow], userId);
   return comment;
+}
+
+export async function deleteComment(userId: string, commentId: string) {
+  const { error } = await supabase
+    .from("comments")
+    .delete()
+    .eq("id", commentId)
+    .eq("user_id", userId);
+
+  if (error) throw error;
 }
 
 export async function toggleCommentLike(userId: string, commentId: string) {
