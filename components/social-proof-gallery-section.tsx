@@ -6,7 +6,7 @@ const timelineItems = [
     step: 1,
     title: "Cachorro",
     description: "Así comenzó todo: pequeño, curioso y con ganas de descubrir el mundo.",
-    src: "/napo/1.jpg",
+    src: "/napo/1.jpeg",
     alt: "Napoleón en etapa cachorro",
   },
   {
