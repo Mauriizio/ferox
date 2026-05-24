@@ -678,19 +678,20 @@ export function AccountPetsSection() {
             </article>
           </div>
         ) : (
-          <div className="mt-8 space-y-4">
-            <div className="flex items-center justify-end">
-              <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-3 py-2 text-xs font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
+          <div className="mt-8 space-y-5">
+            <div className="flex flex-col items-center justify-center gap-3 text-center">
+              <h2 className="font-serif text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Mis perros</h2>
+              <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-4 py-2 text-sm font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
             </div>
             {dogs.length > 0 ? (
-              <div className="grid grid-cols-1 gap-3">
+              <div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {dogs.map((dog) => {
                   const recommendation = calculateDogFood(dog);
                   const dogOrderMessage = encodeURIComponent(
                     `Hola FEROX BARF, quiero pedir comida para ${dog.nombre}. Recomendación diaria: ${recommendation.gramosDia}g.`,
                   );
                   return (
-                    <article key={dog.id} className="rounded-3xl border border-border bg-background p-3 shadow-sm">
+                    <article key={dog.id} className="rounded-3xl border border-border bg-background p-4 shadow-sm">
                       <div className="mx-auto h-20 w-20 overflow-hidden rounded-full bg-muted">
                         {dog.photo_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -722,7 +723,7 @@ export function AccountPetsSection() {
                 })}
               </div>
             ) : (
-              <div className="rounded-3xl border border-dashed border-border bg-muted/25 p-8 text-center text-sm text-muted-foreground">
+              <div className="mx-auto max-w-3xl rounded-3xl border border-dashed border-border bg-muted/25 p-8 text-center text-sm text-muted-foreground">
                 No tienes perros aún. Toca + para agregar el primero.
               </div>
             )}

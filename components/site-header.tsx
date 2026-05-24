@@ -1,9 +1,9 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { LogOut, Menu, ShoppingCart, UserRound, X } from "lucide-react";
+import { Camera, LogOut, Menu, Settings, ShoppingCart, UserRound, X } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import {
@@ -12,8 +12,11 @@ import {
   signInWithPassword,
   signOut,
   signUpWithPassword,
+  upsertProfile,
 } from "@/lib/services/auth-service";
 import type { Profile } from "@/lib/supabase/database.types";
+import { deleteMediaFile, getMediaPathFromPublicUrl, uploadImageToMediaBucket } from "@/lib/services/storage-service";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -37,9 +40,23 @@ export function SiteHeader({ onSessionChange }: Props) {
   const [fullName, setFullName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsName, setSettingsName] = useState("");
+  const [settingsUsername, setSettingsUsername] = useState("");
+  const [settingsAvatarUrl, setSettingsAvatarUrl] = useState("");
+  const [settingsAvatarFile, setSettingsAvatarFile] = useState<File | null>(null);
+  const [settingsAvatarPreview, setSettingsAvatarPreview] = useState("");
 
   const user = session?.user ?? null;
   const onHero = !scrolled;
+
+  useEffect(() => {
+    setSettingsName(profile?.full_name ?? "");
+    setSettingsUsername(profile?.username ?? "");
+    setSettingsAvatarUrl(profile?.avatar_url ?? "");
+    setSettingsAvatarPreview(profile?.avatar_url ?? "");
+    setSettingsAvatarFile(null);
+  }, [profile]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -110,6 +127,49 @@ export function SiteHeader({ onSessionChange }: Props) {
       setMessage("");
     } catch {
       setMessage("No se pudo cerrar sesión. Intenta nuevamente.");
+    }
+  };
+
+  const handleSettingsAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    setSettingsAvatarFile(file);
+    if (!file) {
+      setSettingsAvatarPreview(settingsAvatarUrl);
+      return;
+    }
+    const previewUrl = URL.createObjectURL(file);
+    setSettingsAvatarPreview((current) => {
+      if (current.startsWith("blob:")) URL.revokeObjectURL(current);
+      return previewUrl;
+    });
+  };
+
+  const handleProfileUpdate = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!user) return;
+    setIsSaving(true);
+    setMessage("");
+    try {
+      const nextAvatarUrl = settingsAvatarFile
+        ? await uploadImageToMediaBucket({ file: settingsAvatarFile, userId: user.id, folder: "avatars" })
+        : settingsAvatarUrl;
+      const nextProfile = await upsertProfile(user, {
+        fullName: settingsName,
+        username: settingsUsername,
+        avatarUrl: nextAvatarUrl,
+      });
+      const prevPath = getMediaPathFromPublicUrl(settingsAvatarUrl);
+      const nextPath = getMediaPathFromPublicUrl(nextProfile.avatar_url);
+      if (settingsAvatarFile && prevPath && prevPath !== nextPath) {
+        await deleteMediaFile(prevPath).catch(() => undefined);
+      }
+      setProfile(nextProfile);
+      setMessage("Perfil actualizado correctamente.");
+      setSettingsOpen(false);
+    } catch {
+      setMessage("No se pudo actualizar el perfil. Intenta nuevamente.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -184,9 +244,13 @@ export function SiteHeader({ onSessionChange }: Props) {
                 <LogOut className="h-4 w-4" />
                 Salir
               </button>
-              <a href="/" className={cn("rounded-full px-4 py-2 text-sm font-semibold", onHero ? "text-white" : "text-foreground")}>
+              <a href="#cuenta" className={cn("rounded-full px-4 py-2 text-sm font-semibold", onHero ? "text-white" : "text-foreground")}>
                 Mi cuenta
               </a>
+              <button type="button" onClick={() => setSettingsOpen(true)} className={cn("inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition", onHero ? "border border-white/30 text-white hover:bg-white/10" : "border border-border text-foreground hover:bg-muted")}>
+                <Settings className="h-4 w-4" />
+                Configuración
+              </button>
               <span className={cn("grid h-10 w-10 place-items-center overflow-hidden rounded-full", onHero ? "border border-white/30 bg-white/10" : "border border-border bg-muted")} aria-label="Tu avatar">
                 {profile?.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -260,6 +324,9 @@ export function SiteHeader({ onSessionChange }: Props) {
                 <a href="#cuenta" onClick={() => setOpen(false)} className={cn("mt-2 w-full max-w-sm rounded-full px-4 py-2 text-center text-sm font-semibold", onHero ? "bg-white text-black" : "bg-foreground text-background")}>
                   Dashboard
                 </a>
+                <button type="button" onClick={() => { setSettingsOpen(true); setOpen(false); }} className={cn("w-full max-w-sm rounded-full px-4 py-2 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
+                  Configuración
+                </button>
                 <button type="button" onClick={handleSignOut} className={cn("w-full max-w-sm rounded-full px-4 py-2 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
                   Cerrar sesión
                 </button>
@@ -297,6 +364,34 @@ export function SiteHeader({ onSessionChange }: Props) {
           </div>
         </div>
       ) : null}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Configuración de perfil</DialogTitle>
+            <DialogDescription>Actualiza tu nombre, usuario y foto de perfil.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleProfileUpdate} className="space-y-4">
+            <div className="mx-auto h-24 w-24 overflow-hidden rounded-full border border-border bg-muted">
+              {settingsAvatarPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={settingsAvatarPreview} alt="Vista previa avatar" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-6 w-6" /></div>
+              )}
+            </div>
+            <label className="block text-sm font-medium">Foto de perfil
+              <input type="file" accept="image/*" onChange={handleSettingsAvatarChange} className="mt-2 block w-full text-sm" />
+            </label>
+            <label className="block text-sm font-medium">Nombre
+              <input value={settingsName} onChange={(e)=>setSettingsName(e.target.value)} className="mt-2 w-full rounded-xl border border-border px-3 py-2 text-sm" />
+            </label>
+            <label className="block text-sm font-medium">Usuario
+              <input value={settingsUsername} onChange={(e)=>setSettingsUsername(e.target.value)} className="mt-2 w-full rounded-xl border border-border px-3 py-2 text-sm" />
+            </label>
+            <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Guardando..." : "Guardar cambios"}</button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }
