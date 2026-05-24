@@ -6,21 +6,21 @@ const timelineItems = [
     step: 1,
     title: "Cachorro",
     description: "Así comenzó todo: pequeño, curioso y con ganas de descubrir el mundo.",
-    src: "/perros/napoleon.png",
+    src: "/napo/1.jpg",
     alt: "Napoleón en etapa cachorro",
   },
   {
     step: 2,
     title: "Transición con BARF",
     description: "Alimentación natural que nutre, fortalece y mejora su bienestar día a día.",
-    src: "/perros/napo.jpeg",
+    src: "/napo/2.png",
     alt: "Napoleón durante transición BARF",
   },
   {
     step: 3,
     title: "Hoy",
     description: "Un perro fuerte, feliz y lleno de energía. Así es Napoleón hoy.",
-    src: "/perros/2.jpeg",
+    src: "/napo/3.png",
     alt: "Napoleón adulto y saludable",
   },
 ];
@@ -92,7 +92,7 @@ export function SocialProofGallerySection() {
                 Desde que empezó con BARF, Napoleón se ve más activo, feliz y con un pelaje hermoso.
               </p>
               <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-white shadow">
-                <Image src="/perros/2.jpeg" alt="Napoleón actual" fill sizes="56px" className="object-cover" />
+                <Image src="/napo/3.png" alt="Napoleón actual" fill sizes="56px" className="object-cover" />
               </div>
             </div>
             <p className="mt-1 text-right text-sm font-semibold text-amber-900">— Su familia</p>
