@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase/client";
 import {
   getProfile,
   signInWithGoogle,
+  sendPasswordRecoveryEmail,
   signInWithPassword,
   signOut,
   signUpWithPassword,
@@ -40,6 +41,10 @@ export function SiteHeader({ onSessionChange }: Props) {
   const [fullName, setFullName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [isSendingRecovery, setIsSendingRecovery] = useState(false);
+  const [recoveryMessage, setRecoveryMessage] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsName, setSettingsName] = useState("");
   const [settingsUsername, setSettingsUsername] = useState("");
@@ -116,6 +121,21 @@ export function SiteHeader({ onSessionChange }: Props) {
       setMessage("No se pudo iniciar sesión. Verifica tus datos.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSendRecovery = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSendingRecovery(true);
+    setRecoveryMessage("Enviando enlace...");
+
+    try {
+      await sendPasswordRecoveryEmail(recoveryEmail);
+      setRecoveryMessage("Revisa tu correo para continuar con la recuperación.");
+    } catch {
+      setRecoveryMessage("No se pudo enviar el enlace. Verifica el correo e intenta nuevamente.");
+    } finally {
+      setIsSendingRecovery(false);
     }
   };
 
@@ -295,8 +315,24 @@ export function SiteHeader({ onSessionChange }: Props) {
                 <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
                 <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
               </form>
+              {mode === "login" ? (
+                <>
+                  <button type="button" onClick={() => setRecoveryOpen((value) => !value)} className="text-xs font-medium text-muted-foreground underline underline-offset-4">
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                  {recoveryOpen ? (
+                    <form onSubmit={handleSendRecovery} className="mt-2 space-y-2 rounded-xl border border-border p-3">
+                      <input type="email" required value={recoveryEmail} onChange={(e) => setRecoveryEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+                      <button type="submit" disabled={isSendingRecovery} className="w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">
+                        {isSendingRecovery ? "Enviando..." : "Enviar enlace"}
+                      </button>
+                    </form>
+                  ) : null}
+                </>
+              ) : null}
               <button type="button" onClick={() => signInWithGoogle()} className="mt-2 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
               {message ? <p className="mt-2 text-xs text-muted-foreground">{message}</p> : null}
+              {recoveryMessage ? <p className="mt-2 text-xs text-muted-foreground">{recoveryMessage}</p> : null}
             </div>
           </div>
         </div>
@@ -355,8 +391,24 @@ export function SiteHeader({ onSessionChange }: Props) {
                       <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
                       <button type="submit" disabled={isSaving} className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
                     </form>
+                    {mode === "login" ? (
+                      <>
+                        <button type="button" onClick={() => setRecoveryOpen((value) => !value)} className="text-left text-xs font-medium text-muted-foreground underline underline-offset-4">
+                          ¿Olvidaste tu contraseña?
+                        </button>
+                        {recoveryOpen ? (
+                          <form onSubmit={handleSendRecovery} className="grid gap-2 rounded-xl border border-border p-3">
+                            <input type="email" required value={recoveryEmail} onChange={(e) => setRecoveryEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+                            <button type="submit" disabled={isSendingRecovery} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">
+                              {isSendingRecovery ? "Enviando..." : "Enviar enlace"}
+                            </button>
+                          </form>
+                        ) : null}
+                      </>
+                    ) : null}
                     <button type="button" onClick={() => signInWithGoogle()} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
                     {message ? <p className="text-xs text-muted-foreground">{message}</p> : null}
+                    {recoveryMessage ? <p className="text-xs text-muted-foreground">{recoveryMessage}</p> : null}
                   </div>
                 ) : null}
               </>
