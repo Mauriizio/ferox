@@ -44,7 +44,7 @@ export function SocialProofGallerySection() {
           </div>
 
           <header className="mt-4 text-center">
-            <h2 className="font-serif text-3xl font-bold leading-tight text-foreground sm:text-4xl">
+            <h2 className="section-title text-3xl text-foreground sm:text-4xl">
               La evolución de Napoleón con BARF
             </h2>
             <p className="mt-2 text-sm text-muted-foreground sm:text-base">

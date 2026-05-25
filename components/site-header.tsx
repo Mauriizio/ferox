@@ -3,7 +3,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Camera, LogOut, Menu, Settings, ShoppingCart, UserRound, X } from "lucide-react";
+import { Camera, LogOut, Menu, Settings, UserRound, X } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import {
@@ -25,6 +25,7 @@ const navLinks = [
   { href: "#beneficios", label: "Beneficios" },
   { href: "#comunidad", label: "Comunidad" },
   { href: "#comentarios", label: "Reseñas" },
+  { href: "#tienda", label: "Tienda" },
 ];
 
 type Props = { onSessionChange?: (session: Session | null) => void };
@@ -61,6 +62,11 @@ export function SiteHeader({ onSessionChange }: Props) {
     : "idle";
 
   const user = session?.user ?? null;
+  const userName =
+    profile?.full_name?.trim() ||
+    profile?.username?.trim() ||
+    user?.email?.split("@")[0]?.trim() ||
+    "Usuario";
   const onHero = !scrolled;
 
   useEffect(() => {
@@ -261,6 +267,30 @@ export function SiteHeader({ onSessionChange }: Props) {
         <div className="hidden items-center gap-3 lg:flex">
           {user ? (
             <>
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/90 px-2.5 py-1.5">
+                <span className={cn("grid h-10 w-10 place-items-center overflow-hidden rounded-full", onHero ? "border border-white/30 bg-white/10" : "border border-border bg-muted")} aria-label="Tu avatar">
+                  {profile?.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                  ) : (
+                    <UserRound className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </span>
+                <span className={cn("max-w-[9rem] truncate text-sm font-semibold", onHero ? "text-white" : "text-foreground")}>
+                  {userName}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(true)}
+                aria-label="Configuración"
+                className={cn(
+                  "inline-flex h-10 w-10 items-center justify-center rounded-full transition",
+                  onHero ? "border border-white/30 text-white hover:bg-white/10" : "border border-border text-foreground hover:bg-muted",
+                )}
+              >
+                <Settings className="h-4 w-4" />
+              </button>
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -272,21 +302,6 @@ export function SiteHeader({ onSessionChange }: Props) {
                 <LogOut className="h-4 w-4" />
                 Salir
               </button>
-              <a href="#cuenta" className={cn("rounded-full px-4 py-2 text-sm font-semibold", onHero ? "text-white" : "text-foreground")}>
-                Mi cuenta
-              </a>
-              <button type="button" onClick={() => setSettingsOpen(true)} className={cn("inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition", onHero ? "border border-white/30 text-white hover:bg-white/10" : "border border-border text-foreground hover:bg-muted")}>
-                <Settings className="h-4 w-4" />
-                Configuración
-              </button>
-              <span className={cn("grid h-10 w-10 place-items-center overflow-hidden rounded-full", onHero ? "border border-white/30 bg-white/10" : "border border-border bg-muted")} aria-label="Tu avatar">
-                {profile?.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
-                ) : (
-                  <UserRound className="h-5 w-5 text-muted-foreground" />
-                )}
-              </span>
             </>
           ) : (
             <button
@@ -300,9 +315,6 @@ export function SiteHeader({ onSessionChange }: Props) {
               Iniciar sesión
             </button>
           )}
-          <a href="#tienda" className={cn("inline-flex h-10 w-10 items-center justify-center rounded-full border transition", onHero ? "border-white/25 text-white hover:bg-white/10" : "border-border text-foreground hover:bg-muted")} aria-label="Ir a tienda">
-            <ShoppingCart className="h-4 w-4" />
-          </a>
         </div>
 
         <button type="button" onClick={() => setOpen((v) => !v)} className={cn("inline-flex h-10 w-10 items-center justify-center rounded-md border lg:hidden", onHero ? "border-white/25 text-white" : "border-border text-foreground")} aria-label="Abrir menú">
@@ -361,8 +373,8 @@ export function SiteHeader({ onSessionChange }: Props) {
       ) : null}
 
       {open ? (
-        <div className={cn("border-t lg:hidden", onHero ? "border-white/15 bg-black/85 text-white backdrop-blur-xl" : "border-border bg-background")}>
-          <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-1 px-4 py-4 sm:px-6">
+        <div className={cn("border-t lg:hidden", onHero ? "border-white/15 bg-black/88 text-white backdrop-blur-xl" : "border-border bg-background/95 backdrop-blur-md")}>
+          <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-4 py-5 sm:px-6 sm:py-6">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -379,9 +391,19 @@ export function SiteHeader({ onSessionChange }: Props) {
             ))}
             {user ? (
               <>
-                <a href="#cuenta" onClick={() => setOpen(false)} className={cn("mt-2 w-full max-w-sm rounded-full px-4 py-2 text-center text-sm font-semibold", onHero ? "bg-white text-black" : "bg-foreground text-background")}>
-                  Dashboard
-                </a>
+                <div className={cn("mt-1 w-full max-w-sm rounded-2xl border px-3 py-3", onHero ? "border-white/20 bg-white/5" : "border-border bg-muted/50")}>
+                  <div className="flex items-center gap-3">
+                    <span className={cn("grid h-10 w-10 place-items-center overflow-hidden rounded-full", onHero ? "border border-white/30 bg-white/10" : "border border-border bg-background")} aria-label="Tu avatar">
+                      {profile?.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                      ) : (
+                        <UserRound className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </span>
+                    <p className={cn("text-sm font-semibold", onHero ? "text-white" : "text-foreground")}>{userName}</p>
+                  </div>
+                </div>
                 <button type="button" onClick={() => { setSettingsOpen(true); setOpen(false); }} className={cn("w-full max-w-sm rounded-full px-4 py-2 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
                   Configuración
                 </button>
