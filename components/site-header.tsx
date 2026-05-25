@@ -267,8 +267,8 @@ export function SiteHeader({ onSessionChange }: Props) {
         <div className="hidden items-center gap-3 lg:flex">
           {user ? (
             <>
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/90 px-2.5 py-1.5">
-                <span className={cn("grid h-10 w-10 place-items-center overflow-hidden rounded-full", onHero ? "border border-white/30 bg-white/10" : "border border-border bg-muted")} aria-label="Tu avatar">
+              <div className="inline-flex items-center gap-2">
+                <span className={cn("grid h-11 w-11 place-items-center overflow-hidden rounded-full", onHero ? "border border-white/30 bg-white/10" : "border border-border bg-muted")} aria-label="Tu avatar">
                   {profile?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
@@ -374,14 +374,14 @@ export function SiteHeader({ onSessionChange }: Props) {
 
       {open ? (
         <div className={cn("border-t lg:hidden", onHero ? "border-white/15 bg-black/88 text-white backdrop-blur-xl" : "border-border bg-background/95 backdrop-blur-md")}>
-          <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-4 py-5 sm:px-6 sm:py-6">
+          <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 px-4 py-6 sm:px-6 sm:py-7">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "w-full max-w-sm rounded-lg px-3 py-2 text-center text-[1.1rem] leading-none",
+                  "w-full max-w-sm rounded-lg px-3 py-2.5 text-center text-[1.1rem] leading-none",
                   onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted",
                 )}
                 style={{ fontFamily: '"Ferox", ui-sans-serif, system-ui, sans-serif' }}
@@ -391,23 +391,11 @@ export function SiteHeader({ onSessionChange }: Props) {
             ))}
             {user ? (
               <>
-                <div className={cn("mt-1 w-full max-w-sm rounded-2xl border px-3 py-3", onHero ? "border-white/20 bg-white/5" : "border-border bg-muted/50")}>
-                  <div className="flex items-center gap-3">
-                    <span className={cn("grid h-10 w-10 place-items-center overflow-hidden rounded-full", onHero ? "border border-white/30 bg-white/10" : "border border-border bg-background")} aria-label="Tu avatar">
-                      {profile?.avatar_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
-                      ) : (
-                        <UserRound className="h-5 w-5 text-muted-foreground" />
-                      )}
-                    </span>
-                    <p className={cn("text-sm font-semibold", onHero ? "text-white" : "text-foreground")}>{userName}</p>
-                  </div>
-                </div>
-                <button type="button" onClick={() => { setSettingsOpen(true); setOpen(false); }} className={cn("w-full max-w-sm rounded-full px-4 py-2 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
+                <div className={cn("my-1 h-px w-full max-w-sm", onHero ? "bg-white/20" : "bg-border")} aria-hidden="true" />
+                <button type="button" onClick={() => { setSettingsOpen(true); setOpen(false); }} className={cn("w-full max-w-sm rounded-full px-4 py-3 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
                   Configuración
                 </button>
-                <button type="button" onClick={handleSignOut} className={cn("w-full max-w-sm rounded-full px-4 py-2 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
+                <button type="button" onClick={handleSignOut} className={cn("w-full max-w-sm rounded-full px-4 py-3 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
                   Cerrar sesión
                 </button>
               </>
