@@ -3,7 +3,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Camera, LogOut, Menu, Settings, ShoppingCart, UserRound, X } from "lucide-react";
+import { Camera, LogOut, Menu, Settings, UserRound, X } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import {
@@ -25,6 +25,7 @@ const navLinks = [
   { href: "#beneficios", label: "Beneficios" },
   { href: "#comunidad", label: "Comunidad" },
   { href: "#comentarios", label: "Reseñas" },
+  { href: "#tienda", label: "Tienda" },
 ];
 
 type Props = { onSessionChange?: (session: Session | null) => void };
@@ -52,7 +53,20 @@ export function SiteHeader({ onSessionChange }: Props) {
   const [settingsAvatarFile, setSettingsAvatarFile] = useState<File | null>(null);
   const [settingsAvatarPreview, setSettingsAvatarPreview] = useState("");
 
+  const recoveryMessageType = recoveryMessage
+    ? recoveryMessage.startsWith("Revisa tu correo")
+      ? "success"
+      : recoveryMessage.startsWith("No se pudo")
+        ? "error"
+        : "loading"
+    : "idle";
+
   const user = session?.user ?? null;
+  const userName =
+    profile?.full_name?.trim() ||
+    profile?.username?.trim() ||
+    user?.email?.split("@")[0]?.trim() ||
+    "Usuario";
   const onHero = !scrolled;
 
   useEffect(() => {
@@ -253,6 +267,30 @@ export function SiteHeader({ onSessionChange }: Props) {
         <div className="hidden items-center gap-3 lg:flex">
           {user ? (
             <>
+              <div className="inline-flex items-center gap-2">
+                <span className={cn("grid h-11 w-11 place-items-center overflow-hidden rounded-full", onHero ? "border border-white/30 bg-white/10" : "border border-border bg-muted")} aria-label="Tu avatar">
+                  {profile?.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                  ) : (
+                    <UserRound className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </span>
+                <span className={cn("max-w-[9rem] truncate text-sm font-semibold", onHero ? "text-white" : "text-foreground")}>
+                  {userName}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(true)}
+                aria-label="Configuración"
+                className={cn(
+                  "inline-flex h-10 w-10 items-center justify-center rounded-full transition",
+                  onHero ? "border border-white/30 text-white hover:bg-white/10" : "border border-border text-foreground hover:bg-muted",
+                )}
+              >
+                <Settings className="h-4 w-4" />
+              </button>
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -264,21 +302,6 @@ export function SiteHeader({ onSessionChange }: Props) {
                 <LogOut className="h-4 w-4" />
                 Salir
               </button>
-              <a href="#cuenta" className={cn("rounded-full px-4 py-2 text-sm font-semibold", onHero ? "text-white" : "text-foreground")}>
-                Mi cuenta
-              </a>
-              <button type="button" onClick={() => setSettingsOpen(true)} className={cn("inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition", onHero ? "border border-white/30 text-white hover:bg-white/10" : "border border-border text-foreground hover:bg-muted")}>
-                <Settings className="h-4 w-4" />
-                Configuración
-              </button>
-              <span className={cn("grid h-10 w-10 place-items-center overflow-hidden rounded-full", onHero ? "border border-white/30 bg-white/10" : "border border-border bg-muted")} aria-label="Tu avatar">
-                {profile?.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
-                ) : (
-                  <UserRound className="h-5 w-5 text-muted-foreground" />
-                )}
-              </span>
             </>
           ) : (
             <button
@@ -292,9 +315,6 @@ export function SiteHeader({ onSessionChange }: Props) {
               Iniciar sesión
             </button>
           )}
-          <a href="#tienda" className={cn("inline-flex h-10 w-10 items-center justify-center rounded-full border transition", onHero ? "border-white/25 text-white hover:bg-white/10" : "border-border text-foreground hover:bg-muted")} aria-label="Ir a tienda">
-            <ShoppingCart className="h-4 w-4" />
-          </a>
         </div>
 
         <button type="button" onClick={() => setOpen((v) => !v)} className={cn("inline-flex h-10 w-10 items-center justify-center rounded-md border lg:hidden", onHero ? "border-white/25 text-white" : "border-border text-foreground")} aria-label="Abrir menú">
@@ -332,22 +352,36 @@ export function SiteHeader({ onSessionChange }: Props) {
               ) : null}
               <button type="button" onClick={() => signInWithGoogle()} className="mt-2 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
               {message ? <p className="mt-2 text-xs text-muted-foreground">{message}</p> : null}
-              {recoveryMessage ? <p className="mt-2 text-xs text-muted-foreground">{recoveryMessage}</p> : null}
+              {recoveryMessage ? (
+                <p
+                  className={`mt-2 rounded-lg border px-2.5 py-2 text-xs ${
+                    recoveryMessageType === "error"
+                      ? "border-red-200 bg-red-50 text-red-700"
+                      : recoveryMessageType === "success"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        : "border-border bg-muted text-muted-foreground"
+                  }`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {recoveryMessage}
+                </p>
+              ) : null}
             </div>
           </div>
         </div>
       ) : null}
 
       {open ? (
-        <div className={cn("border-t lg:hidden", onHero ? "border-white/15 bg-black/85 text-white backdrop-blur-xl" : "border-border bg-background")}>
-          <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-1 px-4 py-4 sm:px-6">
+        <div className={cn("border-t lg:hidden", onHero ? "border-white/15 bg-black/88 text-white backdrop-blur-xl" : "border-border bg-background/95 backdrop-blur-md")}>
+          <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 px-4 py-6 sm:px-6 sm:py-7">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "w-full max-w-sm rounded-lg px-3 py-2 text-center text-[1.1rem] leading-none",
+                  "w-full max-w-sm rounded-lg px-3 py-2.5 text-center text-[1.1rem] leading-none",
                   onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted",
                 )}
                 style={{ fontFamily: '"Ferox", ui-sans-serif, system-ui, sans-serif' }}
@@ -357,13 +391,11 @@ export function SiteHeader({ onSessionChange }: Props) {
             ))}
             {user ? (
               <>
-                <a href="#cuenta" onClick={() => setOpen(false)} className={cn("mt-2 w-full max-w-sm rounded-full px-4 py-2 text-center text-sm font-semibold", onHero ? "bg-white text-black" : "bg-foreground text-background")}>
-                  Dashboard
-                </a>
-                <button type="button" onClick={() => { setSettingsOpen(true); setOpen(false); }} className={cn("w-full max-w-sm rounded-full px-4 py-2 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
+                <div className={cn("my-1 h-px w-full max-w-sm", onHero ? "bg-white/20" : "bg-border")} aria-hidden="true" />
+                <button type="button" onClick={() => { setSettingsOpen(true); setOpen(false); }} className={cn("w-full max-w-sm rounded-full px-4 py-3 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
                   Configuración
                 </button>
-                <button type="button" onClick={handleSignOut} className={cn("w-full max-w-sm rounded-full px-4 py-2 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
+                <button type="button" onClick={handleSignOut} className={cn("w-full max-w-sm rounded-full px-4 py-3 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
                   Cerrar sesión
                 </button>
               </>
@@ -408,7 +440,21 @@ export function SiteHeader({ onSessionChange }: Props) {
                     ) : null}
                     <button type="button" onClick={() => signInWithGoogle()} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
                     {message ? <p className="text-xs text-muted-foreground">{message}</p> : null}
-                    {recoveryMessage ? <p className="text-xs text-muted-foreground">{recoveryMessage}</p> : null}
+                    {recoveryMessage ? (
+                      <p
+                        className={`rounded-lg border px-2.5 py-2 text-xs ${
+                          recoveryMessageType === "error"
+                            ? "border-red-200 bg-red-50 text-red-700"
+                            : recoveryMessageType === "success"
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              : "border-border bg-muted text-muted-foreground"
+                        }`}
+                        role="status"
+                        aria-live="polite"
+                      >
+                        {recoveryMessage}
+                      </p>
+                    ) : null}
                   </div>
                 ) : null}
               </>

@@ -50,7 +50,7 @@ export function BarfMethodSection() {
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-3xl text-center">
           <span className="text-xs uppercase tracking-[0.2em] text-background/60">¿Qué es BARF?</span>
-          <h2 className="mt-3 font-serif text-3xl font-bold sm:text-4xl md:text-5xl">Comida real, balanceada y completa</h2>
+          <h2 className="mt-3 section-title text-3xl sm:text-4xl md:text-5xl">Comida real, balanceada y completa</h2>
           <p className="mt-4 text-sm text-background/75 sm:text-base">
             BARF combina proteína, vísceras, frutas/verduras y hueso carnoso molido para construir una base nutricional
             completa para tu perro.
