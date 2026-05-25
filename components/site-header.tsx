@@ -263,7 +263,7 @@ export function SiteHeader({ onSessionChange }: Props) {
         </div>
 
         <nav className="mt-8 flex flex-1 flex-col justify-center" aria-label="Menú móvil">
-          <div className="mx-auto flex w-full max-w-sm flex-col gap-3">
+          <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
             {navLinks
               .filter((link) => link.href !== "#tienda")
               .map((link) => (
@@ -272,9 +272,10 @@ export function SiteHeader({ onSessionChange }: Props) {
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "rounded-xl px-4 py-3 text-center text-base font-semibold transition",
+                    "rounded-xl px-4 py-3.5 text-center text-lg font-black uppercase tracking-[0.12em] transition",
                     onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted",
                   )}
+                  style={{ fontFamily: '"Oswald", "Bebas Neue", "Arial Narrow", sans-serif' }}
                 >
                   {link.label}
                 </Link>
@@ -283,9 +284,10 @@ export function SiteHeader({ onSessionChange }: Props) {
               href="#tienda"
               onClick={() => setOpen(false)}
               className={cn(
-                "mt-1 rounded-full px-4 py-3 text-center text-base font-semibold transition",
+                "mt-2 rounded-full px-4 py-3.5 text-center text-base font-semibold transition",
                 onHero ? "bg-white text-black hover:bg-white/90" : "bg-foreground text-background hover:bg-foreground/90",
               )}
+              style={{ fontFamily: `"Oswald", "Bebas Neue", "Arial Narrow", sans-serif`, letterSpacing: "0.06em" }}
             >
               Tienda
             </Link>
