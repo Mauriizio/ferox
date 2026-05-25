@@ -76,7 +76,8 @@ export function SiteHeader({ onSessionChange }: Props) {
       try {
         const currentSession = await getCurrentSession();
         if (!mounted) return;
-        console.info("[auth] carga inicial getSession", { hasSession: Boolean(currentSession), userId: currentSession?.user?.id ?? null });
+        console.info("Google OAuth diagnose: session después de redirect", currentSession);
+        console.info("Google OAuth diagnose: resultado exacto getSession", { hasSession: Boolean(currentSession), userId: currentSession?.user?.id ?? null });
         setSession(currentSession);
         onSessionChange?.(currentSession);
         if (currentSession?.user) {
@@ -92,6 +93,8 @@ export function SiteHeader({ onSessionChange }: Props) {
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (event, nextSession) => {
+        console.info("Google OAuth diagnose: auth state event", event);
+        console.info("Google OAuth diagnose: user id recibido", nextSession?.user?.id ?? null);
         try {
           setSession(nextSession);
           onSessionChange?.(nextSession);

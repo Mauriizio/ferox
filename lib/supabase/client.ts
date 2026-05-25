@@ -17,3 +17,11 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
   },
 });
+
+
+if (typeof window !== "undefined") {
+  const key = "__ferox_supabase_client_inits__";
+  const current = (window as any)[key] ?? 0;
+  (window as any)[key] = current + 1;
+  console.info("Google OAuth diagnose: supabase client singleton-check", { inits: (window as any)[key] });
+}

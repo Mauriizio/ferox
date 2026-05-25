@@ -74,6 +74,8 @@ export async function signUpWithPassword(
 }
 
 export async function signInWithGoogle() {
+  console.info("Google OAuth diagnose: current origin", window.location.origin);
+  console.info("Google OAuth diagnose: callback URL recibida", window.location.href);
   console.info("Calling signInWithOAuth");
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
