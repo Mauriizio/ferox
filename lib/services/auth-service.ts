@@ -79,7 +79,7 @@ export async function signInWithGoogle() {
     options: {
       redirectTo:
         typeof window !== "undefined"
-          ? `${window.location.origin}/#cuenta`
+          ? window.location.origin
           : undefined,
     },
   });

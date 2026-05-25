@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Camera, LogOut, Menu, Settings, ShoppingCart, UserRound, X } from "lucide-react";
@@ -46,6 +47,9 @@ export function SiteHeader({ onSessionChange }: Props) {
   const [settingsAvatarUrl, setSettingsAvatarUrl] = useState("");
   const [settingsAvatarFile, setSettingsAvatarFile] = useState<File | null>(null);
   const [settingsAvatarPreview, setSettingsAvatarPreview] = useState("");
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleAvailable, setGoogleAvailable] = useState(true);
+  const searchParams = useSearchParams();
 
   const user = session?.user ?? null;
   const onHero = !scrolled;
@@ -57,6 +61,13 @@ export function SiteHeader({ onSessionChange }: Props) {
     setSettingsAvatarPreview(profile?.avatar_url ?? "");
     setSettingsAvatarFile(null);
   }, [profile]);
+
+
+  useEffect(() => {
+    if (searchParams.get("authError") === "oauth_callback") {
+      setMessage("No se pudo completar Google OAuth. Revisa la configuración de Redirect URL en Supabase.");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -295,7 +306,23 @@ export function SiteHeader({ onSessionChange }: Props) {
                 <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
                 <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
               </form>
-              <button type="button" onClick={() => signInWithGoogle()} className="mt-2 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
+              <button type="button" disabled={isGoogleLoading || !googleAvailable} onClick={async () => {
+                setIsGoogleLoading(true);
+                setMessage("");
+                try {
+                  await signInWithGoogle();
+                } catch (error) {
+                  const reason = error instanceof Error ? error.message.toLowerCase() : "";
+                  if (reason.includes("provider") && reason.includes("enabled")) {
+                    setGoogleAvailable(false);
+                    setMessage("Google OAuth no está habilitado en Supabase. Actívalo para continuar.");
+                  } else {
+                    setMessage("No se pudo iniciar con Google. Verifica Redirect URL y proveedor OAuth.");
+                  }
+                } finally {
+                  setIsGoogleLoading(false);
+                }
+              }} className="mt-2 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60">{isGoogleLoading ? "Redirigiendo..." : googleAvailable ? "Continuar con Google" : "Google no disponible"}</button>
               {message ? <p className="mt-2 text-xs text-muted-foreground">{message}</p> : null}
             </div>
           </div>
@@ -355,7 +382,23 @@ export function SiteHeader({ onSessionChange }: Props) {
                       <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
                       <button type="submit" disabled={isSaving} className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
                     </form>
-                    <button type="button" onClick={() => signInWithGoogle()} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
+                    <button type="button" disabled={isGoogleLoading || !googleAvailable} onClick={async () => {
+                      setIsGoogleLoading(true);
+                      setMessage("");
+                      try {
+                        await signInWithGoogle();
+                      } catch (error) {
+                        const reason = error instanceof Error ? error.message.toLowerCase() : "";
+                        if (reason.includes("provider") && reason.includes("enabled")) {
+                          setGoogleAvailable(false);
+                          setMessage("Google OAuth no está habilitado en Supabase. Actívalo para continuar.");
+                        } else {
+                          setMessage("No se pudo iniciar con Google. Verifica Redirect URL y proveedor OAuth.");
+                        }
+                      } finally {
+                        setIsGoogleLoading(false);
+                      }
+                    }} className="rounded-full border border-border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60">{isGoogleLoading ? "Redirigiendo..." : googleAvailable ? "Continuar con Google" : "Google no disponible"}</button>
                     {message ? <p className="text-xs text-muted-foreground">{message}</p> : null}
                   </div>
                 ) : null}
