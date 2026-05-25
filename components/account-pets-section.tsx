@@ -501,184 +501,25 @@ export function AccountPetsSection() {
     }
   };
 
+
+  if (isLoading) return null;
+
+  if (!user) return null;
+
   return (
     <section
       id="cuenta"
       className="border-t border-border bg-[linear-gradient(180deg,#f7f7f7_0%,#ffffff_100%)]"
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        {!user ? (
-          <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr] lg:items-end">
-            <div className="max-w-3xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground shadow-sm">
-                <ShieldCheck className="h-3.5 w-3.5 text-foreground" />
-                Cuenta FEROX
-              </span>
-              <h2 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-balance sm:text-4xl md:text-5xl">
-                Tu perfil, tus perros y sus porciones en un solo lugar
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-                Crea una cuenta, registra tus perros y gestiona sus recomendaciones BARF desde tu dashboard privado.
-              </p>
-            </div>
-
-            <div className="rounded-[2rem] border border-border bg-background p-5 shadow-sm">
-              <div className="flex items-start gap-3">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-foreground text-background">
-                  <PawPrint className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">
-                    Acceso seguro
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Email y contraseña listo. Google OAuth queda preparado para activar en Supabase.
-                  </p>
-                </div>
-              </div>
-              {message ? (
-                <div className="mt-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
-                  {message}
-                </div>
-              ) : null}
-            </div>
+        {message ? (
+          <div className="mb-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            {message}
           </div>
-        ) : (
-          message ? (
-            <div className="mb-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
-              <CheckCircle2 className="h-4 w-4 shrink-0" />
-              {message}
-            </div>
-          ) : null
-        )}
+        ) : null}
 
-        {!user ? (
-          <div className="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
-            <article className="rounded-[2rem] border border-border bg-background p-5 shadow-[0_20px_50px_rgba(0,0,0,0.06)] sm:p-6 lg:p-8">
-              <div className="flex items-center gap-2 text-foreground">
-                <UserRound className="h-5 w-5" />
-                <h3 className="font-semibold">
-                  {authMode === "signup" ? "Crear cuenta" : "Iniciar sesión"}
-                </h3>
-              </div>
-
-              <div className="mt-5 grid grid-cols-2 rounded-full bg-muted p-1 text-sm font-semibold">
-                {(["login", "signup"] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => setAuthMode(mode)}
-                    className={`rounded-full px-4 py-2 transition ${authMode === mode ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
-                  >
-                    {mode === "login" ? "Entrar" : "Registrarme"}
-                  </button>
-                ))}
-              </div>
-
-              <form onSubmit={handleAuthSubmit} className="mt-5 space-y-4">
-                {authMode === "signup" ? (
-                  <label className="text-sm font-medium text-foreground">
-                    Nombre completo
-                    <input
-                      type="text"
-                      value={fullName}
-                      onChange={(event) => setFullName(event.target.value)}
-                      placeholder="Tu nombre"
-                      className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                    />
-                  </label>
-                ) : null}
-
-                <label className="text-sm font-medium text-foreground">
-                  Email
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="correo@ejemplo.com"
-                    className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                  />
-                </label>
-
-                <label className="text-sm font-medium text-foreground">
-                  Contraseña
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Mínimo 6 caracteres"
-                    className="mt-2 block w-full rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background focus:ring-2 focus:ring-foreground/10"
-                  />
-                </label>
-
-                <button
-                  type="submit"
-                  disabled={isSaving || isLoading}
-                  className="inline-flex w-full items-center justify-center rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSaving
-                    ? "Procesando..."
-                    : authMode === "signup"
-                      ? "Crear cuenta"
-                      : "Entrar"}
-                </button>
-              </form>
-
-              <button
-                type="button"
-                onClick={() =>
-                  signInWithGoogle().catch((error) => {
-                    logSupabaseError("Google OAuth", error);
-                    setMessage(getSupabaseErrorMessage(error));
-                  })
-                }
-                className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-border px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted"
-              >
-                Continuar con Google
-              </button>
-            </article>
-
-            <article className="overflow-hidden rounded-[2rem] border border-border bg-foreground text-background shadow-[0_20px_55px_rgba(0,0,0,0.18)]">
-              <div className="relative p-6 sm:p-8">
-                <Image
-                  src="/icon.svg"
-                  alt="FEROX BARF"
-                  width={140}
-                  height={140}
-                  className="absolute -right-8 -top-8 h-32 w-32 opacity-10 invert"
-                />
-                <Sparkles className="h-6 w-6" />
-                <h3 className="mt-4 font-serif text-2xl font-bold">
-                  Base profesional para una app con comunidad
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-background/70">
-                  La capa privada queda separada de la landing: perfiles,
-                  perros y gestión completa con recomendaciones automáticas por perro.
-                </p>
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {[
-                    "Perros privados",
-                    "Recomendación automática",
-                    "Fotos con upload",
-                    "Base social",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="rounded-2xl bg-background/10 p-4 text-sm font-semibold"
-                    >
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </article>
-          </div>
-        ) : (
-          <div className="mt-8 space-y-5">
+        <div className="mt-8 space-y-5">
             <div className="flex flex-col items-center justify-center gap-3 text-center">
               <h2 className="ferox-display-title text-center text-3xl font-normal tracking-tight text-foreground sm:text-4xl">Mis perros</h2>
               <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-4 py-2 text-sm font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
@@ -728,7 +569,6 @@ export function AccountPetsSection() {
               </div>
             )}
           </div>
-        )}
       </div>
       <Dialog open={isAddDogDialogOpen} onOpenChange={setIsAddDogDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">

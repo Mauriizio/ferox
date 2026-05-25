@@ -263,7 +263,7 @@ export function SiteHeader({ onSessionChange }: Props) {
         </div>
 
         <nav className="mt-8 flex flex-1 flex-col justify-center" aria-label="Menú móvil">
-          <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
+          <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
             {navLinks
               .filter((link) => link.href !== "#tienda")
               .map((link) => (
@@ -272,10 +272,9 @@ export function SiteHeader({ onSessionChange }: Props) {
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "rounded-xl px-4 py-3.5 text-center text-lg font-black uppercase tracking-[0.12em] transition",
+                    "ferox-display-title rounded-xl px-4 py-4 text-center text-[2rem] leading-none tracking-[0.04em] transition",
                     onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted",
                   )}
-                  style={{ fontFamily: '"Oswald", "Bebas Neue", "Arial Narrow", sans-serif' }}
                 >
                   {link.label}
                 </Link>
@@ -284,10 +283,10 @@ export function SiteHeader({ onSessionChange }: Props) {
               href="#tienda"
               onClick={() => setOpen(false)}
               className={cn(
-                "mt-2 rounded-full px-4 py-3.5 text-center text-base font-semibold transition",
+                "mt-3 rounded-full px-4 py-3.5 text-center text-base font-semibold transition",
                 onHero ? "bg-white text-black hover:bg-white/90" : "bg-foreground text-background hover:bg-foreground/90",
               )}
-              style={{ fontFamily: `"Oswald", "Bebas Neue", "Arial Narrow", sans-serif`, letterSpacing: "0.06em" }}
+
             >
               Tienda
             </Link>
@@ -303,7 +302,7 @@ export function SiteHeader({ onSessionChange }: Props) {
                     setOpen(false);
                   }}
                   className={cn(
-                    "rounded-full border px-4 py-3.5 text-sm font-semibold transition",
+                    "rounded-full border px-4 py-3.5 text-center text-sm font-semibold transition",
                     onHero ? "border-white/30 text-white hover:bg-white/10" : "border-border text-foreground hover:bg-muted",
                   )}
                 >
@@ -313,7 +312,7 @@ export function SiteHeader({ onSessionChange }: Props) {
                   type="button"
                   onClick={handleSignOut}
                   className={cn(
-                    "rounded-full border px-4 py-3.5 text-sm font-semibold transition",
+                    "rounded-full border px-4 py-3.5 text-center text-sm font-semibold transition",
                     onHero ? "border-white/30 text-white hover:bg-white/10" : "border-border text-foreground hover:bg-muted",
                   )}
                 >
@@ -438,6 +437,38 @@ export function SiteHeader({ onSessionChange }: Props) {
           )}
         </div>
 
+        <div className="flex items-center gap-2 lg:hidden">
+          {user ? (
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(true)}
+              aria-label="Configuración"
+              className={cn(
+                "inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full transition",
+                onHero ? "border border-white/30 bg-white/10 text-white hover:bg-white/15" : "border border-border bg-muted text-foreground hover:bg-muted/80",
+              )}
+            >
+              {profile?.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+              ) : (
+                <UserRound className="h-4 w-4" />
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAuthOpen(true)}
+              className={cn(
+                "inline-flex h-10 items-center justify-center rounded-full px-3 text-sm font-semibold transition",
+                onHero ? "bg-white text-black hover:bg-white/90" : "bg-foreground text-background hover:bg-foreground/90",
+              )}
+            >
+              Entrar
+            </button>
+          )}
+        </div>
+
         <button type="button" onClick={() => setOpen((v) => !v)} className={cn("inline-flex h-10 w-10 items-center justify-center rounded-md border lg:hidden", onHero ? "border-white/25 text-white" : "border-border text-foreground")} aria-label="Abrir menú">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -494,6 +525,58 @@ export function SiteHeader({ onSessionChange }: Props) {
       ) : null}
 
       {mounted && open && mobileMenu ? createPortal(mobileMenu, document.body) : null}
+
+      <Dialog open={authOpen && !user} onOpenChange={setAuthOpen}>
+        <DialogContent className="sm:max-w-md lg:hidden">
+          <DialogHeader>
+            <DialogTitle>Iniciar sesión</DialogTitle>
+            <DialogDescription>Accede a tu cuenta FEROX.</DialogDescription>
+          </DialogHeader>
+          <div className="mb-1 flex gap-2 text-sm font-semibold">
+            <button type="button" onClick={() => setMode("login")} className={cn("rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
+            <button type="button" onClick={() => setMode("signup")} className={cn("rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
+          </div>
+          <form onSubmit={handleAuthSubmit} className="space-y-2">
+            {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+            <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
+          </form>
+          {mode === "login" ? (
+            <>
+              <button type="button" onClick={() => setRecoveryOpen((value) => !value)} className="text-xs font-medium text-muted-foreground underline underline-offset-4">
+                ¿Olvidaste tu contraseña?
+              </button>
+              {recoveryOpen ? (
+                <form onSubmit={handleSendRecovery} className="mt-2 space-y-2 rounded-xl border border-border p-3">
+                  <input type="email" required value={recoveryEmail} onChange={(e) => setRecoveryEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+                  <button type="submit" disabled={isSendingRecovery} className="w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">
+                    {isSendingRecovery ? "Enviando..." : "Enviar enlace"}
+                  </button>
+                </form>
+              ) : null}
+            </>
+          ) : null}
+          <button type="button" onClick={() => signInWithGoogle()} className="mt-1 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
+          {message ? <p className="mt-1 text-xs text-muted-foreground">{message}</p> : null}
+          {recoveryMessage ? (
+            <p
+              className={`mt-2 rounded-lg border px-2.5 py-2 text-xs ${
+                recoveryMessageType === "error"
+                  ? "border-red-200 bg-red-50 text-red-700"
+                  : recoveryMessageType === "success"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-border bg-muted text-muted-foreground"
+              }`}
+              role="status"
+              aria-live="polite"
+            >
+              {recoveryMessage}
+            </p>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
