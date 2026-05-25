@@ -85,6 +85,18 @@ export function SiteHeader({ onSessionChange }: Props) {
   }, []);
 
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+
+    if (open) {
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
+  useEffect(() => {
     let mounted = true;
 
     async function loadSession() {
@@ -373,92 +385,91 @@ export function SiteHeader({ onSessionChange }: Props) {
       ) : null}
 
       {open ? (
-        <div className={cn("border-t lg:hidden", onHero ? "border-white/15 bg-black/88 text-white backdrop-blur-xl" : "border-border bg-background/95 backdrop-blur-md")}>
-          <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 px-4 py-6 sm:px-6 sm:py-7">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "w-full max-w-sm rounded-lg px-3 py-2.5 text-center text-[1.1rem] leading-none",
-                  onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted",
-                )}
-                style={{ fontFamily: '"Ferox", ui-sans-serif, system-ui, sans-serif' }}
-              >
-                {link.label}
+        <div
+          className={cn(
+            "fixed inset-0 z-[90] lg:hidden",
+            onHero ? "bg-black/95 text-white" : "bg-background text-foreground",
+          )}
+        >
+          <div className="flex min-h-[100dvh] flex-col overflow-y-auto px-4 pb-8 pt-4 sm:px-6">
+            <div className="flex items-center justify-between">
+              <Link href="/" className="flex items-center" aria-label="Inicio FEROX" onClick={() => setOpen(false)}>
+                <Image src={scrolled ? "/logo.png" : "/logoblanco.png"} alt="FEROX" width={170} height={48} className="h-10 w-auto" />
               </Link>
-            ))}
-            {user ? (
-              <>
-                <div className={cn("my-1 h-px w-full max-w-sm", onHero ? "bg-white/20" : "bg-border")} aria-hidden="true" />
-                <button type="button" onClick={() => { setSettingsOpen(true); setOpen(false); }} className={cn("w-full max-w-sm rounded-full px-4 py-3 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
-                  Configuración
-                </button>
-                <button type="button" onClick={handleSignOut} className={cn("w-full max-w-sm rounded-full px-4 py-3 text-sm font-semibold", onHero ? "border border-white/25 text-white" : "border border-border text-foreground")}>
-                  Cerrar sesión
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("login");
-                    setAuthOpen((value) => !value);
-                  }}
-                  className={cn("mt-2 w-full max-w-sm rounded-full px-4 py-2 text-center text-sm font-semibold", onHero ? "bg-white text-black" : "bg-foreground text-background")}
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Cerrar menú"
+                className={cn(
+                  "inline-flex h-11 w-11 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                  onHero
+                    ? "border-white/25 text-white hover:bg-white/10 focus-visible:ring-white/70 focus-visible:ring-offset-black"
+                    : "border-border text-foreground hover:bg-muted focus-visible:ring-foreground/50 focus-visible:ring-offset-background",
+                )}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <nav className="mt-8 flex flex-1 flex-col justify-center" aria-label="Menú móvil">
+              <div className="mx-auto flex w-full max-w-sm flex-col gap-3">
+                {navLinks
+                  .filter((link) => link.href !== "#tienda")
+                  .map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "rounded-xl px-4 py-3 text-center text-base font-semibold transition",
+                        onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted",
+                      )}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                <Link
+                  href="#tienda"
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "mt-1 rounded-full px-4 py-3 text-center text-base font-semibold transition",
+                    onHero ? "bg-white text-black hover:bg-white/90" : "bg-foreground text-background hover:bg-foreground/90",
+                  )}
                 >
-                  Iniciar sesión
-                </button>
-                {authOpen ? (
-                  <div className="mt-2 w-full max-w-sm grid gap-2 rounded-2xl border border-border/60 bg-background/95 p-3 text-foreground">
-                    <div className="flex gap-2 text-xs font-semibold">
-                      <button type="button" onClick={() => setMode("login")} className={cn("rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Iniciar sesión</button>
-                      <button type="button" onClick={() => setMode("signup")} className={cn("rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Registrarse</button>
-                    </div>
-                    <form onSubmit={handleAuthSubmit} className="grid gap-2">
-                      {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
-                      <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
-                      <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
-                      <button type="submit" disabled={isSaving} className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
-                    </form>
-                    {mode === "login" ? (
-                      <>
-                        <button type="button" onClick={() => setRecoveryOpen((value) => !value)} className="text-left text-xs font-medium text-muted-foreground underline underline-offset-4">
-                          ¿Olvidaste tu contraseña?
-                        </button>
-                        {recoveryOpen ? (
-                          <form onSubmit={handleSendRecovery} className="grid gap-2 rounded-xl border border-border p-3">
-                            <input type="email" required value={recoveryEmail} onChange={(e) => setRecoveryEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
-                            <button type="submit" disabled={isSendingRecovery} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">
-                              {isSendingRecovery ? "Enviando..." : "Enviar enlace"}
-                            </button>
-                          </form>
-                        ) : null}
-                      </>
-                    ) : null}
-                    <button type="button" onClick={() => signInWithGoogle()} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
-                    {message ? <p className="text-xs text-muted-foreground">{message}</p> : null}
-                    {recoveryMessage ? (
-                      <p
-                        className={`rounded-lg border px-2.5 py-2 text-xs ${
-                          recoveryMessageType === "error"
-                            ? "border-red-200 bg-red-50 text-red-700"
-                            : recoveryMessageType === "success"
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                              : "border-border bg-muted text-muted-foreground"
-                        }`}
-                        role="status"
-                        aria-live="polite"
-                      >
-                        {recoveryMessage}
-                      </p>
-                    ) : null}
-                  </div>
+                  Tienda
+                </Link>
+
+                {user ? (
+                  <>
+                    <div className={cn("my-2 h-px", onHero ? "bg-white/20" : "bg-border")} aria-hidden="true" />
+                    <button
+                      type="button"
+                      aria-label="Configuración"
+                      onClick={() => {
+                        setSettingsOpen(true);
+                        setOpen(false);
+                      }}
+                      className={cn(
+                        "rounded-full border px-4 py-3.5 text-sm font-semibold transition",
+                        onHero ? "border-white/30 text-white hover:bg-white/10" : "border-border text-foreground hover:bg-muted",
+                      )}
+                    >
+                      Configuración
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      className={cn(
+                        "rounded-full border px-4 py-3.5 text-sm font-semibold transition",
+                        onHero ? "border-white/30 text-white hover:bg-white/10" : "border-border text-foreground hover:bg-muted",
+                      )}
+                    >
+                      Cerrar sesión
+                    </button>
+                  </>
                 ) : null}
-              </>
-            )}
+              </div>
+            </nav>
           </div>
         </div>
       ) : null}

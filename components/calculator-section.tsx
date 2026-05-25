@@ -183,7 +183,7 @@ export function CalculatorSection() {
             <Sparkles className="h-3.5 w-3.5 text-foreground" />
             Calculadora BARF
           </span>
-          <h2 className="mt-3 section-title text-2xl sm:mt-4 sm:text-3xl md:text-4xl">
+          <h2 className="mt-3 text-2xl sm:mt-4 sm:text-3xl md:text-4xl">
             Descubre cuánta comida necesita tu perro
           </h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">

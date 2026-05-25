@@ -54,7 +54,7 @@ export function ShopSection() {
           <span className="inline-block text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Tienda FEROX
           </span>
-          <h2 className="mt-1.5 section-title text-[2rem] sm:text-3xl md:text-4xl">
+          <h2 className="mt-1.5 text-[2rem] sm:text-3xl md:text-4xl">
             Pasa de producto a producto y pide directo
           </h2>
         </div>

@@ -680,7 +680,7 @@ export function AccountPetsSection() {
         ) : (
           <div className="mt-8 space-y-5">
             <div className="flex flex-col items-center justify-center gap-3 text-center">
-              <h2 className="font-serif text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Mis perros</h2>
+              <h2 className="ferox-display-title text-center text-3xl font-normal tracking-tight text-foreground sm:text-4xl">Mis perros</h2>
               <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-4 py-2 text-sm font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
             </div>
             {dogs.length > 0 ? (

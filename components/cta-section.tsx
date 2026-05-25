@@ -18,7 +18,7 @@ export function CtaSection() {
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-[72svh] w-full max-w-4xl flex-col justify-center px-4 py-20 text-center sm:px-6 sm:py-24 lg:px-8 lg:py-28">
-        <h2 className="section-title text-3xl sm:text-5xl md:text-6xl">
+        <h2 className="text-3xl sm:text-5xl md:text-6xl">
           Tu perro depende de ti para comer bien.
         </h2>
         <p className="mt-4 text-base sm:text-lg md:text-xl text-background/80 leading-relaxed text-pretty max-w-2xl mx-auto">

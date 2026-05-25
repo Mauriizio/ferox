@@ -168,7 +168,7 @@ export function CommentsSection() {
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">Reseñas reales</span>
-          <h2 className="mt-2 section-title text-3xl sm:text-4xl md:text-5xl">Lo que dice la comunidad FEROX</h2>
+          <h2 className="mt-2 ferox-display-title text-3xl sm:text-4xl md:text-5xl">Lo que dice la comunidad FEROX</h2>
         </div>
 
         <ul className="mt-8 grid grid-cols-1 gap-4">

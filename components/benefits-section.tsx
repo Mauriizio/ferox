@@ -55,7 +55,7 @@ export function BenefitsSection() {
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-background/60">
             Beneficios
           </span>
-          <h2 className="mt-2 sm:mt-3 section-title text-3xl sm:text-4xl md:text-5xl">
+          <h2 className="mt-2 sm:mt-3 ferox-display-title text-3xl sm:text-4xl md:text-5xl">
             Tu perro no solo come mejor… vive mejor.
           </h2>
           <p className="mt-4 text-base sm:text-lg text-background/70 leading-relaxed">
