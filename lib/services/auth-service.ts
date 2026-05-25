@@ -28,7 +28,23 @@ function normalizeProfile(row: ProfileRow | null): Profile | null {
 
 export async function getCurrentSession(): Promise<Session | null> {
   const { data, error } = await supabase.auth.getSession();
-  if (error) throw error;
+
+  if (error) {
+    console.error("[auth] getSession error", error);
+    const message = `${error.message ?? ""}`.toLowerCase();
+    if (message.includes("refresh token") && message.includes("not found")) {
+      await supabase.auth.signOut({ scope: "local" });
+      console.info("[auth] sesión local corrupta limpiada");
+      return null;
+    }
+    throw error;
+  }
+
+  console.info("[auth] session encontrada", {
+    hasSession: Boolean(data.session),
+    userId: data.session?.user?.id ?? null,
+  });
+
   return data.session;
 }
 
@@ -128,4 +144,36 @@ export async function upsertProfile(
     throw new Error("No se pudo leer el perfil actualizado.");
 
   return normalizedProfile;
+}
+
+
+export async function recoverSessionFromOAuthUrl() {
+  if (typeof window === "undefined") return null;
+
+  const url = new URL(window.location.href);
+  const hasCode = url.searchParams.has("code");
+  const hasOauthState = url.searchParams.has("state");
+
+  if (!hasCode || !hasOauthState) return null;
+
+  console.info("[auth] oauth callback recibido", { pathname: url.pathname });
+
+  const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+  if (error) {
+    console.error("[auth] error al intercambiar código OAuth", error);
+    throw error;
+  }
+
+  url.searchParams.delete("code");
+  url.searchParams.delete("state");
+  url.searchParams.delete("scope");
+  url.searchParams.delete("authuser");
+  url.searchParams.delete("prompt");
+  window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+
+  console.info("[auth] sesión restaurada desde callback OAuth", {
+    userId: data.session?.user?.id ?? null,
+  });
+
+  return data.session ?? null;
 }

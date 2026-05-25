@@ -9,6 +9,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import {
   getProfile,
+  recoverSessionFromOAuthUrl,
   signInWithGoogle,
   signInWithPassword,
   signOut,
@@ -80,20 +81,38 @@ export function SiteHeader({ onSessionChange }: Props) {
     let mounted = true;
 
     async function loadSession() {
-      const { data, error } = await supabase.auth.getSession();
-      if (error || !mounted) return;
-      setSession(data.session);
-      onSessionChange?.(data.session);
-      if (data.session?.user) {
-        const userProfile = await getProfile(data.session.user.id);
-        if (mounted) setProfile(userProfile);
+      try {
+        const oauthSession = await recoverSessionFromOAuthUrl();
+        if (!mounted) return;
+
+        if (oauthSession) {
+          setSession(oauthSession);
+          onSessionChange?.(oauthSession);
+          console.info("[auth] usuario encontrado tras callback OAuth", { userId: oauthSession.user.id });
+          const userProfile = await getProfile(oauthSession.user.id);
+          if (mounted) setProfile(userProfile);
+          return;
+        }
+
+        const { data, error } = await supabase.auth.getSession();
+        if (error || !mounted) return;
+        console.info("[auth] carga inicial getSession", { hasSession: Boolean(data.session), userId: data.session?.user?.id ?? null });
+        setSession(data.session);
+        onSessionChange?.(data.session);
+        if (data.session?.user) {
+          const userProfile = await getProfile(data.session.user.id);
+          if (mounted) setProfile(userProfile);
+        }
+      } catch (error) {
+        console.error("[auth] error en recuperación de sesión inicial", error);
       }
     }
 
     loadSession();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, nextSession) => {
+      async (event, nextSession) => {
+        console.info("[auth] auth state changed", { event, hasSession: Boolean(nextSession), userId: nextSession?.user?.id ?? null });
         setSession(nextSession);
         onSessionChange?.(nextSession);
         if (nextSession?.user) {
