@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { Camera, LogOut, Menu, Settings, UserRound, X } from "lucide-react";
@@ -52,6 +53,7 @@ export function SiteHeader({ onSessionChange }: Props) {
   const [settingsAvatarUrl, setSettingsAvatarUrl] = useState("");
   const [settingsAvatarFile, setSettingsAvatarFile] = useState<File | null>(null);
   const [settingsAvatarPreview, setSettingsAvatarPreview] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   const recoveryMessageType = recoveryMessage
     ? recoveryMessage.startsWith("Revisa tu correo")
@@ -95,6 +97,11 @@ export function SiteHeader({ onSessionChange }: Props) {
       document.body.style.overflow = previousOverflow;
     };
   }, [open]);
+
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -218,6 +225,106 @@ export function SiteHeader({ onSessionChange }: Props) {
       setIsSaving(false);
     }
   };
+
+  const mobileMenu = open ? (
+    <div
+      data-mobile-menu-overlay="true"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 2147483647,
+        minHeight: "100dvh",
+        width: "100vw",
+        backgroundColor: onHero ? "#000000" : "#ffffff",
+        color: onHero ? "#ffffff" : "#111111",
+        overflowY: "auto",
+        isolation: "isolate",
+      }}
+      className="lg:hidden"
+    >
+      <div className="flex min-h-[100dvh] flex-col px-4 pb-8 pt-4 sm:px-6">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center" aria-label="Inicio FEROX" onClick={() => setOpen(false)}>
+            <Image src={scrolled ? "/logo.png" : "/logoblanco.png"} alt="FEROX" width={170} height={48} className="h-10 w-auto" />
+          </Link>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Cerrar menú"
+            className={cn(
+              "inline-flex h-11 w-11 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+              onHero
+                ? "border-white/25 text-white hover:bg-white/10 focus-visible:ring-white/70 focus-visible:ring-offset-black"
+                : "border-border text-foreground hover:bg-muted focus-visible:ring-foreground/50 focus-visible:ring-offset-background",
+            )}
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <nav className="mt-8 flex flex-1 flex-col justify-center" aria-label="Menú móvil">
+          <div className="mx-auto flex w-full max-w-sm flex-col gap-3">
+            {navLinks
+              .filter((link) => link.href !== "#tienda")
+              .map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "rounded-xl px-4 py-3 text-center text-base font-semibold transition",
+                    onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            <Link
+              href="#tienda"
+              onClick={() => setOpen(false)}
+              className={cn(
+                "mt-1 rounded-full px-4 py-3 text-center text-base font-semibold transition",
+                onHero ? "bg-white text-black hover:bg-white/90" : "bg-foreground text-background hover:bg-foreground/90",
+              )}
+            >
+              Tienda
+            </Link>
+
+            {user ? (
+              <>
+                <div className={cn("my-2 h-px", onHero ? "bg-white/20" : "bg-border")} aria-hidden="true" />
+                <button
+                  type="button"
+                  aria-label="Configuración"
+                  onClick={() => {
+                    setSettingsOpen(true);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "rounded-full border px-4 py-3.5 text-sm font-semibold transition",
+                    onHero ? "border-white/30 text-white hover:bg-white/10" : "border-border text-foreground hover:bg-muted",
+                  )}
+                >
+                  Configuración
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className={cn(
+                    "rounded-full border px-4 py-3.5 text-sm font-semibold transition",
+                    onHero ? "border-white/30 text-white hover:bg-white/10" : "border-border text-foreground hover:bg-muted",
+                  )}
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : null}
+          </div>
+        </nav>
+      </div>
+    </div>
+  ) : null;
+
 
   return (
     <header
@@ -384,95 +491,7 @@ export function SiteHeader({ onSessionChange }: Props) {
         </div>
       ) : null}
 
-      {open ? (
-        <div
-          className={cn(
-            "fixed inset-0 z-[90] lg:hidden",
-            onHero ? "bg-black/95 text-white" : "bg-background text-foreground",
-          )}
-        >
-          <div className="flex min-h-[100dvh] flex-col overflow-y-auto px-4 pb-8 pt-4 sm:px-6">
-            <div className="flex items-center justify-between">
-              <Link href="/" className="flex items-center" aria-label="Inicio FEROX" onClick={() => setOpen(false)}>
-                <Image src={scrolled ? "/logo.png" : "/logoblanco.png"} alt="FEROX" width={170} height={48} className="h-10 w-auto" />
-              </Link>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="Cerrar menú"
-                className={cn(
-                  "inline-flex h-11 w-11 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-                  onHero
-                    ? "border-white/25 text-white hover:bg-white/10 focus-visible:ring-white/70 focus-visible:ring-offset-black"
-                    : "border-border text-foreground hover:bg-muted focus-visible:ring-foreground/50 focus-visible:ring-offset-background",
-                )}
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <nav className="mt-8 flex flex-1 flex-col justify-center" aria-label="Menú móvil">
-              <div className="mx-auto flex w-full max-w-sm flex-col gap-3">
-                {navLinks
-                  .filter((link) => link.href !== "#tienda")
-                  .map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        "rounded-xl px-4 py-3 text-center text-base font-semibold transition",
-                        onHero ? "text-white hover:bg-white/10" : "text-foreground hover:bg-muted",
-                      )}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                <Link
-                  href="#tienda"
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "mt-1 rounded-full px-4 py-3 text-center text-base font-semibold transition",
-                    onHero ? "bg-white text-black hover:bg-white/90" : "bg-foreground text-background hover:bg-foreground/90",
-                  )}
-                >
-                  Tienda
-                </Link>
-
-                {user ? (
-                  <>
-                    <div className={cn("my-2 h-px", onHero ? "bg-white/20" : "bg-border")} aria-hidden="true" />
-                    <button
-                      type="button"
-                      aria-label="Configuración"
-                      onClick={() => {
-                        setSettingsOpen(true);
-                        setOpen(false);
-                      }}
-                      className={cn(
-                        "rounded-full border px-4 py-3.5 text-sm font-semibold transition",
-                        onHero ? "border-white/30 text-white hover:bg-white/10" : "border-border text-foreground hover:bg-muted",
-                      )}
-                    >
-                      Configuración
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSignOut}
-                      className={cn(
-                        "rounded-full border px-4 py-3.5 text-sm font-semibold transition",
-                        onHero ? "border-white/30 text-white hover:bg-white/10" : "border-border text-foreground hover:bg-muted",
-                      )}
-                    >
-                      Cerrar sesión
-                    </button>
-                  </>
-                ) : null}
-              </div>
-            </nav>
-          </div>
-        </div>
-      ) : null}
+      {mounted && open && mobileMenu ? createPortal(mobileMenu, document.body) : null}
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
