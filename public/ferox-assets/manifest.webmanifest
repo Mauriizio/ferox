@@ -1,52 +1,32 @@
-{
-  "name": "FEROX ",
-  "short_name": "FEROX APP",
-  "description": "Assets generados con IconFull",
+﻿{
+  "name": "FEROX - Nutrición BARF Premium",
+  "short_name": "FEROX",
+  "description": "Nutrición BARF premium para perros. Calculadora, comunidad y recomendaciones personalizadas.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#f5f5f4",
-  "theme_color": "#0b0b0b",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "./icon-512-maskable.png",
+      "src": "/ferox-assets/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/ferox-assets/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "./android-chrome-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "./android-chrome-512x512.png",
+      "src": "/ferox-assets/icon-512-maskable.png",
       "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "./icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "./icon-384.png",
-      "sizes": "384x384",
-      "type": "image/png"
-    },
-    {
-      "src": "./icon-256.png",
-      "sizes": "256x256",
-      "type": "image/png"
-    },
-    {
-      "src": "./icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "./apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
