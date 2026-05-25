@@ -1,7 +1,6 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Camera, LogOut, Menu, Settings, ShoppingCart, UserRound, X } from "lucide-react";
@@ -10,7 +9,6 @@ import { supabase } from "@/lib/supabase/client";
 import {
   getCurrentSession,
   getProfile,
-  recoverSessionFromOAuthUrl,
   signInWithGoogle,
   signInWithPassword,
   signOut,
@@ -51,7 +49,6 @@ export function SiteHeader({ onSessionChange }: Props) {
   const [settingsAvatarPreview, setSettingsAvatarPreview] = useState("");
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [googleAvailable, setGoogleAvailable] = useState(true);
-  const searchParams = useSearchParams();
 
   const user = session?.user ?? null;
   const onHero = !scrolled;
@@ -66,12 +63,6 @@ export function SiteHeader({ onSessionChange }: Props) {
 
 
   useEffect(() => {
-    if (searchParams.get("authError") === "oauth_callback") {
-      setMessage("No se pudo completar Google OAuth. Revisa la configuración de Redirect URL en Supabase.");
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -83,18 +74,6 @@ export function SiteHeader({ onSessionChange }: Props) {
 
     async function loadSession() {
       try {
-        const oauthSession = await recoverSessionFromOAuthUrl();
-        if (!mounted) return;
-
-        if (oauthSession) {
-          setSession(oauthSession);
-          onSessionChange?.(oauthSession);
-          console.info("[auth] usuario encontrado tras callback OAuth", { userId: oauthSession.user.id });
-          const userProfile = await getProfile(oauthSession.user.id);
-          if (mounted) setProfile(userProfile);
-          return;
-        }
-
         const currentSession = await getCurrentSession();
         if (!mounted) return;
         console.info("[auth] carga inicial getSession", { hasSession: Boolean(currentSession), userId: currentSession?.user?.id ?? null });
@@ -113,7 +92,6 @@ export function SiteHeader({ onSessionChange }: Props) {
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (event, nextSession) => {
-        console.info("[auth] auth state changed", { event, hasSession: Boolean(nextSession), userId: nextSession?.user?.id ?? null });
         try {
           setSession(nextSession);
           onSessionChange?.(nextSession);
@@ -184,8 +162,6 @@ export function SiteHeader({ onSessionChange }: Props) {
     event.preventDefault();
     if (!user) return;
     setIsSaving(true);
-    console.info("[profile] save profile start");
-    console.info("[auth] loading true", { key: "saveProfile" });
     setMessage("");
     try {
       const nextAvatarUrl = settingsAvatarFile
@@ -208,21 +184,21 @@ export function SiteHeader({ onSessionChange }: Props) {
       setMessage("No se pudo actualizar el perfil. Intenta nuevamente.");
     } finally {
       setIsSaving(false);
-      console.info("[auth] loading false", { key: "saveProfile" });
-      console.info("[profile] save profile end");
     }
   };
 
 
   const handleGoogleSignIn = async () => {
+    console.info("Google button clicked");
     if (isGoogleLoading) return;
-    console.info("[auth] login Google click");
+
     setIsGoogleLoading(true);
-    console.info("[auth] loading true", { key: "googleLogin" });
     setMessage("");
+
     try {
       await signInWithGoogle();
     } catch (error) {
+      console.error("OAuth error", error);
       const reason = error instanceof Error ? error.message.toLowerCase() : "";
       if (reason.includes("provider") && reason.includes("enabled")) {
         setGoogleAvailable(false);
@@ -232,7 +208,6 @@ export function SiteHeader({ onSessionChange }: Props) {
       }
     } finally {
       setIsGoogleLoading(false);
-      console.info("[auth] loading false", { key: "googleLogin" });
     }
   };
 
