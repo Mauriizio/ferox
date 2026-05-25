@@ -437,36 +437,29 @@ export function SiteHeader({ onSessionChange }: Props) {
           )}
         </div>
 
-        <div className="flex items-center gap-2 lg:hidden">
-          {user ? (
-            <button
-              type="button"
-              onClick={() => setSettingsOpen(true)}
-              aria-label="Configuración"
-              className={cn(
-                "inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full transition",
-                onHero ? "border border-white/30 bg-white/10 text-white hover:bg-white/15" : "border border-border bg-muted text-foreground hover:bg-muted/80",
-              )}
-            >
-              {profile?.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
-              ) : (
-                <UserRound className="h-4 w-4" />
-              )}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setAuthOpen(true)}
-              className={cn(
-                "inline-flex h-10 items-center justify-center rounded-full px-3 text-sm font-semibold transition",
-                onHero ? "bg-white text-black hover:bg-white/90" : "bg-foreground text-background hover:bg-foreground/90",
-              )}
-            >
-              Entrar
-            </button>
-          )}
+        <div className="flex items-center gap-1 lg:hidden">
+          <button
+            type="button"
+            onClick={() => {
+              if (user) {
+                setSettingsOpen(true);
+                return;
+              }
+              setAuthOpen(true);
+            }}
+            aria-label={user ? "Configuración" : "Entrar"}
+            className={cn(
+              "inline-flex h-8 w-8 items-center justify-center transition",
+              onHero ? "text-white/95 hover:text-white" : "text-foreground hover:text-foreground/80",
+            )}
+          >
+            {user && profile?.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.avatar_url} alt="Avatar" className="h-6 w-6 rounded-full object-cover" />
+            ) : (
+              <UserRound className="h-5 w-5" />
+            )}
+          </button>
         </div>
 
         <button type="button" onClick={() => setOpen((v) => !v)} className={cn("inline-flex h-10 w-10 items-center justify-center rounded-md border lg:hidden", onHero ? "border-white/25 text-white" : "border-border text-foreground")} aria-label="Abrir menú">
