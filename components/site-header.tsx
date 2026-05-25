@@ -52,6 +52,14 @@ export function SiteHeader({ onSessionChange }: Props) {
   const [settingsAvatarFile, setSettingsAvatarFile] = useState<File | null>(null);
   const [settingsAvatarPreview, setSettingsAvatarPreview] = useState("");
 
+  const recoveryMessageType = recoveryMessage
+    ? recoveryMessage.startsWith("Revisa tu correo")
+      ? "success"
+      : recoveryMessage.startsWith("No se pudo")
+        ? "error"
+        : "loading"
+    : "idle";
+
   const user = session?.user ?? null;
   const onHero = !scrolled;
 
@@ -332,7 +340,21 @@ export function SiteHeader({ onSessionChange }: Props) {
               ) : null}
               <button type="button" onClick={() => signInWithGoogle()} className="mt-2 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
               {message ? <p className="mt-2 text-xs text-muted-foreground">{message}</p> : null}
-              {recoveryMessage ? <p className="mt-2 text-xs text-muted-foreground">{recoveryMessage}</p> : null}
+              {recoveryMessage ? (
+                <p
+                  className={`mt-2 rounded-lg border px-2.5 py-2 text-xs ${
+                    recoveryMessageType === "error"
+                      ? "border-red-200 bg-red-50 text-red-700"
+                      : recoveryMessageType === "success"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        : "border-border bg-muted text-muted-foreground"
+                  }`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {recoveryMessage}
+                </p>
+              ) : null}
             </div>
           </div>
         </div>
@@ -408,7 +430,21 @@ export function SiteHeader({ onSessionChange }: Props) {
                     ) : null}
                     <button type="button" onClick={() => signInWithGoogle()} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
                     {message ? <p className="text-xs text-muted-foreground">{message}</p> : null}
-                    {recoveryMessage ? <p className="text-xs text-muted-foreground">{recoveryMessage}</p> : null}
+                    {recoveryMessage ? (
+                      <p
+                        className={`rounded-lg border px-2.5 py-2 text-xs ${
+                          recoveryMessageType === "error"
+                            ? "border-red-200 bg-red-50 text-red-700"
+                            : recoveryMessageType === "success"
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              : "border-border bg-muted text-muted-foreground"
+                        }`}
+                        role="status"
+                        aria-live="polite"
+                      >
+                        {recoveryMessage}
+                      </p>
+                    ) : null}
                   </div>
                 ) : null}
               </>
