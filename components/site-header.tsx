@@ -8,6 +8,7 @@ import { Camera, LogOut, Menu, Settings, ShoppingCart, UserRound, X } from "luci
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import {
+  getCurrentSession,
   getProfile,
   recoverSessionFromOAuthUrl,
   signInWithGoogle,
@@ -94,13 +95,13 @@ export function SiteHeader({ onSessionChange }: Props) {
           return;
         }
 
-        const { data, error } = await supabase.auth.getSession();
-        if (error || !mounted) return;
-        console.info("[auth] carga inicial getSession", { hasSession: Boolean(data.session), userId: data.session?.user?.id ?? null });
-        setSession(data.session);
-        onSessionChange?.(data.session);
-        if (data.session?.user) {
-          const userProfile = await getProfile(data.session.user.id);
+        const currentSession = await getCurrentSession();
+        if (!mounted) return;
+        console.info("[auth] carga inicial getSession", { hasSession: Boolean(currentSession), userId: currentSession?.user?.id ?? null });
+        setSession(currentSession);
+        onSessionChange?.(currentSession);
+        if (currentSession?.user) {
+          const userProfile = await getProfile(currentSession.user.id);
           if (mounted) setProfile(userProfile);
         }
       } catch (error) {
@@ -113,13 +114,18 @@ export function SiteHeader({ onSessionChange }: Props) {
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (event, nextSession) => {
         console.info("[auth] auth state changed", { event, hasSession: Boolean(nextSession), userId: nextSession?.user?.id ?? null });
-        setSession(nextSession);
-        onSessionChange?.(nextSession);
-        if (nextSession?.user) {
-          const userProfile = await getProfile(nextSession.user.id);
-          setProfile(userProfile);
-        } else {
-          setProfile(null);
+        try {
+          setSession(nextSession);
+          onSessionChange?.(nextSession);
+          if (nextSession?.user) {
+            const userProfile = await getProfile(nextSession.user.id);
+            if (mounted) setProfile(userProfile);
+          } else if (mounted) {
+            setProfile(null);
+          }
+        } catch (error) {
+          console.error("[auth] error manejando auth state change", error);
+          if (mounted) setMessage("No se pudo sincronizar la sesión. Intenta refrescar.");
         }
       },
     );
@@ -178,6 +184,8 @@ export function SiteHeader({ onSessionChange }: Props) {
     event.preventDefault();
     if (!user) return;
     setIsSaving(true);
+    console.info("[profile] save profile start");
+    console.info("[auth] loading true", { key: "saveProfile" });
     setMessage("");
     try {
       const nextAvatarUrl = settingsAvatarFile
@@ -200,6 +208,31 @@ export function SiteHeader({ onSessionChange }: Props) {
       setMessage("No se pudo actualizar el perfil. Intenta nuevamente.");
     } finally {
       setIsSaving(false);
+      console.info("[auth] loading false", { key: "saveProfile" });
+      console.info("[profile] save profile end");
+    }
+  };
+
+
+  const handleGoogleSignIn = async () => {
+    if (isGoogleLoading) return;
+    console.info("[auth] login Google click");
+    setIsGoogleLoading(true);
+    console.info("[auth] loading true", { key: "googleLogin" });
+    setMessage("");
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      const reason = error instanceof Error ? error.message.toLowerCase() : "";
+      if (reason.includes("provider") && reason.includes("enabled")) {
+        setGoogleAvailable(false);
+        setMessage("Google OAuth no está habilitado en Supabase. Actívalo para continuar.");
+      } else {
+        setMessage("No se pudo iniciar con Google. Verifica Redirect URL y proveedor OAuth.");
+      }
+    } finally {
+      setIsGoogleLoading(false);
+      console.info("[auth] loading false", { key: "googleLogin" });
     }
   };
 
@@ -325,23 +358,7 @@ export function SiteHeader({ onSessionChange }: Props) {
                 <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
                 <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
               </form>
-              <button type="button" disabled={isGoogleLoading || !googleAvailable} onClick={async () => {
-                setIsGoogleLoading(true);
-                setMessage("");
-                try {
-                  await signInWithGoogle();
-                } catch (error) {
-                  const reason = error instanceof Error ? error.message.toLowerCase() : "";
-                  if (reason.includes("provider") && reason.includes("enabled")) {
-                    setGoogleAvailable(false);
-                    setMessage("Google OAuth no está habilitado en Supabase. Actívalo para continuar.");
-                  } else {
-                    setMessage("No se pudo iniciar con Google. Verifica Redirect URL y proveedor OAuth.");
-                  }
-                } finally {
-                  setIsGoogleLoading(false);
-                }
-              }} className="mt-2 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60">{isGoogleLoading ? "Redirigiendo..." : googleAvailable ? "Continuar con Google" : "Google no disponible"}</button>
+              <button type="button" disabled={isGoogleLoading || !googleAvailable} onClick={handleGoogleSignIn} className="mt-2 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60">{isGoogleLoading ? "Redirigiendo..." : googleAvailable ? "Continuar con Google" : "Google no disponible"}</button>
               {message ? <p className="mt-2 text-xs text-muted-foreground">{message}</p> : null}
             </div>
           </div>
@@ -401,23 +418,7 @@ export function SiteHeader({ onSessionChange }: Props) {
                       <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
                       <button type="submit" disabled={isSaving} className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
                     </form>
-                    <button type="button" disabled={isGoogleLoading || !googleAvailable} onClick={async () => {
-                      setIsGoogleLoading(true);
-                      setMessage("");
-                      try {
-                        await signInWithGoogle();
-                      } catch (error) {
-                        const reason = error instanceof Error ? error.message.toLowerCase() : "";
-                        if (reason.includes("provider") && reason.includes("enabled")) {
-                          setGoogleAvailable(false);
-                          setMessage("Google OAuth no está habilitado en Supabase. Actívalo para continuar.");
-                        } else {
-                          setMessage("No se pudo iniciar con Google. Verifica Redirect URL y proveedor OAuth.");
-                        }
-                      } finally {
-                        setIsGoogleLoading(false);
-                      }
-                    }} className="rounded-full border border-border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60">{isGoogleLoading ? "Redirigiendo..." : googleAvailable ? "Continuar con Google" : "Google no disponible"}</button>
+                    <button type="button" disabled={isGoogleLoading || !googleAvailable} onClick={handleGoogleSignIn} className="rounded-full border border-border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60">{isGoogleLoading ? "Redirigiendo..." : googleAvailable ? "Continuar con Google" : "Google no disponible"}</button>
                     {message ? <p className="text-xs text-muted-foreground">{message}</p> : null}
                   </div>
                 ) : null}

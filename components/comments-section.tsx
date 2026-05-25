@@ -149,6 +149,8 @@ export function CommentsSection() {
   const handleDeleteComment = async (commentId: string) => {
     if (!user) return;
     setIsSaving(true);
+    console.info("[comments] publish comment start");
+    console.info("[auth] loading true", { key: "publishComment" });
     setMessage("");
 
     try {
@@ -160,6 +162,8 @@ export function CommentsSection() {
       setMessage(getSupabaseErrorMessage(error));
     } finally {
       setIsSaving(false);
+      console.info("[auth] loading false", { key: "publishComment" });
+      console.info("[comments] publish comment end");
     }
   };
 
