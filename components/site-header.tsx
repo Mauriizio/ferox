@@ -437,6 +437,31 @@ export function SiteHeader({ onSessionChange }: Props) {
           )}
         </div>
 
+        <div className="flex items-center gap-1 lg:hidden">
+          <button
+            type="button"
+            onClick={() => {
+              if (user) {
+                setSettingsOpen(true);
+                return;
+              }
+              setAuthOpen(true);
+            }}
+            aria-label={user ? "Configuración" : "Entrar"}
+            className={cn(
+              "inline-flex h-8 w-8 items-center justify-center transition",
+              onHero ? "text-white/95 hover:text-white" : "text-foreground hover:text-foreground/80",
+            )}
+          >
+            {user && profile?.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.avatar_url} alt="Avatar" className="h-6 w-6 rounded-full object-cover" />
+            ) : (
+              <UserRound className="h-5 w-5" />
+            )}
+          </button>
+        </div>
+
         <button type="button" onClick={() => setOpen((v) => !v)} className={cn("inline-flex h-10 w-10 items-center justify-center rounded-md border lg:hidden", onHero ? "border-white/25 text-white" : "border-border text-foreground")} aria-label="Abrir menú">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -493,6 +518,58 @@ export function SiteHeader({ onSessionChange }: Props) {
       ) : null}
 
       {mounted && open && mobileMenu ? createPortal(mobileMenu, document.body) : null}
+
+      <Dialog open={authOpen && !user} onOpenChange={setAuthOpen}>
+        <DialogContent className="sm:max-w-md lg:hidden">
+          <DialogHeader>
+            <DialogTitle>Iniciar sesión</DialogTitle>
+            <DialogDescription>Accede a tu cuenta FEROX.</DialogDescription>
+          </DialogHeader>
+          <div className="mb-1 flex gap-2 text-sm font-semibold">
+            <button type="button" onClick={() => setMode("login")} className={cn("rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
+            <button type="button" onClick={() => setMode("signup")} className={cn("rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
+          </div>
+          <form onSubmit={handleAuthSubmit} className="space-y-2">
+            {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+            <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
+          </form>
+          {mode === "login" ? (
+            <>
+              <button type="button" onClick={() => setRecoveryOpen((value) => !value)} className="text-xs font-medium text-muted-foreground underline underline-offset-4">
+                ¿Olvidaste tu contraseña?
+              </button>
+              {recoveryOpen ? (
+                <form onSubmit={handleSendRecovery} className="mt-2 space-y-2 rounded-xl border border-border p-3">
+                  <input type="email" required value={recoveryEmail} onChange={(e) => setRecoveryEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
+                  <button type="submit" disabled={isSendingRecovery} className="w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">
+                    {isSendingRecovery ? "Enviando..." : "Enviar enlace"}
+                  </button>
+                </form>
+              ) : null}
+            </>
+          ) : null}
+          <button type="button" onClick={() => signInWithGoogle()} className="mt-1 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
+          {message ? <p className="mt-1 text-xs text-muted-foreground">{message}</p> : null}
+          {recoveryMessage ? (
+            <p
+              className={`mt-2 rounded-lg border px-2.5 py-2 text-xs ${
+                recoveryMessageType === "error"
+                  ? "border-red-200 bg-red-50 text-red-700"
+                  : recoveryMessageType === "success"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-border bg-muted text-muted-foreground"
+              }`}
+              role="status"
+              aria-live="polite"
+            >
+              {recoveryMessage}
+            </p>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
