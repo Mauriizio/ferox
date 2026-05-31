@@ -77,6 +77,16 @@ const emptyDogForm: DogFormData = {
   photo_url: null,
 };
 
+function logSubmitDiagnostic(
+  event: string,
+  details: Record<string, unknown> = {},
+) {
+  console.info("[FEROX submit diagnóstico]", {
+    event,
+    timestamp: new Date().toISOString(),
+    ...details,
+  });
+}
 
 export function AccountPetsSection() {
   const [session, setSession] = useState<Session | null>(null);
@@ -180,6 +190,11 @@ export function AccountPetsSection() {
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    logSubmitDiagnostic("setIsSaving(true)", {
+      caller: "handleAuthSubmit",
+      isSaving,
+      isAddDogDialogOpen,
+    });
     setIsSaving(true);
     setMessage("");
 
@@ -197,6 +212,11 @@ export function AccountPetsSection() {
       logSupabaseError("Autenticación", error);
       setMessage(getSupabaseErrorMessage(error));
     } finally {
+      logSubmitDiagnostic("setIsSaving(false)", {
+        caller: "handleAuthSubmit.finally",
+        isSaving,
+        isAddDogDialogOpen,
+      });
       setIsSaving(false);
     }
   };
@@ -297,6 +317,11 @@ export function AccountPetsSection() {
       return;
     }
 
+    logSubmitDiagnostic("setIsSaving(true)", {
+      caller: "handleProfileSubmit",
+      isSaving,
+      isAddDogDialogOpen,
+    });
     setIsSaving(true);
     setMessage("");
 
@@ -323,27 +348,63 @@ export function AccountPetsSection() {
       logSupabaseError("Guardar perfil", error);
       setMessage(getSupabaseErrorMessage(error));
     } finally {
+      logSubmitDiagnostic("setIsSaving(false)", {
+        caller: "handleProfileSubmit.finally",
+        isSaving,
+        isAddDogDialogOpen,
+      });
       setIsSaving(false);
     }
   };
 
   const handleDogSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    logSubmitDiagnostic("handleDogSubmit:start", {
+      isSaving,
+      isAddDogDialogOpen,
+      hasUser: Boolean(user),
+      userId: user?.id ?? null,
+      nombre: dogForm.nombre.trim() || null,
+      edad: dogForm.edad,
+      hasPhoto: Boolean(dogPhotoFile),
+    });
+
     if (!user) {
+      logSubmitDiagnostic("handleDogSubmit:return", {
+        reason: "sin usuario",
+        isSaving,
+        isAddDogDialogOpen,
+      });
       setMessage("Inicia sesión para registrar perros.");
       return;
     }
 
     if (!dogForm.nombre.trim()) {
+      logSubmitDiagnostic("handleDogSubmit:return", {
+        reason: "nombre vacío",
+        isSaving,
+        isAddDogDialogOpen,
+      });
       setMessage("Agrega al menos el nombre del perro para guardarlo.");
       return;
     }
 
     if (dogForm.edad === null || !Number.isInteger(dogForm.edad)) {
+      logSubmitDiagnostic("handleDogSubmit:return", {
+        reason: "edad inválida",
+        edad: dogForm.edad,
+        isSaving,
+        isAddDogDialogOpen,
+      });
       setMessage("Agrega la edad numérica del perro en años.");
       return;
     }
 
+    logSubmitDiagnostic("setIsSaving(true)", {
+      caller: "handleDogSubmit",
+      isSaving,
+      isAddDogDialogOpen,
+    });
     setIsSaving(true);
     setMessage("");
 
@@ -375,12 +436,23 @@ export function AccountPetsSection() {
       setDogs((currentDogs) => [dog, ...currentDogs]);
       setDogForm(emptyDogForm);
       clearDogPhotoSelection();
+      logSubmitDiagnostic("modal:close", {
+        caller: "handleDogSubmit.success",
+        previousOpen: isAddDogDialogOpen,
+        nextOpen: false,
+        isSaving,
+      });
       setIsAddDogDialogOpen(false);
       setMessage(`${dog.nombre} quedó guardado correctamente.`);
     } catch (error) {
       logSupabaseError("Crear perro", error);
       setMessage(getSupabaseErrorMessage(error));
     } finally {
+      logSubmitDiagnostic("setIsSaving(false)", {
+        caller: "handleDogSubmit.finally",
+        isSaving,
+        isAddDogDialogOpen,
+      });
       setIsSaving(false);
     }
   };
@@ -388,6 +460,11 @@ export function AccountPetsSection() {
   const handleDeleteDog = async (dog: Dog) => {
     if (!user) return;
 
+    logSubmitDiagnostic("setIsSaving(true)", {
+      caller: "handleDeleteDog",
+      isSaving,
+      isAddDogDialogOpen,
+    });
     setIsSaving(true);
     setMessage("");
 
@@ -413,6 +490,11 @@ export function AccountPetsSection() {
       logSupabaseError("Eliminar perro", error);
       setMessage(getSupabaseErrorMessage(error));
     } finally {
+      logSubmitDiagnostic("setIsSaving(false)", {
+        caller: "handleDeleteDog.finally",
+        isSaving,
+        isAddDogDialogOpen,
+      });
       setIsSaving(false);
     }
   };
@@ -431,6 +513,11 @@ export function AccountPetsSection() {
       return;
     }
 
+    logSubmitDiagnostic("setIsSaving(true)", {
+      caller: "handleUpdateDog",
+      isSaving,
+      isAddDogDialogOpen,
+    });
     setIsSaving(true);
     setMessage("");
 
@@ -475,6 +562,11 @@ export function AccountPetsSection() {
       logSupabaseError("Editar perro", error);
       setMessage(getSupabaseErrorMessage(error));
     } finally {
+      logSubmitDiagnostic("setIsSaving(false)", {
+        caller: "handleUpdateDog.finally",
+        isSaving,
+        isAddDogDialogOpen,
+      });
       setIsSaving(false);
     }
   };
@@ -486,6 +578,11 @@ export function AccountPetsSection() {
   };
 
   const handleSignOut = async () => {
+    logSubmitDiagnostic("setIsSaving(true)", {
+      caller: "handleSignOut",
+      isSaving,
+      isAddDogDialogOpen,
+    });
     setIsSaving(true);
     setMessage("");
 
@@ -498,14 +595,60 @@ export function AccountPetsSection() {
       logSupabaseError("Cerrar sesión", error);
       setMessage(getSupabaseErrorMessage(error));
     } finally {
+      logSubmitDiagnostic("setIsSaving(false)", {
+        caller: "handleSignOut.finally",
+        isSaving,
+        isAddDogDialogOpen,
+      });
       setIsSaving(false);
     }
+  };
+
+
+  const handleAddDogDialogOpenChange = (open: boolean) => {
+    logSubmitDiagnostic("modal:onOpenChange", {
+      previousOpen: isAddDogDialogOpen,
+      nextOpen: open,
+      isSaving,
+    });
+    setIsAddDogDialogOpen(open);
+  };
+
+  const handleAddDogButtonClick = () => {
+    logSubmitDiagnostic("modal:open", {
+      previousOpen: isAddDogDialogOpen,
+      nextOpen: true,
+      isSaving,
+    });
+    setIsAddDogDialogOpen(true);
+  };
+
+  const handleAddDogSubmitButtonClick = () => {
+    logSubmitDiagnostic("submit button:click", {
+      isSaving,
+      isAddDogDialogOpen,
+      disabled: isSaving,
+      loadingState: isSaving ? "Guardando..." : "Añadir perro",
+    });
   };
 
 
   if (isLoading) return null;
 
   if (!user) return null;
+
+  const addDogSubmitDisabled = isSaving;
+  const addDogSubmitLoadingState = isSaving ? "Guardando..." : "Añadir perro";
+
+  logSubmitDiagnostic("modal:render", {
+    isSaving,
+    isAddDogDialogOpen,
+  });
+  logSubmitDiagnostic("submit button:render", {
+    isSaving,
+    disabled: addDogSubmitDisabled,
+    loadingState: addDogSubmitLoadingState,
+  });
 
   return (
     <section
@@ -523,7 +666,7 @@ export function AccountPetsSection() {
         <div className="mt-8 space-y-5">
             <div className="flex flex-col items-center justify-center gap-3 text-center">
               <h2 className="ferox-display-title text-center text-3xl font-normal tracking-tight text-foreground sm:text-4xl">Mis perros</h2>
-              <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-4 py-2 text-sm font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
+              <button type="button" onClick={handleAddDogButtonClick} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-4 py-2 text-sm font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
             </div>
             {dogs.length > 0 ? (
               <div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -571,7 +714,14 @@ export function AccountPetsSection() {
             )}
           </div>
       </div>
-      <Dialog open={isAddDogDialogOpen} onOpenChange={setIsAddDogDialogOpen}>
+      <Dialog open={isAddDogDialogOpen} onOpenChange={handleAddDogDialogOpenChange}>
+        {(() => {
+          logSubmitDiagnostic("modal:render:inside", {
+            isSaving,
+            isAddDogDialogOpen,
+          });
+          return null;
+        })()}
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Agregar nuevo perro</DialogTitle>
@@ -590,9 +740,9 @@ export function AccountPetsSection() {
                 <input type="file" accept="image/*" onChange={handleDogPhotoFileChange} className={imageInputClassName} />
               </label>
             </div>
-            <button type="submit" disabled={isSaving} className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60">
+            <button type="submit" onClick={handleAddDogSubmitButtonClick} disabled={addDogSubmitDisabled} className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60">
               <Plus className="h-4 w-4" />
-              {isSaving ? "Guardando..." : "Añadir perro"}
+              {addDogSubmitLoadingState}
             </button>
           </form>
         </DialogContent>
