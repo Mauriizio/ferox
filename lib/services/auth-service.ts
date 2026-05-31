@@ -1,7 +1,13 @@
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/supabase/database.types";
-import { isMissingSchemaError } from "@/lib/supabase/schema-errors";
+import {
+  getAuthDurationMs,
+  getAuthErrorDiagnostic,
+  getAuthSessionDiagnostic,
+  getAuthDiagnosticTime,
+  logAuthDiagnostic,
+} from "@/lib/services/auth-diagnostics";
 
 export type AuthMode = "login" | "signup";
 
@@ -27,9 +33,44 @@ function normalizeProfile(row: ProfileRow | null): Profile | null {
 }
 
 export async function getCurrentSession(): Promise<Session | null> {
-  const { data, error } = await supabase.auth.getSession();
-  if (error) throw error;
-  return data.session;
+  const currentSessionStartedAt = getAuthDiagnosticTime();
+  logAuthDiagnostic("getCurrentSession:start");
+
+  const getSessionStartedAt = getAuthDiagnosticTime();
+  logAuthDiagnostic("supabase.auth.getSession:start", {
+    caller: "getCurrentSession",
+  });
+
+  try {
+    const { data, error } = await supabase.auth.getSession();
+
+    logAuthDiagnostic("supabase.auth.getSession:done", {
+      caller: "getCurrentSession",
+      durationMs: getAuthDurationMs(getSessionStartedAt),
+      hasError: Boolean(error),
+      ...getAuthSessionDiagnostic(data.session),
+    });
+
+    if (error) throw error;
+
+    logAuthDiagnostic("getCurrentSession:done", {
+      durationMs: getAuthDurationMs(currentSessionStartedAt),
+      ...getAuthSessionDiagnostic(data.session),
+    });
+
+    return data.session;
+  } catch (error) {
+    logAuthDiagnostic("supabase.auth.getSession:error", {
+      caller: "getCurrentSession",
+      durationMs: getAuthDurationMs(getSessionStartedAt),
+      ...getAuthErrorDiagnostic(error),
+    });
+    logAuthDiagnostic("getCurrentSession:error", {
+      durationMs: getAuthDurationMs(currentSessionStartedAt),
+      ...getAuthErrorDiagnostic(error),
+    });
+    throw error;
+  }
 }
 
 export async function signInWithPassword(email: string, password: string) {

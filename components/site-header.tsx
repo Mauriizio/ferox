@@ -8,6 +8,14 @@ import { Camera, LogOut, Menu, Settings, UserRound, X } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import {
+  getAuthDurationMs,
+  getAuthErrorDiagnostic,
+  getAuthSessionDiagnostic,
+  getAuthDiagnosticTime,
+  logAuthDiagnostic,
+  logAuthStateChangeDiagnostic,
+} from "@/lib/services/auth-diagnostics";
+import {
   getProfile,
   signInWithGoogle,
   sendPasswordRecoveryEmail,
@@ -107,8 +115,41 @@ export function SiteHeader({ onSessionChange }: Props) {
     let mounted = true;
 
     async function loadSession() {
-      const { data, error } = await supabase.auth.getSession();
-      if (error || !mounted) return;
+      const getSessionStartedAt = getAuthDiagnosticTime();
+      logAuthDiagnostic("supabase.auth.getSession:start", {
+        caller: "SiteHeader.loadSession",
+      });
+
+      let sessionResult;
+      try {
+        sessionResult = await supabase.auth.getSession();
+      } catch (error) {
+        logAuthDiagnostic("supabase.auth.getSession:error", {
+          caller: "SiteHeader.loadSession",
+          durationMs: getAuthDurationMs(getSessionStartedAt),
+          ...getAuthErrorDiagnostic(error),
+        });
+        throw error;
+      }
+
+      const { data, error } = sessionResult;
+
+      logAuthDiagnostic("supabase.auth.getSession:done", {
+        caller: "SiteHeader.loadSession",
+        durationMs: getAuthDurationMs(getSessionStartedAt),
+        hasError: Boolean(error),
+        ...getAuthSessionDiagnostic(data.session),
+      });
+
+      if (error) {
+        logAuthDiagnostic("supabase.auth.getSession:error", {
+          caller: "SiteHeader.loadSession",
+          durationMs: getAuthDurationMs(getSessionStartedAt),
+          ...getAuthErrorDiagnostic(error),
+        });
+        return;
+      }
+      if (!mounted) return;
       setSession(data.session);
       onSessionChange?.(data.session);
       if (data.session?.user) {
@@ -121,13 +162,37 @@ export function SiteHeader({ onSessionChange }: Props) {
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, nextSession) => {
-        setSession(nextSession);
-        onSessionChange?.(nextSession);
-        if (nextSession?.user) {
-          const userProfile = await getProfile(nextSession.user.id);
-          setProfile(userProfile);
-        } else {
-          setProfile(null);
+        const authStateStartedAt = getAuthDiagnosticTime();
+        logAuthStateChangeDiagnostic(_event, nextSession, {
+          caller: "SiteHeader",
+          phase: "start",
+        });
+
+        try {
+          setSession(nextSession);
+          onSessionChange?.(nextSession);
+          if (nextSession?.user) {
+            const userProfile = await getProfile(nextSession.user.id);
+            setProfile(userProfile);
+          } else {
+            setProfile(null);
+          }
+        } catch (error) {
+          logAuthDiagnostic("supabase.auth.onAuthStateChange:error", {
+            caller: "SiteHeader",
+            authEvent: _event,
+            durationMs: getAuthDurationMs(authStateStartedAt),
+            ...getAuthSessionDiagnostic(nextSession),
+            ...getAuthErrorDiagnostic(error),
+          });
+          throw error;
+        } finally {
+          logAuthDiagnostic("supabase.auth.onAuthStateChange:done", {
+            caller: "SiteHeader",
+            authEvent: _event,
+            durationMs: getAuthDurationMs(authStateStartedAt),
+            ...getAuthSessionDiagnostic(nextSession),
+          });
         }
       },
     );

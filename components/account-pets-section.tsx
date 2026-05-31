@@ -61,6 +61,15 @@ import {
   logSupabaseError,
 } from "@/lib/services/supabase-error";
 import { supabase } from "@/lib/supabase/client";
+import {
+  getAuthDurationMs,
+  getAuthErrorDiagnostic,
+  getAuthSessionDiagnostic,
+  getAuthUserDiagnostic,
+  getAuthDiagnosticTime,
+  logAuthDiagnostic,
+  logAuthStateChangeDiagnostic,
+} from "@/lib/services/auth-diagnostics";
 import type {
   Dog,
   Profile,
@@ -77,22 +86,6 @@ const emptyDogForm: DogFormData = {
   photo_url: null,
 };
 
-const getDiagnosticTime = () =>
-  typeof performance !== "undefined" ? performance.now() : Date.now();
-
-const getDurationMs = (startedAt: number) =>
-  Math.round((getDiagnosticTime() - startedAt) * 100) / 100;
-
-const logDogCreationDiagnostic = (
-  event: string,
-  details: Record<string, unknown> = {},
-) => {
-  console.info("[FEROX crear perro diagnóstico]", {
-    event,
-    timestamp: new Date().toISOString(),
-    ...details,
-  });
-};
 
 export function AccountPetsSection() {
   const [session, setSession] = useState<Session | null>(null);
@@ -122,11 +115,6 @@ export function AccountPetsSection() {
   const user = session?.user ?? null;
 
   const refreshDashboard = useCallback(async (userId: string) => {
-    const refreshStartedAt = getDiagnosticTime();
-    logDogCreationDiagnostic("refreshDashboard:start", {
-      userId,
-    });
-
     const [profileData, userDogs] = await Promise.all([
       getProfile(userId),
       getDogsByUser(userId),
@@ -139,13 +127,6 @@ export function AccountPetsSection() {
     setAvatarFile(null);
     setAvatarPreview(profileData?.avatar_url ?? "");
     setDogs(userDogs);
-
-    logDogCreationDiagnostic("refreshDashboard:done", {
-      userId,
-      durationMs: getDurationMs(refreshStartedAt),
-      dogsCount: userDogs.length,
-      hasProfile: Boolean(profileData),
-    });
   }, []);
 
   useEffect(() => {
@@ -170,19 +151,43 @@ export function AccountPetsSection() {
     loadInitialSession();
 
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      if (nextSession?.user) {
-        refreshDashboard(nextSession.user.id).catch((error) => {
-          logSupabaseError("Refrescar dashboard después de auth", error);
-          setMessage(getSupabaseErrorMessage(error));
+      const authStateStartedAt = getAuthDiagnosticTime();
+      logAuthStateChangeDiagnostic(_event, nextSession, {
+        caller: "AccountPetsSection",
+        phase: "start",
+      });
+
+      try {
+        setSession(nextSession);
+        if (nextSession?.user) {
+          refreshDashboard(nextSession.user.id).catch((error) => {
+            logSupabaseError("Refrescar dashboard después de auth", error);
+            setMessage(getSupabaseErrorMessage(error));
+          });
+        } else {
+          setProfile(null);
+          setDogs([]);
+          setAvatarFile(null);
+          setAvatarPreview("");
+          setDogPhotoFile(null);
+          setDogPhotoPreview("");
+        }
+      } catch (error) {
+        logAuthDiagnostic("supabase.auth.onAuthStateChange:error", {
+          caller: "AccountPetsSection",
+          authEvent: _event,
+          durationMs: getAuthDurationMs(authStateStartedAt),
+          ...getAuthSessionDiagnostic(nextSession),
+          ...getAuthErrorDiagnostic(error),
         });
-      } else {
-        setProfile(null);
-        setDogs([]);
-        setAvatarFile(null);
-        setAvatarPreview("");
-        setDogPhotoFile(null);
-        setDogPhotoPreview("");
+        throw error;
+      } finally {
+        logAuthDiagnostic("supabase.auth.onAuthStateChange:done", {
+          caller: "AccountPetsSection",
+          authEvent: _event,
+          durationMs: getAuthDurationMs(authStateStartedAt),
+          ...getAuthSessionDiagnostic(nextSession),
+        });
       }
     });
 
@@ -357,18 +362,6 @@ export function AccountPetsSection() {
 
   const handleDogSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    const flowStartedAt = getDiagnosticTime();
-    logDogCreationDiagnostic("handleDogSubmit:start", {
-      hasUser: Boolean(user),
-      localUserId: user?.id ?? null,
-      dogName: dogForm.nombre.trim() || null,
-      hasPhoto: Boolean(dogPhotoFile),
-      photoName: dogPhotoFile?.name ?? null,
-      photoType: dogPhotoFile?.type ?? null,
-      photoSizeBytes: dogPhotoFile?.size ?? null,
-    });
-
     if (!user) {
       setMessage("Inicia sesión para registrar perros.");
       return;
@@ -388,55 +381,61 @@ export function AccountPetsSection() {
     setMessage("");
 
     try {
-      let stageStartedAt = getDiagnosticTime();
-      logDogCreationDiagnostic("auth:getUser:start", {
-        elapsedMs: getDurationMs(flowStartedAt),
+      const getUserStartedAt = getAuthDiagnosticTime();
+      logAuthDiagnostic("supabase.auth.getUser:start", {
+        caller: "AccountPetsSection.handleDogSubmit",
         localUserId: user.id,
+        ...getAuthSessionDiagnostic(session),
       });
 
-      const { data: userData, error: userError } =
-        await supabase.auth.getUser();
+      let userResult;
+      try {
+        userResult = await supabase.auth.getUser();
+      } catch (error) {
+        logAuthDiagnostic("supabase.auth.getUser:error", {
+          caller: "AccountPetsSection.handleDogSubmit",
+          durationMs: getAuthDurationMs(getUserStartedAt),
+          localUserId: user.id,
+          ...getAuthSessionDiagnostic(session),
+          ...getAuthErrorDiagnostic(error),
+        });
+        throw error;
+      }
 
-      logDogCreationDiagnostic("auth:getUser:done", {
-        durationMs: getDurationMs(stageStartedAt),
-        elapsedMs: getDurationMs(flowStartedAt),
-        authUserId: userData.user?.id ?? null,
-        localUserId: user.id,
+      const { data: userData, error: userError } = userResult;
+
+      logAuthDiagnostic("supabase.auth.getUser:done", {
+        caller: "AccountPetsSection.handleDogSubmit",
+        durationMs: getAuthDurationMs(getUserStartedAt),
         hasError: Boolean(userError),
+        localUserId: user.id,
+        ...getAuthSessionDiagnostic(session),
+        ...getAuthUserDiagnostic(userData.user),
       });
 
-      if (userError) throw userError;
+      if (userError) {
+        logAuthDiagnostic("supabase.auth.getUser:error", {
+          caller: "AccountPetsSection.handleDogSubmit",
+          durationMs: getAuthDurationMs(getUserStartedAt),
+          localUserId: user.id,
+          ...getAuthSessionDiagnostic(session),
+          ...getAuthErrorDiagnostic(userError),
+        });
+        throw userError;
+      }
       if (!userData.user || userData.user.id !== user.id) {
         throw new Error(
           "No hay una sesión autenticada válida para registrar el perro.",
         );
       }
 
-      let photoUrl: string | null = null;
-      if (dogPhotoFile) {
-        stageStartedAt = getDiagnosticTime();
-        logDogCreationDiagnostic("upload:start", {
-          elapsedMs: getDurationMs(flowStartedAt),
-          fileName: dogPhotoFile.name,
-          fileType: dogPhotoFile.type,
-          fileSizeBytes: dogPhotoFile.size,
-          folder: "dogs",
-          userId: userData.user.id,
-        });
-
-        photoUrl = await uploadImageToMediaBucket({
-          file: dogPhotoFile,
-          userId: userData.user.id,
-          folder: "dogs",
-        });
-
-        logDogCreationDiagnostic("upload:done", {
-          durationMs: getDurationMs(stageStartedAt),
-          elapsedMs: getDurationMs(flowStartedAt),
-          hasPhotoUrl: Boolean(photoUrl),
-          photoUrl,
-        });
-      }
+      const photoUrl = dogPhotoFile
+        ? await uploadImageToMediaBucket({
+            file: dogPhotoFile,
+            userId: userData.user.id,
+            folder: "dogs",
+          })
+        : null;
 
       const dogPayload = {
         ...dogForm,
@@ -444,44 +443,16 @@ export function AccountPetsSection() {
       };
       console.info("[FEROX dogs] form payload", dogPayload);
 
-      stageStartedAt = getDiagnosticTime();
-      logDogCreationDiagnostic("createDog:start", {
-        elapsedMs: getDurationMs(flowStartedAt),
-        userId: userData.user.id,
-        hasPhotoUrl: Boolean(photoUrl),
-      });
-
       const dog = await createDog(userData.user.id, dogPayload);
-
-      logDogCreationDiagnostic("createDog:done", {
-        durationMs: getDurationMs(stageStartedAt),
-        elapsedMs: getDurationMs(flowStartedAt),
-        dogId: dog.id,
-        dogName: dog.nombre,
-        hasPhotoUrl: Boolean(dog.photo_url),
-      });
-
       setDogs((currentDogs) => [dog, ...currentDogs]);
       setDogForm(emptyDogForm);
       clearDogPhotoSelection();
       setMessage(`${dog.nombre} quedó guardado correctamente.`);
     } catch (error) {
-      logDogCreationDiagnostic("handleDogSubmit:error", {
-        elapsedMs: getDurationMs(flowStartedAt),
-        message: getSupabaseErrorMessage(error),
-      });
       logSupabaseError("Crear perro", error);
       setMessage(getSupabaseErrorMessage(error));
     } finally {
-      const finallyStartedAt = getDiagnosticTime();
-      logDogCreationDiagnostic("finally:start", {
-        elapsedMs: getDurationMs(flowStartedAt),
-      });
       setIsSaving(false);
-      logDogCreationDiagnostic("finally:done", {
-        durationMs: getDurationMs(finallyStartedAt),
-        totalDurationMs: getDurationMs(flowStartedAt),
-      });
     }
   };
 

@@ -5,6 +5,15 @@ import { Heart, Send, UserRound } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import {
+  getAuthDurationMs,
+  getAuthErrorDiagnostic,
+  getAuthSessionDiagnostic,
+  getAuthUserDiagnostic,
+  getAuthDiagnosticTime,
+  logAuthDiagnostic,
+  logAuthStateChangeDiagnostic,
+} from "@/lib/services/auth-diagnostics";
+import {
   createComment,
   deleteComment,
   listRecentComments,
@@ -46,8 +55,40 @@ export function CommentsSection() {
 
     async function loadComments() {
       try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        const getSessionStartedAt = getAuthDiagnosticTime();
+        logAuthDiagnostic("supabase.auth.getSession:start", {
+          caller: "CommentsSection.loadComments",
+        });
+
+        let sessionResult;
+        try {
+          sessionResult = await supabase.auth.getSession();
+        } catch (error) {
+          logAuthDiagnostic("supabase.auth.getSession:error", {
+            caller: "CommentsSection.loadComments",
+            durationMs: getAuthDurationMs(getSessionStartedAt),
+            ...getAuthErrorDiagnostic(error),
+          });
+          throw error;
+        }
+
+        const { data, error } = sessionResult;
+
+        logAuthDiagnostic("supabase.auth.getSession:done", {
+          caller: "CommentsSection.loadComments",
+          durationMs: getAuthDurationMs(getSessionStartedAt),
+          hasError: Boolean(error),
+          ...getAuthSessionDiagnostic(data.session),
+        });
+
+        if (error) {
+          logAuthDiagnostic("supabase.auth.getSession:error", {
+            caller: "CommentsSection.loadComments",
+            durationMs: getAuthDurationMs(getSessionStartedAt),
+            ...getAuthErrorDiagnostic(error),
+          });
+          throw error;
+        }
         if (!mounted) return;
 
         setSession(data.session);
@@ -64,11 +105,35 @@ export function CommentsSection() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, nextSession) => {
-        setSession(nextSession);
-        refreshComments(nextSession?.user.id).catch((error) => {
-          logSupabaseError("Refrescar comentarios después de auth", error);
-          setMessage(getSupabaseErrorMessage(error));
+        const authStateStartedAt = getAuthDiagnosticTime();
+        logAuthStateChangeDiagnostic(_event, nextSession, {
+          caller: "CommentsSection",
+          phase: "start",
         });
+
+        try {
+          setSession(nextSession);
+          refreshComments(nextSession?.user.id).catch((error) => {
+            logSupabaseError("Refrescar comentarios después de auth", error);
+            setMessage(getSupabaseErrorMessage(error));
+          });
+        } catch (error) {
+          logAuthDiagnostic("supabase.auth.onAuthStateChange:error", {
+            caller: "CommentsSection",
+            authEvent: _event,
+            durationMs: getAuthDurationMs(authStateStartedAt),
+            ...getAuthSessionDiagnostic(nextSession),
+            ...getAuthErrorDiagnostic(error),
+          });
+          throw error;
+        } finally {
+          logAuthDiagnostic("supabase.auth.onAuthStateChange:done", {
+            caller: "CommentsSection",
+            authEvent: _event,
+            durationMs: getAuthDurationMs(authStateStartedAt),
+            ...getAuthSessionDiagnostic(nextSession),
+          });
+        }
       },
     );
 
@@ -102,8 +167,48 @@ export function CommentsSection() {
     setMessage("");
 
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
+      const getUserStartedAt = getAuthDiagnosticTime();
+      logAuthDiagnostic("supabase.auth.getUser:start", {
+        caller: "CommentsSection.handleCommentSubmit",
+        localUserId: user.id,
+        ...getAuthSessionDiagnostic(session),
+      });
+
+      let userResult;
+      try {
+        userResult = await supabase.auth.getUser();
+      } catch (error) {
+        logAuthDiagnostic("supabase.auth.getUser:error", {
+          caller: "CommentsSection.handleCommentSubmit",
+          durationMs: getAuthDurationMs(getUserStartedAt),
+          localUserId: user.id,
+          ...getAuthSessionDiagnostic(session),
+          ...getAuthErrorDiagnostic(error),
+        });
+        throw error;
+      }
+
+      const { data: userData, error: userError } = userResult;
+
+      logAuthDiagnostic("supabase.auth.getUser:done", {
+        caller: "CommentsSection.handleCommentSubmit",
+        durationMs: getAuthDurationMs(getUserStartedAt),
+        hasError: Boolean(userError),
+        localUserId: user.id,
+        ...getAuthSessionDiagnostic(session),
+        ...getAuthUserDiagnostic(userData.user),
+      });
+
+      if (userError) {
+        logAuthDiagnostic("supabase.auth.getUser:error", {
+          caller: "CommentsSection.handleCommentSubmit",
+          durationMs: getAuthDurationMs(getUserStartedAt),
+          localUserId: user.id,
+          ...getAuthSessionDiagnostic(session),
+          ...getAuthErrorDiagnostic(userError),
+        });
+        throw userError;
+      }
       if (!userData.user || userData.user.id !== user.id) {
         throw new Error("No hay una sesión autenticada válida para comentar.");
       }
