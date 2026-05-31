@@ -51,10 +51,10 @@ export function ShopSection() {
     <section id="tienda" className="border-t border-border bg-background">
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-3 py-3 sm:min-h-[100svh] sm:px-6 sm:py-5 lg:px-8 lg:py-5">
         <div className="mx-auto max-w-3xl text-center sm:text-center">
-          <span className="inline-block text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          <span className="section-eyebrow text-muted-foreground">
             Tienda FEROX
           </span>
-          <h2 className="mt-1.5 text-[2rem] sm:text-3xl md:text-4xl">
+          <h2 className="section-heading">
             Pasa de producto a producto y pide directo
           </h2>
         </div>
@@ -78,11 +78,11 @@ export function ShopSection() {
             >
               <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 92vw, 420px" className="object-cover object-center scale-[1.04]" />
             </button>
-            <h3 className="mt-2 font-serif text-[1.9rem] font-bold leading-none text-foreground sm:text-3xl">{product.name}</h3>
+            <h3 className="mt-2 text-[1.9rem] font-bold leading-none text-foreground sm:text-3xl">{product.name}</h3>
             <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-muted-foreground line-clamp-2 sm:text-base">
               {product.description}
             </p>
-            <p className="mt-1 font-serif text-3xl font-bold text-foreground sm:text-4xl">{product.price}</p>
+            <p className="mt-1 text-3xl font-bold text-foreground sm:text-4xl">{product.price}</p>
  
             <a
               href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -18,6 +18,14 @@
     url("../styles/fonts/ferox-font/ferox.otf") format("opentype"),
     url("../styles/fonts/ferox-font/ferox.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "A4 Speed";
+  src: url("../styles/fonts/a4_speed (1)/A4SPEED-Bold.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -94,8 +102,8 @@
 }
 
 @theme inline {
-  --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-serif: "Sora", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif: "A4 Speed", "Figtree", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -181,13 +189,16 @@
   h4,
   h5,
   h6 {
-    font-family: "Sora", "Manrope", ui-sans-serif, system-ui, sans-serif;
-    letter-spacing: -0.035em;
+    font-family: "A4 Speed", "Figtree", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.015em;
+    text-wrap: balance;
   }
 
   p,
   li {
-    letter-spacing: -0.01em;
+    font-family: "Figtree", ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.005em;
   }
 }
 
@@ -198,6 +209,18 @@
     line-height: 1.05;
     letter-spacing: -0.03em;
     text-wrap: balance;
+  }
+
+  .section-eyebrow {
+    @apply inline-block text-xs font-semibold uppercase tracking-[0.22em];
+  }
+
+  .section-heading {
+    @apply mt-2 text-3xl leading-[1.08] sm:mt-3 sm:text-4xl md:text-5xl;
+  }
+
+  .section-copy {
+    @apply mt-4 max-w-2xl text-base leading-relaxed sm:text-lg;
   }
 
   .viewport-section {
