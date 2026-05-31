@@ -48,6 +48,7 @@ export function SiteHeader() {
   const [settingsAvatarFile, setSettingsAvatarFile] = useState<File | null>(null);
   const [settingsAvatarPreview, setSettingsAvatarPreview] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
 
   const recoveryMessageType = recoveryMessage
     ? recoveryMessage.startsWith("Revisa tu correo")
@@ -94,6 +95,16 @@ export function SiteHeader() {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const updateViewport = () => setIsDesktopViewport(mediaQuery.matches);
+
+    updateViewport();
+    mediaQuery.addEventListener("change", updateViewport);
+
+    return () => mediaQuery.removeEventListener("change", updateViewport);
   }, []);
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -424,7 +435,7 @@ export function SiteHeader() {
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
-      {authOpen && !user ? (
+      {authOpen && !user && isDesktopViewport ? (
         <div className="pointer-events-none absolute inset-x-0 top-full z-50 hidden lg:block">
           <div className="mx-auto flex w-full max-w-7xl justify-end px-4 sm:px-6 lg:px-8">
             <div className="pointer-events-auto mt-3 w-full max-w-sm rounded-2xl border border-border bg-background p-4 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
@@ -477,7 +488,7 @@ export function SiteHeader() {
 
       {mounted && open && mobileMenu ? createPortal(mobileMenu, document.body) : null}
 
-      <Dialog open={authOpen && !user} onOpenChange={setAuthOpen}>
+      <Dialog open={authOpen && !user && !isDesktopViewport} onOpenChange={setAuthOpen}>
         <DialogContent className="sm:max-w-md lg:hidden">
           <DialogHeader>
             <DialogTitle>Iniciar sesión</DialogTitle>
