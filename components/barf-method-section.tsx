@@ -47,7 +47,7 @@ export function BarfMethodSection() {
 
         <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-background/20 bg-background/10 p-4 text-center sm:p-5">
           <p className="text-sm leading-relaxed text-background/75 sm:text-base">
-            Esta sección resume la base de la fórmula. La transición, tolerancias y advertencias responsables quedan detalladas en la guía siguiente.
+            Ahora que conoces la base de la fórmula, revisa la guía responsable para hacer el cambio de forma gradual y segura.
           </p>
         </div>
       </div>

@@ -473,9 +473,12 @@ export function AccountPetsSection() {
   return (
     <section
       id="cuenta"
-      className="border-t border-border bg-[linear-gradient(180deg,#f7f7f7_0%,#ffffff_100%)]"
+      className="relative overflow-hidden border-t border-border bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.08),transparent_34%),linear-gradient(180deg,#f7f7f7_0%,#ffffff_100%)]"
     >
-      <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+      <PawPrint className="pointer-events-none absolute -left-8 top-20 h-32 w-32 rotate-[-18deg] text-foreground/[0.035]" aria-hidden="true" />
+      <PawPrint className="pointer-events-none absolute right-6 top-44 h-24 w-24 rotate-[18deg] text-foreground/[0.04]" aria-hidden="true" />
+      <PawPrint className="pointer-events-none absolute bottom-14 left-1/2 h-40 w-40 -translate-x-1/2 rotate-[10deg] text-foreground/[0.025]" aria-hidden="true" />
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         {message ? (
           <div className="mb-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
@@ -483,20 +486,24 @@ export function AccountPetsSection() {
           </div>
         ) : null}
 
-        <div className="mt-8 space-y-5">
-            <div className="flex flex-col items-center justify-center gap-3 text-center">
-              <h2 className="ferox-display-title text-center text-3xl font-normal tracking-tight text-foreground sm:text-4xl">Mis perros</h2>
-              <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-4 py-2 text-sm font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
+        <div className="mt-8 rounded-[2rem] border border-border/80 bg-background/75 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.08)] backdrop-blur sm:p-6">
+            <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+              <div>
+                <span className="section-eyebrow text-muted-foreground">Dashboard</span>
+                <h2 className="ferox-display-title text-3xl font-normal tracking-tight text-foreground sm:text-4xl">Mis perros</h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Gestiona sus datos, revisa su porción diaria y pide directo por WhatsApp.</p>
+              </div>
+              <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-full border border-foreground bg-foreground px-5 py-3 text-sm font-semibold text-background shadow-[0_14px_32px_rgba(0,0,0,0.18)] transition hover:bg-foreground/90"><Plus className="h-4 w-4" />Agregar perro</button>
             </div>
             {dogs.length > 0 ? (
-              <div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mx-auto mt-6 grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {dogs.map((dog) => {
                   const recommendation = calculateDogFood(dog);
                   const dogOrderMessage = encodeURIComponent(
                     `Hola FEROX BARF, quiero pedir comida para ${dog.nombre}. Recomendación diaria: ${recommendation.gramosDia}g.`,
                   );
                   return (
-                    <article key={dog.id} className="rounded-3xl border border-border bg-background p-4 shadow-sm">
+                    <article key={dog.id} className="rounded-3xl border border-border bg-background/95 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(0,0,0,0.10)]">
                       <div className="mx-auto h-20 w-20 overflow-hidden rounded-full bg-muted">
                         {dog.photo_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
