@@ -88,6 +88,32 @@ function logSubmitDiagnostic(
   });
 }
 
+function getSubmitDiagnosticRuntime(session?: Session | null) {
+  return {
+    documentVisibilityState:
+      typeof document !== "undefined" ? document.visibilityState : null,
+    navigatorOnLine:
+      typeof navigator !== "undefined" ? navigator.onLine : null,
+    sessionUserId: session?.user?.id ?? null,
+    hasAccessToken: Boolean(session?.access_token),
+    hasRefreshToken: Boolean(session?.refresh_token),
+    sessionExpiresAt: session?.expires_at ?? null,
+    sessionExpiresAtIso: session?.expires_at
+      ? new Date(session.expires_at * 1000).toISOString()
+      : null,
+  };
+}
+
+function getSubmitAwaitDurationMs(startedAt: number) {
+  return (
+    Math.round(
+      ((typeof performance !== "undefined" ? performance.now() : Date.now()) -
+        startedAt) *
+        100,
+    ) / 100
+  );
+}
+
 export function AccountPetsSection() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -431,10 +457,71 @@ export function AccountPetsSection() {
     try {
       let awaitStartedAt =
         typeof performance !== "undefined" ? performance.now() : Date.now();
+      logSubmitDiagnostic("await:getSession:start", {
+        durationMs: getSubmitDurationMs(),
+        isSaving,
+        isAddDogDialogOpen,
+        ...getSubmitDiagnosticRuntime(session),
+      });
+
+      let sessionResult;
+      try {
+        sessionResult = await supabase.auth.getSession();
+      } catch (error) {
+        logSubmitDiagnostic("await:getSession:error", {
+          durationMs: getSubmitDurationMs(),
+          awaitDurationMs: getSubmitAwaitDurationMs(awaitStartedAt),
+          error,
+          ...getSubmitDiagnosticRuntime(session),
+        });
+        throw error;
+      }
+
+      logSubmitDiagnostic("await:getSession:done", {
+        durationMs: getSubmitDurationMs(),
+        awaitDurationMs: getSubmitAwaitDurationMs(awaitStartedAt),
+        hasError: Boolean(sessionResult.error),
+        error: sessionResult.error ?? null,
+        ...getSubmitDiagnosticRuntime(sessionResult.data.session),
+      });
+
+      awaitStartedAt =
+        typeof performance !== "undefined" ? performance.now() : Date.now();
+      logSubmitDiagnostic("await:refreshSession:start", {
+        durationMs: getSubmitDurationMs(),
+        isSaving,
+        isAddDogDialogOpen,
+        ...getSubmitDiagnosticRuntime(sessionResult.data.session),
+      });
+
+      let refreshResult;
+      try {
+        refreshResult = await supabase.auth.refreshSession();
+      } catch (error) {
+        logSubmitDiagnostic("await:refreshSession:error", {
+          durationMs: getSubmitDurationMs(),
+          awaitDurationMs: getSubmitAwaitDurationMs(awaitStartedAt),
+          error,
+          ...getSubmitDiagnosticRuntime(sessionResult.data.session),
+        });
+        throw error;
+      }
+
+      logSubmitDiagnostic("await:refreshSession:done", {
+        durationMs: getSubmitDurationMs(),
+        awaitDurationMs: getSubmitAwaitDurationMs(awaitStartedAt),
+        hasError: Boolean(refreshResult.error),
+        error: refreshResult.error ?? null,
+        ...getSubmitDiagnosticRuntime(refreshResult.data.session),
+      });
+
+      awaitStartedAt =
+        typeof performance !== "undefined" ? performance.now() : Date.now();
       logSubmitDiagnostic("await:getUser:start", {
         durationMs: getSubmitDurationMs(),
         isSaving,
         isAddDogDialogOpen,
+        ...getSubmitDiagnosticRuntime(refreshResult.data.session),
       });
 
       let userResult;
@@ -443,30 +530,21 @@ export function AccountPetsSection() {
       } catch (error) {
         logSubmitDiagnostic("await:getUser:error", {
           durationMs: getSubmitDurationMs(),
-          awaitDurationMs:
-            Math.round(
-              ((typeof performance !== "undefined"
-                ? performance.now()
-                : Date.now()) -
-                awaitStartedAt) *
-                100,
-            ) / 100,
+          awaitDurationMs: getSubmitAwaitDurationMs(awaitStartedAt),
           error,
+          ...getSubmitDiagnosticRuntime(refreshResult.data.session),
         });
         throw error;
       }
 
       logSubmitDiagnostic("await:getUser:done", {
         durationMs: getSubmitDurationMs(),
-        awaitDurationMs:
-          Math.round(
-            ((typeof performance !== "undefined" ? performance.now() : Date.now()) -
-              awaitStartedAt) *
-              100,
-          ) / 100,
+        awaitDurationMs: getSubmitAwaitDurationMs(awaitStartedAt),
         hasUser: Boolean(userResult.data.user),
         userId: userResult.data.user?.id ?? null,
         hasError: Boolean(userResult.error),
+        error: userResult.error ?? null,
+        ...getSubmitDiagnosticRuntime(refreshResult.data.session),
       });
 
       const { data: userData, error: userError } = userResult;
