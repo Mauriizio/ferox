@@ -75,7 +75,7 @@ export function BenefitsSection() {
                 <div className="flex h-9 w-9 sm:h-10 sm:w-10 lg:h-12 lg:w-12 items-center justify-center rounded-full border border-background/20 group-hover:border-background/50 transition-colors">
                   <Icon className="h-4 w-4 lg:h-5 lg:w-5" aria-hidden="true" />
                 </div>
-                <h3 className="mt-5 text-xl font-bold lg:text-2xl">
+                <h3 className="mt-5 font-sans text-xl font-extrabold tracking-tight lg:text-2xl">
                   {benefit.title}
                 </h3>
                 <p className="mt-2 text-sm sm:text-base text-background/70 leading-relaxed">

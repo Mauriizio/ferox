@@ -9,6 +9,7 @@ import { ShopSection } from "@/components/shop-section";
 import { SocialProofGallerySection } from "@/components/social-proof-gallery-section";
 import { CommentsSection } from "@/components/comments-section";
 import { AccountPetsSection } from "@/components/account-pets-section";
+import { ResponsibleFeedingSection } from "@/components/responsible-feeding-section";
 import { CtaSection } from "@/components/cta-section";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsappFloat } from "@/components/whatsapp-float";
@@ -40,6 +41,7 @@ export default function HomePage() {
           <BenefitsSection />
           <CalculatorSection />
           <BarfMethodSection />
+          <ResponsibleFeedingSection />
           <SocialProofGallerySection />
           <CommentsSection />
           <CtaSection />

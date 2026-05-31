@@ -9,28 +9,20 @@ const PHONE = "56927973379";
 
 const products = [
   {
-    name: "Fórmula Vacuno",
-    subtitle: "Proteína principal de vacuno",
+    name: "BARF mix de proteína",
+    subtitle: "Pollo y carne",
     description:
-      "Receta BARF completa con carne, órganos y vegetales frescos para una nutrición diaria equilibrada.",
-    price: "$ 5.990",
-    image: "/product/product1.png",
-  },
-  {
-    name: "Mix de Proteína",
-    subtitle: "Combinación balanceada",
-    description:
-      "Blend de proteínas pensado para rotación nutricional y mayor variedad en la alimentación del perro.",
-    price: "$ 6.490",
+      "Mezcla BARF con pollo y carne para una alimentación diaria real, fresca y balanceada.",
+    price: "$ 3.000",
     image: "/product/product2.png",
   },
   {
-    name: "Snack de Pollo",
-    subtitle: "Premio natural",
+    name: "BARF solo de vacuno",
+    subtitle: "Proteína de vacuno",
     description:
-      "Snack funcional ideal para reforzar entrenamiento o complementar su rutina con una opción natural.",
-    price: "$ 15.990",
-    image: "/product/product3.png",
+      "Fórmula BARF de vacuno con ingredientes reales para perros que prefieren una proteína principal.",
+    price: "$ 3.500",
+    image: "/product/product1.png",
   },
 ];
 
@@ -55,7 +47,7 @@ export function ShopSection() {
             Tienda FEROX
           </span>
           <h2 className="section-heading">
-            Pasa de producto a producto y pide directo
+            Elige tu BARF y pide directo
           </h2>
         </div>
 

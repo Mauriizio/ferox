@@ -32,14 +32,18 @@ export function SiteFooter() {
                 <MessageCircle className="h-4 w-4" />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/barfferox"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-foreground hover:text-background transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4" />
               </a>
               <a
-                href="#"
+                href="https://www.facebook.com/profile.php?id=61579530517514"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-foreground hover:text-background transition-colors"
                 aria-label="Facebook"
               >
@@ -88,8 +92,28 @@ export function SiteFooter() {
                 </a>
               </li>
               <li>
-                <a href="mailto:hola@feroxbarf.cl" className="hover:text-foreground transition-colors">
-                  hola@feroxbarf.cl
+                <a href="mailto:Ferox156500@gmail.com" className="hover:text-foreground transition-colors">
+                  Ferox156500@gmail.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.instagram.com/barfferox"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Instagram @barfferox
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.facebook.com/profile.php?id=61579530517514"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Facebook FEROX
                 </a>
               </li>
               <li>Santiago, Chile</li>
