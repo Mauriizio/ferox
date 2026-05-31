@@ -1,5 +1,6 @@
 ﻿import type { Metadata, Viewport } from "next"
 import "./globals.css"
+import { Toaster } from "@/components/ui/toaster"
 
 const title = "FEROX BARF — Alimentación natural para tu perro"
 const description =
@@ -65,6 +66,7 @@ export default function RootLayout({
     <html lang="es" className="bg-background">
       <body className="font-sans antialiased">
         {children}
+        <Toaster />
         {process.env.NODE_ENV === "production"}
       </body>
     </html>

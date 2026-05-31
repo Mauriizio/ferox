@@ -18,35 +18,6 @@ type DogRow = Partial<Dog> & {
   user_id: string;
 };
 
-
-const getDogDiagnosticTime = () =>
-  typeof performance !== "undefined" ? performance.now() : Date.now();
-
-const getDogDiagnosticDurationMs = (startedAt: number) =>
-  Math.round((getDogDiagnosticTime() - startedAt) * 100) / 100;
-
-function logCreateDogDiagnostic(
-  event: string,
-  details: Record<string, unknown> = {},
-) {
-  console.info("[FEROX createDog diagnóstico]", {
-    event,
-    timestamp: new Date().toISOString(),
-    ...details,
-  });
-}
-
-function logCreateDogError(
-  event: string,
-  details: Record<string, unknown> = {},
-) {
-  console.error("[FEROX createDog diagnóstico]", {
-    event,
-    timestamp: new Date().toISOString(),
-    ...details,
-  });
-}
-
 function normalizeDog(row: DogRow): Dog {
   return {
     id: row.id,
@@ -78,10 +49,6 @@ export async function createDog(
   userId: string,
   dog: DogFormData,
 ): Promise<Dog> {
-  const createDogStartedAt = getDogDiagnosticTime();
-  let insertStartedAt = createDogStartedAt;
-  let insertErrorLogged = false;
-
   const payload = {
     user_id: userId,
     nombre: dog.nombre.trim(),
@@ -94,76 +61,14 @@ export async function createDog(
     photo_url: dog.photo_url?.trim() || null,
   };
 
-  logCreateDogDiagnostic("createDog:start", {
-    user_id: payload.user_id,
-    nombre: payload.nombre,
-  });
+  const { data, error } = await supabase
+    .from("dogs")
+    .insert(payload)
+    .select("*")
+    .single();
 
-  console.info("[FEROX dogs] create payload", payload);
-
-  try {
-    insertStartedAt = getDogDiagnosticTime();
-    logCreateDogDiagnostic("before insert", {
-      durationMs: getDogDiagnosticDurationMs(createDogStartedAt),
-      user_id: payload.user_id,
-      nombre: payload.nombre,
-    });
-
-    const { data, error } = await supabase
-      .from("dogs")
-      .insert(payload)
-      .select("*")
-      .single();
-
-    logCreateDogDiagnostic("after insert response", {
-      durationMs: getDogDiagnosticDurationMs(insertStartedAt),
-      totalDurationMs: getDogDiagnosticDurationMs(createDogStartedAt),
-      user_id: payload.user_id,
-      nombre: payload.nombre,
-      dogId: (data as DogRow | null)?.id ?? null,
-      hasError: Boolean(error),
-    });
-
-    if (error) {
-      logCreateDogError("insert error", {
-        durationMs: getDogDiagnosticDurationMs(insertStartedAt),
-        totalDurationMs: getDogDiagnosticDurationMs(createDogStartedAt),
-        user_id: payload.user_id,
-        nombre: payload.nombre,
-        dogId: (data as DogRow | null)?.id ?? null,
-        error,
-      });
-      insertErrorLogged = true;
-      throw error;
-    }
-
-    const normalizedDog = normalizeDog(data as DogRow);
-    logCreateDogDiagnostic("before return", {
-      durationMs: getDogDiagnosticDurationMs(createDogStartedAt),
-      user_id: payload.user_id,
-      nombre: payload.nombre,
-      dogId: normalizedDog.id,
-    });
-
-    return normalizedDog;
-  } catch (error) {
-    if (!insertErrorLogged) {
-      logCreateDogError("insert error", {
-        durationMs: getDogDiagnosticDurationMs(insertStartedAt),
-        totalDurationMs: getDogDiagnosticDurationMs(createDogStartedAt),
-        user_id: payload.user_id,
-        nombre: payload.nombre,
-        error,
-      });
-    }
-    throw error;
-  } finally {
-    logCreateDogDiagnostic("finally", {
-      durationMs: getDogDiagnosticDurationMs(createDogStartedAt),
-      user_id: payload.user_id,
-      nombre: payload.nombre,
-    });
-  }
+  if (error) throw error;
+  return normalizeDog(data as DogRow);
 }
 
 export async function deleteDog(userId: string, dogId: string): Promise<void> {

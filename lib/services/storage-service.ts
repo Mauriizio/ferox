@@ -13,18 +13,6 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
 
 export type MediaFolder = "avatars" | "dogs" | "comments";
 
-
-function logSubmitDiagnostic(
-  event: string,
-  details: Record<string, unknown> = {},
-) {
-  console.info("[FEROX submit diagnóstico]", {
-    event,
-    timestamp: new Date().toISOString(),
-    ...details,
-  });
-}
-
 function slugifyFilenamePart(value: string) {
   return value
     .normalize("NFD")
@@ -84,58 +72,17 @@ export async function uploadImageToMediaBucket({
       : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const path = `${folder}/${userId}/${Date.now()}-${uniqueId}-${safeName}.${extension}`;
 
-  logSubmitDiagnostic("await:storage.upload:start", {
-    folder,
-    userId,
-    path,
-    fileName: file.name,
-    fileType: file.type,
-    fileSizeBytes: file.size,
-  });
-
-  let uploadResult;
-  try {
-    uploadResult = await supabase.storage
-      .from(MEDIA_BUCKET)
-      .upload(path, file, {
-        cacheControl: "3600",
-        contentType: file.type,
-        upsert: false,
-      });
-  } catch (error) {
-    logSubmitDiagnostic("await:storage.upload:error", {
-      folder,
-      userId,
-      path,
-      error,
+  const { error } = await supabase.storage
+    .from(MEDIA_BUCKET)
+    .upload(path, file, {
+      cacheControl: "3600",
+      contentType: file.type,
+      upsert: false,
     });
-    throw error;
-  }
-
-  const { error } = uploadResult;
-
-  logSubmitDiagnostic("await:storage.upload:done", {
-    folder,
-    userId,
-    path,
-    hasError: Boolean(error),
-  });
 
   if (error) throw error;
 
-  logSubmitDiagnostic("[STEP 5] antes de obtener URL pública", {
-    folder,
-    userId,
-    path,
-  });
   const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path);
-  logSubmitDiagnostic("[STEP 6] después de obtener URL pública", {
-    folder,
-    userId,
-    path,
-    publicUrl: data.publicUrl,
-    hasPublicUrl: Boolean(data.publicUrl),
-  });
   return data.publicUrl;
 }
 
