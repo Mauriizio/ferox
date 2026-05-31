@@ -141,8 +141,9 @@ export function CommentsSection() {
   };
 
   return (
-    <section id="comentarios" className="border-t border-border bg-background">
-      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+    <section id="comentarios" className="relative overflow-hidden border-t border-border bg-[linear-gradient(180deg,#ffffff_0%,#f7f7f7_100%)]">
+      <Heart className="pointer-events-none absolute -right-10 top-20 h-40 w-40 rotate-12 text-foreground/[0.025]" aria-hidden="true" />
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">Reseñas reales</span>
           <h2 className="mt-2 ferox-display-title text-3xl sm:text-4xl md:text-5xl">Lo que dice la comunidad FEROX</h2>
@@ -153,33 +154,36 @@ export function CommentsSection() {
             <li className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Cargando reseñas...</li>
           ) : comments.length > 0 ? (
             paginatedComments.map((comment) => (
-              <li key={comment.id} className="rounded-2xl border border-border bg-gradient-to-br from-background to-muted/25 p-6 sm:p-7 lg:p-8 shadow-sm transition-colors hover:border-foreground">
-                <blockquote className="text-base leading-relaxed text-foreground sm:text-lg">
-                  &ldquo;{comment.body}&rdquo;
-                </blockquote>
-                <div className="mt-6 border-t border-border pt-4">
+              <li key={comment.id} className="overflow-hidden rounded-[1.75rem] border border-border bg-background shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(0,0,0,0.08)]">
+                <div className="relative bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.07),transparent_34%),linear-gradient(135deg,#ffffff_0%,#f2f2f2_100%)] p-6 sm:p-7 lg:p-8">
+                  <span className="absolute right-5 top-4 text-5xl leading-none text-foreground/10">“</span>
+                  <blockquote className="relative max-w-3xl text-base leading-relaxed text-foreground sm:text-lg">
+                    &ldquo;{comment.body}&rdquo;
+                  </blockquote>
+                </div>
+                <div className="border-t border-border bg-foreground px-5 py-4 text-background sm:px-6">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <span className="grid h-8 w-8 overflow-hidden rounded-full bg-muted">
+                      <span className="grid h-10 w-10 overflow-hidden rounded-full border border-background/20 bg-background/10">
                         {comment.author_avatar_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={comment.author_avatar_url} alt={comment.author_name ?? "Miembro FEROX"} className="h-full w-full object-cover" />
                         ) : (
-                          <span className="grid h-full w-full place-items-center text-muted-foreground"><UserRound className="h-4 w-4" /></span>
+                          <span className="grid h-full w-full place-items-center text-background/70"><UserRound className="h-4 w-4" /></span>
                         )}
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-foreground">{comment.author_name ?? "Miembro FEROX"}</p>
-                        <p className="text-xs text-muted-foreground">{formatCommentDate(comment.created_at)}</p>
+                        <p className="text-sm font-semibold text-background">{comment.author_name ?? "Miembro FEROX"}</p>
+                        <p className="text-xs text-background/60">{formatCommentDate(comment.created_at)}</p>
                       </div>
                     </div>
-                    <button type="button" onClick={() => handleToggleLike(comment.id)} disabled={!user} className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground disabled:opacity-60">
+                    <button type="button" onClick={() => handleToggleLike(comment.id)} disabled={!user} className="inline-flex items-center gap-1 rounded-full border border-background/20 bg-background px-2.5 py-1 text-xs font-semibold text-foreground transition hover:bg-background/90 disabled:opacity-60">
                       <Heart className={`h-3.5 w-3.5 ${comment.liked_by_current_user ? "fill-current text-red-500" : ""}`} />
                       {comment.likes_count}
                     </button>
                   </div>
                   {user?.id === comment.user_id ? (
-                    <button type="button" onClick={() => handleDeleteComment(comment.id)} disabled={isSaving} className="mt-3 text-xs font-semibold text-muted-foreground hover:text-foreground">
+                    <button type="button" onClick={() => handleDeleteComment(comment.id)} disabled={isSaving} className="mt-3 text-xs font-semibold text-background/65 hover:text-background">
                       Eliminar reseña
                     </button>
                   ) : null}
@@ -215,7 +219,7 @@ export function CommentsSection() {
           </nav>
         ) : null}
 
-        <form className="mt-8 rounded-2xl border border-border bg-background p-4 sm:p-5" onSubmit={handleCommentSubmit}>
+        <form className="mt-8 rounded-[1.75rem] border border-border bg-background p-4 shadow-sm sm:p-5" onSubmit={handleCommentSubmit}>
           <label className="grid gap-2 text-sm font-semibold text-foreground">
             Comentar
             <textarea

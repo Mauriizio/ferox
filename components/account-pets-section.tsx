@@ -503,32 +503,35 @@ export function AccountPetsSection() {
                     `Hola FEROX BARF, quiero pedir comida para ${dog.nombre}. Recomendación diaria: ${recommendation.gramosDia}g.`,
                   );
                   return (
-                    <article key={dog.id} className="rounded-3xl border border-border bg-background/95 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(0,0,0,0.10)]">
-                      <div className="mx-auto h-20 w-20 overflow-hidden rounded-full bg-muted">
+                    <article key={dog.id} className="overflow-hidden rounded-[2rem] border border-border bg-background/95 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(0,0,0,0.10)]">
+                      <div className="relative h-36 overflow-hidden bg-muted sm:h-40">
                         {dog.photo_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={dog.photo_url} alt={dog.nombre} className="h-full w-full object-cover" />
-                        ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-6 w-6" /></div>}
+                        ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />
+                        <span className="absolute bottom-3 left-3 rounded-full bg-background/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">{dog.peso ? `${dog.peso} kg` : "-- kg"}</span>
+                        <span className="absolute bottom-3 right-3 rounded-full bg-background/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">{dog.edad ? `${dog.edad} años` : "-- años"}</span>
                       </div>
-                      <p className="mt-2 text-center text-lg font-semibold">{dog.nombre}</p>
-                      <div className="mt-1 flex items-center justify-between text-sm text-muted-foreground">
-                        <span>{dog.peso ? `${dog.peso} kg` : "-- kg"}</span>
-                        <span>{dog.edad ? `${dog.edad} años` : "-- años"}</span>
-                      </div>
-                      <p className="mt-2 text-center text-3xl font-bold text-foreground">{recommendation.gramosDia}g</p>
-                      <p className="text-center text-xs text-muted-foreground">por día</p>
-                      <a
-                        href={`https://wa.me/56927973379?text=${dogOrderMessage}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-3 py-2 text-xs font-semibold text-background"
-                      >
-                        <MessageCircle className="h-3.5 w-3.5" />
-                        Hacer pedido
-                      </a>
-                      <div className="mt-2 flex justify-center gap-2">
-                        <button type="button" onClick={() => openEditDogDialog(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Editar</button>
-                        <button type="button" onClick={() => setDogToDelete(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Borrar</button>
+                      <div className="p-4">
+                        <p className="text-center text-lg font-extrabold tracking-tight text-foreground">{dog.nombre}</p>
+                        <div className="mx-auto mt-3 w-fit rounded-2xl bg-muted px-5 py-3 text-center">
+                          <p className="text-3xl font-bold text-foreground">{recommendation.gramosDia}g</p>
+                          <p className="text-xs text-muted-foreground">por día</p>
+                        </div>
+                        <a
+                          href={`https://wa.me/56927973379?text=${dogOrderMessage}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-3 py-2 text-xs font-semibold text-background"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5" />
+                          Hacer pedido
+                        </a>
+                        <div className="mt-2 flex justify-center gap-2">
+                          <button type="button" onClick={() => openEditDogDialog(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Editar</button>
+                          <button type="button" onClick={() => setDogToDelete(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Borrar</button>
+                        </div>
                       </div>
                     </article>
                   );
