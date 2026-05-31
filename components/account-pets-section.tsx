@@ -375,6 +375,7 @@ export function AccountPetsSection() {
       setDogs((currentDogs) => [dog, ...currentDogs]);
       setDogForm(emptyDogForm);
       clearDogPhotoSelection();
+      setIsAddDogDialogOpen(false);
       setMessage(`${dog.nombre} quedó guardado correctamente.`);
     } catch (error) {
       logSupabaseError("Crear perro", error);
