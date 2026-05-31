@@ -504,10 +504,10 @@ export function AccountPetsSection() {
                   );
                   return (
                     <article key={dog.id} className="overflow-hidden rounded-[2rem] border border-border bg-background/95 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(0,0,0,0.10)]">
-                      <div className="relative h-36 overflow-hidden bg-muted sm:h-40">
+                      <div className="relative h-44 overflow-hidden bg-muted sm:h-48">
                         {dog.photo_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={dog.photo_url} alt={dog.nombre} className="h-full w-full object-cover" />
+                          <img src={dog.photo_url} alt={dog.nombre} className="h-full w-full object-cover object-top" />
                         ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />
                         <span className="absolute bottom-3 left-3 rounded-full bg-background/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">{dog.peso ? `${dog.peso} kg` : "-- kg"}</span>

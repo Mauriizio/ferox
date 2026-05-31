@@ -161,29 +161,29 @@ export function CommentsSection() {
                     &ldquo;{comment.body}&rdquo;
                   </blockquote>
                 </div>
-                <div className="border-t border-border bg-foreground px-5 py-4 text-background sm:px-6">
+                <div className="border-t border-border bg-muted/45 px-5 py-4 text-foreground sm:px-6">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <span className="grid h-10 w-10 overflow-hidden rounded-full border border-background/20 bg-background/10">
+                      <span className="grid h-10 w-10 overflow-hidden rounded-full border border-border bg-background">
                         {comment.author_avatar_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={comment.author_avatar_url} alt={comment.author_name ?? "Miembro FEROX"} className="h-full w-full object-cover" />
                         ) : (
-                          <span className="grid h-full w-full place-items-center text-background/70"><UserRound className="h-4 w-4" /></span>
+                          <span className="grid h-full w-full place-items-center text-muted-foreground"><UserRound className="h-4 w-4" /></span>
                         )}
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-background">{comment.author_name ?? "Miembro FEROX"}</p>
-                        <p className="text-xs text-background/60">{formatCommentDate(comment.created_at)}</p>
+                        <p className="text-sm font-semibold text-foreground">{comment.author_name ?? "Miembro FEROX"}</p>
+                        <p className="text-xs text-muted-foreground">{formatCommentDate(comment.created_at)}</p>
                       </div>
                     </div>
-                    <button type="button" onClick={() => handleToggleLike(comment.id)} disabled={!user} className="inline-flex items-center gap-1 rounded-full border border-background/20 bg-background px-2.5 py-1 text-xs font-semibold text-foreground transition hover:bg-background/90 disabled:opacity-60">
+                    <button type="button" onClick={() => handleToggleLike(comment.id)} disabled={!user} className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground transition hover:bg-muted disabled:opacity-60">
                       <Heart className={`h-3.5 w-3.5 ${comment.liked_by_current_user ? "fill-current text-red-500" : ""}`} />
                       {comment.likes_count}
                     </button>
                   </div>
                   {user?.id === comment.user_id ? (
-                    <button type="button" onClick={() => handleDeleteComment(comment.id)} disabled={isSaving} className="mt-3 text-xs font-semibold text-background/65 hover:text-background">
+                    <button type="button" onClick={() => handleDeleteComment(comment.id)} disabled={isSaving} className="mt-3 text-xs font-semibold text-muted-foreground hover:text-foreground">
                       Eliminar reseña
                     </button>
                   ) : null}

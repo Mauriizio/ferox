@@ -49,6 +49,9 @@ export function ShopSection() {
           <h2 className="section-heading">
             Elige tu BARF y pide directo
           </h2>
+          <p className="mx-auto mt-3 inline-flex rounded-full border border-border bg-muted/45 px-4 py-2 text-sm font-semibold text-foreground">
+            Delivery $3.500 a cualquier comuna.
+          </p>
         </div>
 
         <div className="mx-auto mt-2 flex w-full max-w-5xl items-center justify-center gap-1 sm:mt-3 sm:gap-4">
