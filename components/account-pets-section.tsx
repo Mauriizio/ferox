@@ -77,6 +77,22 @@ const emptyDogForm: DogFormData = {
   photo_url: null,
 };
 
+const getDiagnosticTime = () =>
+  typeof performance !== "undefined" ? performance.now() : Date.now();
+
+const getDurationMs = (startedAt: number) =>
+  Math.round((getDiagnosticTime() - startedAt) * 100) / 100;
+
+const logDogCreationDiagnostic = (
+  event: string,
+  details: Record<string, unknown> = {},
+) => {
+  console.info("[FEROX crear perro diagnóstico]", {
+    event,
+    timestamp: new Date().toISOString(),
+    ...details,
+  });
+};
 
 export function AccountPetsSection() {
   const [session, setSession] = useState<Session | null>(null);
@@ -106,6 +122,11 @@ export function AccountPetsSection() {
   const user = session?.user ?? null;
 
   const refreshDashboard = useCallback(async (userId: string) => {
+    const refreshStartedAt = getDiagnosticTime();
+    logDogCreationDiagnostic("refreshDashboard:start", {
+      userId,
+    });
+
     const [profileData, userDogs] = await Promise.all([
       getProfile(userId),
       getDogsByUser(userId),
@@ -118,6 +139,13 @@ export function AccountPetsSection() {
     setAvatarFile(null);
     setAvatarPreview(profileData?.avatar_url ?? "");
     setDogs(userDogs);
+
+    logDogCreationDiagnostic("refreshDashboard:done", {
+      userId,
+      durationMs: getDurationMs(refreshStartedAt),
+      dogsCount: userDogs.length,
+      hasProfile: Boolean(profileData),
+    });
   }, []);
 
   useEffect(() => {
@@ -329,6 +357,18 @@ export function AccountPetsSection() {
 
   const handleDogSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const flowStartedAt = getDiagnosticTime();
+    logDogCreationDiagnostic("handleDogSubmit:start", {
+      hasUser: Boolean(user),
+      localUserId: user?.id ?? null,
+      dogName: dogForm.nombre.trim() || null,
+      hasPhoto: Boolean(dogPhotoFile),
+      photoName: dogPhotoFile?.name ?? null,
+      photoType: dogPhotoFile?.type ?? null,
+      photoSizeBytes: dogPhotoFile?.size ?? null,
+    });
+
     if (!user) {
       setMessage("Inicia sesión para registrar perros.");
       return;
@@ -348,8 +388,23 @@ export function AccountPetsSection() {
     setMessage("");
 
     try {
+      let stageStartedAt = getDiagnosticTime();
+      logDogCreationDiagnostic("auth:getUser:start", {
+        elapsedMs: getDurationMs(flowStartedAt),
+        localUserId: user.id,
+      });
+
       const { data: userData, error: userError } =
         await supabase.auth.getUser();
+
+      logDogCreationDiagnostic("auth:getUser:done", {
+        durationMs: getDurationMs(stageStartedAt),
+        elapsedMs: getDurationMs(flowStartedAt),
+        authUserId: userData.user?.id ?? null,
+        localUserId: user.id,
+        hasError: Boolean(userError),
+      });
+
       if (userError) throw userError;
       if (!userData.user || userData.user.id !== user.id) {
         throw new Error(
@@ -357,13 +412,31 @@ export function AccountPetsSection() {
         );
       }
 
-      const photoUrl = dogPhotoFile
-        ? await uploadImageToMediaBucket({
-            file: dogPhotoFile,
-            userId: userData.user.id,
-            folder: "dogs",
-          })
-        : null;
+      let photoUrl: string | null = null;
+      if (dogPhotoFile) {
+        stageStartedAt = getDiagnosticTime();
+        logDogCreationDiagnostic("upload:start", {
+          elapsedMs: getDurationMs(flowStartedAt),
+          fileName: dogPhotoFile.name,
+          fileType: dogPhotoFile.type,
+          fileSizeBytes: dogPhotoFile.size,
+          folder: "dogs",
+          userId: userData.user.id,
+        });
+
+        photoUrl = await uploadImageToMediaBucket({
+          file: dogPhotoFile,
+          userId: userData.user.id,
+          folder: "dogs",
+        });
+
+        logDogCreationDiagnostic("upload:done", {
+          durationMs: getDurationMs(stageStartedAt),
+          elapsedMs: getDurationMs(flowStartedAt),
+          hasPhotoUrl: Boolean(photoUrl),
+          photoUrl,
+        });
+      }
 
       const dogPayload = {
         ...dogForm,
@@ -371,16 +444,44 @@ export function AccountPetsSection() {
       };
       console.info("[FEROX dogs] form payload", dogPayload);
 
+      stageStartedAt = getDiagnosticTime();
+      logDogCreationDiagnostic("createDog:start", {
+        elapsedMs: getDurationMs(flowStartedAt),
+        userId: userData.user.id,
+        hasPhotoUrl: Boolean(photoUrl),
+      });
+
       const dog = await createDog(userData.user.id, dogPayload);
+
+      logDogCreationDiagnostic("createDog:done", {
+        durationMs: getDurationMs(stageStartedAt),
+        elapsedMs: getDurationMs(flowStartedAt),
+        dogId: dog.id,
+        dogName: dog.nombre,
+        hasPhotoUrl: Boolean(dog.photo_url),
+      });
+
       setDogs((currentDogs) => [dog, ...currentDogs]);
       setDogForm(emptyDogForm);
       clearDogPhotoSelection();
       setMessage(`${dog.nombre} quedó guardado correctamente.`);
     } catch (error) {
+      logDogCreationDiagnostic("handleDogSubmit:error", {
+        elapsedMs: getDurationMs(flowStartedAt),
+        message: getSupabaseErrorMessage(error),
+      });
       logSupabaseError("Crear perro", error);
       setMessage(getSupabaseErrorMessage(error));
     } finally {
+      const finallyStartedAt = getDiagnosticTime();
+      logDogCreationDiagnostic("finally:start", {
+        elapsedMs: getDurationMs(flowStartedAt),
+      });
       setIsSaving(false);
+      logDogCreationDiagnostic("finally:done", {
+        durationMs: getDurationMs(finallyStartedAt),
+        totalDurationMs: getDurationMs(flowStartedAt),
+      });
     }
   };
 
