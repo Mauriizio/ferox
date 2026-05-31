@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 const PHONE = "56927973379";
 
@@ -108,6 +108,8 @@ export function ShopSection() {
 
       <Dialog open={imageOpen} onOpenChange={setImageOpen}>
         <DialogContent className="max-w-4xl border-0 bg-black/95 p-2 sm:p-4">
+          <DialogTitle className="sr-only">Imagen ampliada de {product.name}</DialogTitle>
+          <DialogDescription className="sr-only">Vista ampliada del producto seleccionado en la tienda FEROX.</DialogDescription>
           <div className="overflow-auto rounded-xl">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img

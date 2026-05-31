@@ -540,30 +540,28 @@ export function AccountPetsSection() {
             <DialogTitle>Agregar nuevo perro</DialogTitle>
             <DialogDescription>Completa los datos para registrar un perro nuevo.</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleDogSubmit} className="space-y-4">
-            <DogFormFields form={dogForm} setForm={setDogForm} />
-            <div className="grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-center">
-              <label htmlFor="add-dog-photo-file" className="group relative h-32 cursor-pointer overflow-hidden rounded-3xl bg-muted transition hover:ring-4 hover:ring-foreground/10" aria-label="Seleccionar foto del perro">
+          <form onSubmit={handleDogSubmit} className="space-y-5">
+            <div className="space-y-3 rounded-[1.75rem] border border-border bg-muted/20 p-3">
+              <p className="text-sm font-semibold text-foreground">Foto del perro</p>
+              <label htmlFor="add-dog-photo-file" className="group relative block h-44 cursor-pointer overflow-hidden rounded-[1.5rem] bg-muted transition hover:ring-4 hover:ring-foreground/10 sm:h-56" aria-label="Seleccionar foto del perro">
                 {dogPhotoPreview ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={dogPhotoPreview} alt="Vista previa del perro" className="h-full w-full object-cover" />
-                ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>}
+                ) : <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground"><Camera className="h-9 w-9" /><span className="text-sm font-medium">Toca para subir una foto</span></div>}
                 <span className="absolute inset-0 grid place-items-center bg-black/0 text-white opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100">
-                  <Camera className="h-6 w-6" />
+                  <Camera className="h-7 w-7" />
                 </span>
               </label>
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Foto del perro</p>
-                <input id="add-dog-photo-file" type="file" accept="image/*" onChange={handleDogPhotoFileChange} className="sr-only" />
-                <label htmlFor="add-dog-photo-file" className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-foreground px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-muted">
-                  <Camera className="h-4 w-4" />
-                  Seleccionar foto
-                </label>
-              </div>
+              <input id="add-dog-photo-file" type="file" accept="image/*" onChange={handleDogPhotoFileChange} className="sr-only" />
+              <label htmlFor="add-dog-photo-file" className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-foreground px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-background">
+                <Camera className="h-4 w-4" />
+                Seleccionar foto
+              </label>
             </div>
-            <button type="submit" disabled={isSaving} className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60">
+            <DogFormFields form={dogForm} setForm={setDogForm} />
+            <button type="submit" disabled={isSaving} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm font-semibold text-background shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition hover:bg-foreground/90 disabled:opacity-60">
               <Plus className="h-4 w-4" />
-              {isSaving ? "Guardando..." : "Añadir perro"}
+              {isSaving ? "Guardando..." : "Agregar perro"}
             </button>
           </form>
         </DialogContent>
