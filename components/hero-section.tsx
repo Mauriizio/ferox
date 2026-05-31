@@ -6,14 +6,6 @@ import { ArrowRight, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
-import {
-  getAuthDurationMs,
-  getAuthErrorDiagnostic,
-  getAuthSessionDiagnostic,
-  getAuthDiagnosticTime,
-  logAuthDiagnostic,
-  logAuthStateChangeDiagnostic,
-} from "@/lib/services/auth-diagnostics";
 import { getDogsByUser } from "@/lib/services/dog-service";
 import { getProfile } from "@/lib/services/auth-service";
 const PHONE = "56927973379";
@@ -27,40 +19,7 @@ export function HeroSection() {
   useEffect(() => {
     let mounted = true;
     async function load() {
-      const getSessionStartedAt = getAuthDiagnosticTime();
-      logAuthDiagnostic("supabase.auth.getSession:start", {
-        caller: "HeroSection.load",
-      });
-
-      let sessionResult;
-      try {
-        sessionResult = await supabase.auth.getSession();
-      } catch (error) {
-        logAuthDiagnostic("supabase.auth.getSession:error", {
-          caller: "HeroSection.load",
-          durationMs: getAuthDurationMs(getSessionStartedAt),
-          ...getAuthErrorDiagnostic(error),
-        });
-        throw error;
-      }
-
-      const { data, error } = sessionResult;
-
-      logAuthDiagnostic("supabase.auth.getSession:done", {
-        caller: "HeroSection.load",
-        durationMs: getAuthDurationMs(getSessionStartedAt),
-        hasError: Boolean(error),
-        ...getAuthSessionDiagnostic(data.session),
-      });
-
-      if (error) {
-        logAuthDiagnostic("supabase.auth.getSession:error", {
-          caller: "HeroSection.load",
-          durationMs: getAuthDurationMs(getSessionStartedAt),
-          ...getAuthErrorDiagnostic(error),
-        });
-      }
-
+      const { data } = await supabase.auth.getSession();
       if (!mounted) return;
       setSession(data.session);
       if (data.session?.user) {
@@ -76,31 +35,7 @@ export function HeroSection() {
     }
     load();
     const { data: listener } = supabase.auth.onAuthStateChange((_e, next) => {
-      const authStateStartedAt = getAuthDiagnosticTime();
-      logAuthStateChangeDiagnostic(_e, next, {
-        caller: "HeroSection",
-        phase: "start",
-      });
-
-      try {
-        setSession(next);
-      } catch (error) {
-        logAuthDiagnostic("supabase.auth.onAuthStateChange:error", {
-          caller: "HeroSection",
-          authEvent: _e,
-          durationMs: getAuthDurationMs(authStateStartedAt),
-          ...getAuthSessionDiagnostic(next),
-          ...getAuthErrorDiagnostic(error),
-        });
-        throw error;
-      } finally {
-        logAuthDiagnostic("supabase.auth.onAuthStateChange:done", {
-          caller: "HeroSection",
-          authEvent: _e,
-          durationMs: getAuthDurationMs(authStateStartedAt),
-          ...getAuthSessionDiagnostic(next),
-        });
-      }
+      setSession(next);
     });
     return () => {
       mounted = false;

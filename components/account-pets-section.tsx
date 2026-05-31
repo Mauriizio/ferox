@@ -61,15 +61,6 @@ import {
   logSupabaseError,
 } from "@/lib/services/supabase-error";
 import { supabase } from "@/lib/supabase/client";
-import {
-  getAuthDurationMs,
-  getAuthErrorDiagnostic,
-  getAuthSessionDiagnostic,
-  getAuthUserDiagnostic,
-  getAuthDiagnosticTime,
-  logAuthDiagnostic,
-  logAuthStateChangeDiagnostic,
-} from "@/lib/services/auth-diagnostics";
 import type {
   Dog,
   Profile,
@@ -151,43 +142,19 @@ export function AccountPetsSection() {
     loadInitialSession();
 
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      const authStateStartedAt = getAuthDiagnosticTime();
-      logAuthStateChangeDiagnostic(_event, nextSession, {
-        caller: "AccountPetsSection",
-        phase: "start",
-      });
-
-      try {
-        setSession(nextSession);
-        if (nextSession?.user) {
-          refreshDashboard(nextSession.user.id).catch((error) => {
-            logSupabaseError("Refrescar dashboard después de auth", error);
-            setMessage(getSupabaseErrorMessage(error));
-          });
-        } else {
-          setProfile(null);
-          setDogs([]);
-          setAvatarFile(null);
-          setAvatarPreview("");
-          setDogPhotoFile(null);
-          setDogPhotoPreview("");
-        }
-      } catch (error) {
-        logAuthDiagnostic("supabase.auth.onAuthStateChange:error", {
-          caller: "AccountPetsSection",
-          authEvent: _event,
-          durationMs: getAuthDurationMs(authStateStartedAt),
-          ...getAuthSessionDiagnostic(nextSession),
-          ...getAuthErrorDiagnostic(error),
+      setSession(nextSession);
+      if (nextSession?.user) {
+        refreshDashboard(nextSession.user.id).catch((error) => {
+          logSupabaseError("Refrescar dashboard después de auth", error);
+          setMessage(getSupabaseErrorMessage(error));
         });
-        throw error;
-      } finally {
-        logAuthDiagnostic("supabase.auth.onAuthStateChange:done", {
-          caller: "AccountPetsSection",
-          authEvent: _event,
-          durationMs: getAuthDurationMs(authStateStartedAt),
-          ...getAuthSessionDiagnostic(nextSession),
-        });
+      } else {
+        setProfile(null);
+        setDogs([]);
+        setAvatarFile(null);
+        setAvatarPreview("");
+        setDogPhotoFile(null);
+        setDogPhotoPreview("");
       }
     });
 
@@ -381,48 +348,9 @@ export function AccountPetsSection() {
     setMessage("");
 
     try {
-      const getUserStartedAt = getAuthDiagnosticTime();
-      logAuthDiagnostic("supabase.auth.getUser:start", {
-        caller: "AccountPetsSection.handleDogSubmit",
-        localUserId: user.id,
-        ...getAuthSessionDiagnostic(session),
-      });
-
-      let userResult;
-      try {
-        userResult = await supabase.auth.getUser();
-      } catch (error) {
-        logAuthDiagnostic("supabase.auth.getUser:error", {
-          caller: "AccountPetsSection.handleDogSubmit",
-          durationMs: getAuthDurationMs(getUserStartedAt),
-          localUserId: user.id,
-          ...getAuthSessionDiagnostic(session),
-          ...getAuthErrorDiagnostic(error),
-        });
-        throw error;
-      }
-
-      const { data: userData, error: userError } = userResult;
-
-      logAuthDiagnostic("supabase.auth.getUser:done", {
-        caller: "AccountPetsSection.handleDogSubmit",
-        durationMs: getAuthDurationMs(getUserStartedAt),
-        hasError: Boolean(userError),
-        localUserId: user.id,
-        ...getAuthSessionDiagnostic(session),
-        ...getAuthUserDiagnostic(userData.user),
-      });
-
-      if (userError) {
-        logAuthDiagnostic("supabase.auth.getUser:error", {
-          caller: "AccountPetsSection.handleDogSubmit",
-          durationMs: getAuthDurationMs(getUserStartedAt),
-          localUserId: user.id,
-          ...getAuthSessionDiagnostic(session),
-          ...getAuthErrorDiagnostic(userError),
-        });
-        throw userError;
-      }
+      const { data: userData, error: userError } =
+        await supabase.auth.getUser();
+      if (userError) throw userError;
       if (!userData.user || userData.user.id !== user.id) {
         throw new Error(
           "No hay una sesión autenticada válida para registrar el perro.",
