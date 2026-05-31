@@ -2,8 +2,6 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Heart, Send, UserRound } from "lucide-react";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase/client";
 import {
   createComment,
   deleteComment,
@@ -15,6 +13,7 @@ import {
   getSupabaseErrorMessage,
   logSupabaseError,
 } from "@/lib/services/supabase-error";
+import { useAuth } from "@/components/auth-provider";
 
 const formatCommentDate = (createdAt: string | null) => {
   if (!createdAt) return "Ahora";
@@ -26,15 +25,13 @@ const formatCommentDate = (createdAt: string | null) => {
 };
 
 export function CommentsSection() {
-  const [session, setSession] = useState<Session | null>(null);
+  const { user, authLoading } = useAuth();
   const [comments, setComments] = useState<CommentWithMeta[]>([]);
   const [commentBody, setCommentBody] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const user = session?.user ?? null;
 
   const refreshComments = useCallback(async (currentUserId?: string) => {
     const nextComments = await listRecentComments(50, currentUserId);
@@ -44,39 +41,25 @@ export function CommentsSection() {
   useEffect(() => {
     let mounted = true;
 
-    async function loadComments() {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        if (!mounted) return;
+    if (authLoading) return () => {
+      mounted = false;
+    };
 
-        setSession(data.session);
-        await refreshComments(data.session?.user.id);
-      } catch (error) {
+    setIsLoading(true);
+    refreshComments(user?.id)
+      .catch((error) => {
+        if (!mounted) return;
         logSupabaseError("Cargar comentarios", error);
         setMessage(getSupabaseErrorMessage(error));
-      } finally {
+      })
+      .finally(() => {
         if (mounted) setIsLoading(false);
-      }
-    }
-
-    loadComments();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
-        setSession(nextSession);
-        refreshComments(nextSession?.user.id).catch((error) => {
-          logSupabaseError("Refrescar comentarios después de auth", error);
-          setMessage(getSupabaseErrorMessage(error));
-        });
-      },
-    );
+      });
 
     return () => {
       mounted = false;
-      authListener.subscription.unsubscribe();
     };
-  }, [refreshComments]);
+  }, [authLoading, refreshComments, user?.id]);
 
 
 
@@ -102,13 +85,7 @@ export function CommentsSection() {
     setMessage("");
 
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-      if (!userData.user || userData.user.id !== user.id) {
-        throw new Error("No hay una sesión autenticada válida para comentar.");
-      }
-
-      const newComment = await createComment(userData.user.id, commentBody);
+      const newComment = await createComment(user.id, commentBody);
       setComments((currentComments) => [newComment, ...currentComments]);
       setCurrentPage(1);
       setCommentBody("");

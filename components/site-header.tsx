@@ -5,10 +5,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { Camera, LogOut, Menu, Settings, UserRound, X } from "lucide-react";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase/client";
 import {
-  getProfile,
   signInWithGoogle,
   sendPasswordRecoveryEmail,
   signInWithPassword,
@@ -16,7 +13,7 @@ import {
   signUpWithPassword,
   upsertProfile,
 } from "@/lib/services/auth-service";
-import type { Profile } from "@/lib/supabase/database.types";
+import { useAuth } from "@/components/auth-provider";
 import { deleteMediaFile, getMediaPathFromPublicUrl, uploadImageToMediaBucket } from "@/lib/services/storage-service";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -29,14 +26,11 @@ const navLinks = [
   { href: "#tienda", label: "Tienda" },
 ];
 
-type Props = { onSessionChange?: (session: Session | null) => void };
-
-export function SiteHeader({ onSessionChange }: Props) {
+export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user, profile, authLoading, setProfile } = useAuth();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,7 +57,6 @@ export function SiteHeader({ onSessionChange }: Props) {
         : "loading"
     : "idle";
 
-  const user = session?.user ?? null;
   const userName =
     profile?.full_name?.trim() ||
     profile?.username?.trim() ||
@@ -101,41 +94,6 @@ export function SiteHeader({ onSessionChange }: Props) {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadSession() {
-      const { data, error } = await supabase.auth.getSession();
-      if (error || !mounted) return;
-      setSession(data.session);
-      onSessionChange?.(data.session);
-      if (data.session?.user) {
-        const userProfile = await getProfile(data.session.user.id);
-        if (mounted) setProfile(userProfile);
-      }
-    }
-
-    loadSession();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, nextSession) => {
-        setSession(nextSession);
-        onSessionChange?.(nextSession);
-        if (nextSession?.user) {
-          const userProfile = await getProfile(nextSession.user.id);
-          setProfile(userProfile);
-        } else {
-          setProfile(null);
-        }
-      },
-    );
-
-    return () => {
-      mounted = false;
-      listener.subscription.unsubscribe();
-    };
   }, []);
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -478,7 +436,7 @@ export function SiteHeader({ onSessionChange }: Props) {
                 {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
                 <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
                 <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
-                <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
+                <button type="submit" disabled={isSaving || authLoading} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
               </form>
               {mode === "login" ? (
                 <>
@@ -533,7 +491,7 @@ export function SiteHeader({ onSessionChange }: Props) {
             {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
             <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
-            <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
+            <button type="submit" disabled={isSaving || authLoading} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
           </form>
           {mode === "login" ? (
             <>

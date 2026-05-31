@@ -3,13 +3,11 @@
 import {
   ChangeEvent,
   FormEvent,
-  useCallback,
   useEffect,
   useMemo,
   useState,
 } from "react";
 import Image from "next/image";
-import type { Session } from "@supabase/supabase-js";
 import {
   Camera,
   CheckCircle2,
@@ -20,15 +18,7 @@ import {
   Sparkles,
   UserRound,
 } from "lucide-react";
-import {
-  getCurrentSession,
-  getProfile,
-  signInWithGoogle,
-  signInWithPassword,
-  signOut,
-  signUpWithPassword,
-  upsertProfile,
-} from "@/lib/services/auth-service";
+import { upsertProfile } from "@/lib/services/auth-service";
 import {
   createDog,
   deleteDog,
@@ -62,10 +52,8 @@ import {
   logSupabaseError,
 } from "@/lib/services/supabase-error";
 import { supabase } from "@/lib/supabase/client";
-import type {
-  Dog,
-  Profile,
-} from "@/lib/supabase/database.types";
+import { useAuth } from "@/components/auth-provider";
+import type { Dog } from "@/lib/supabase/database.types";
 
 const emptyDogForm: DogFormData = {
   nombre: "",
@@ -96,12 +84,8 @@ function withAsyncTimeout<T>(
 }
 
 export function AccountPetsSection() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user, profile, authLoading, setProfile } = useAuth();
   const [dogs, setDogs] = useState<Dog[]>([]);
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -120,66 +104,49 @@ export function AccountPetsSection() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const user = session?.user ?? null;
-
-  const refreshDashboard = useCallback(async (userId: string) => {
-    const [profileData, userDogs] = await Promise.all([
-      getProfile(userId),
-      getDogsByUser(userId),
-    ]);
-
-    setProfile(profileData);
-    setUsername(profileData?.username ?? "");
-    setFullName(profileData?.full_name ?? "");
-    setAvatarUrl(profileData?.avatar_url ?? "");
+  useEffect(() => {
+    setUsername(profile?.username ?? "");
+    setFullName(profile?.full_name ?? "");
+    setAvatarUrl(profile?.avatar_url ?? "");
     setAvatarFile(null);
-    setAvatarPreview(profileData?.avatar_url ?? "");
-    setDogs(userDogs);
-  }, []);
+    setAvatarPreview(profile?.avatar_url ?? "");
+  }, [profile]);
 
   useEffect(() => {
     let mounted = true;
 
-    async function loadInitialSession() {
-      try {
-        const currentSession = await getCurrentSession();
-        if (!mounted) return;
-        setSession(currentSession);
-        if (currentSession?.user) {
-          await refreshDashboard(currentSession.user.id);
-        }
-      } catch (error) {
-        logSupabaseError("Cargar sesión inicial / dashboard", error);
-        setMessage(getSupabaseErrorMessage(error));
-      } finally {
-        if (mounted) setIsLoading(false);
-      }
+    if (authLoading) return () => {
+      mounted = false;
+    };
+
+    if (!user) {
+      setDogs([]);
+      setDogPhotoFile(null);
+      setDogPhotoPreview("");
+      setIsLoading(false);
+      return () => {
+        mounted = false;
+      };
     }
 
-    loadInitialSession();
-
-    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      if (nextSession?.user) {
-        refreshDashboard(nextSession.user.id).catch((error) => {
-          logSupabaseError("Refrescar dashboard después de auth", error);
-          setMessage(getSupabaseErrorMessage(error));
-        });
-      } else {
-        setProfile(null);
-        setDogs([]);
-        setAvatarFile(null);
-        setAvatarPreview("");
-        setDogPhotoFile(null);
-        setDogPhotoPreview("");
-      }
-    });
+    setIsLoading(true);
+    getDogsByUser(user.id)
+      .then((userDogs) => {
+        if (mounted) setDogs(userDogs);
+      })
+      .catch((error) => {
+        if (!mounted) return;
+        logSupabaseError("Cargar perros del dashboard", error);
+        setMessage(getSupabaseErrorMessage(error));
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
 
     return () => {
       mounted = false;
-      data.subscription.unsubscribe();
     };
-  }, [refreshDashboard]);
+  }, [authLoading, user?.id]);
 
   useEffect(() => {
     return () => {
@@ -194,29 +161,6 @@ export function AccountPetsSection() {
       }
     };
   }, [avatarPreview, dogPhotoPreview, editDogPhotoPreview]);
-
-  const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsSaving(true);
-    setMessage("");
-
-    try {
-      if (authMode === "signup") {
-        await signUpWithPassword(email, password, fullName);
-        setMessage(
-          "Registro creado. Revisa tu correo si Supabase solicita confirmar la cuenta.",
-        );
-      } else {
-        await signInWithPassword(email, password);
-        setMessage("Sesión iniciada correctamente.");
-      }
-    } catch (error) {
-      logSupabaseError("Autenticación", error);
-      setMessage(getSupabaseErrorMessage(error));
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleAvatarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
@@ -383,7 +327,6 @@ export function AccountPetsSection() {
           title: "Sesión expirada",
           description: expiredSessionMessage,
         });
-        setSession(currentSession ?? null);
         setMessage(expiredSessionMessage);
         setIsAddDogDialogOpen(false);
         return;
@@ -522,22 +465,6 @@ export function AccountPetsSection() {
     setDogToDelete(null);
   };
 
-  const handleSignOut = async () => {
-    setIsSaving(true);
-    setMessage("");
-
-    try {
-      await signOut();
-      setEmail("");
-      setPassword("");
-      setMessage("Sesión cerrada.");
-    } catch (error) {
-      logSupabaseError("Cerrar sesión", error);
-      setMessage(getSupabaseErrorMessage(error));
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
 
   if (isLoading) return null;

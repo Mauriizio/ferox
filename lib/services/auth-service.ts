@@ -1,4 +1,4 @@
-import type { Session, User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/supabase/database.types";
 import { isMissingSchemaError } from "@/lib/supabase/schema-errors";
@@ -24,12 +24,6 @@ function normalizeProfile(row: ProfileRow | null): Profile | null {
     created_at: row.created_at ?? null,
     updated_at: row.updated_at ?? null,
   };
-}
-
-export async function getCurrentSession(): Promise<Session | null> {
-  const { data, error } = await supabase.auth.getSession();
-  if (error) throw error;
-  return data.session;
 }
 
 export async function signInWithPassword(email: string, password: string) {
