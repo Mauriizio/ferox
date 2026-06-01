@@ -45,6 +45,7 @@ import {
 import { DogCard } from "@/components/account-pets/dog-card";
 import { DogFormFields } from "@/components/account-pets/dog-form-fields";
 import { EditDogDialog } from "@/components/account-pets/edit-dog-dialog";
+import { PhotoDisplayControls, type DogPhotoDisplaySettings } from "@/components/account-pets/photo-display-controls";
 import { toast } from "@/hooks/use-toast";
 import {
   getSupabaseErrorMessage,
@@ -66,6 +67,70 @@ const emptyDogForm: DogFormData = {
 };
 
 const ASYNC_OPERATION_TIMEOUT_MS = 10_000;
+
+const defaultDogPhotoDisplay: DogPhotoDisplaySettings = {
+  fit: "contain",
+  position: "center",
+  zoom: 100,
+};
+
+function clampDogPhotoZoom(value: number | null) {
+  if (!value || Number.isNaN(value)) return defaultDogPhotoDisplay.zoom;
+  return Math.min(160, Math.max(100, value));
+}
+
+function getDogPhotoBaseUrl(photoUrl: string | null | undefined) {
+  if (!photoUrl) return null;
+  try {
+    const url = new URL(photoUrl);
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return photoUrl.split("#")[0] || photoUrl;
+  }
+}
+
+function getDogPhotoDisplaySettings(photoUrl: string | null | undefined): DogPhotoDisplaySettings {
+  if (!photoUrl) return defaultDogPhotoDisplay;
+  try {
+    const url = new URL(photoUrl);
+    const params = new URLSearchParams(url.hash.replace(/^#/, ""));
+    const fit = params.get("feroxFit") === "cover" ? "cover" : "contain";
+    const position = params.get("feroxPosition") === "top" ? "top" : "center";
+    const zoom = clampDogPhotoZoom(Number(params.get("feroxZoom")));
+    return { fit, position, zoom };
+  } catch {
+    return defaultDogPhotoDisplay;
+  }
+}
+
+function applyDogPhotoDisplaySettings(
+  photoUrl: string | null | undefined,
+  settings: DogPhotoDisplaySettings,
+) {
+  const baseUrl = getDogPhotoBaseUrl(photoUrl);
+  if (!baseUrl) return null;
+  try {
+    const url = new URL(baseUrl);
+    const params = new URLSearchParams();
+    params.set("feroxFit", settings.fit);
+    params.set("feroxPosition", settings.position);
+    params.set("feroxZoom", String(clampDogPhotoZoom(settings.zoom)));
+    url.hash = params.toString();
+    return url.toString();
+  } catch {
+    return baseUrl;
+  }
+}
+
+function getDogPhotoObjectPosition(settings: DogPhotoDisplaySettings) {
+  return settings.position === "top" ? "center top" : "center center";
+}
+
+function getDogPhotoTransformOrigin(settings: DogPhotoDisplaySettings) {
+  return settings.position === "top" ? "center top" : "center center";
+}
+
 
 function withAsyncTimeout<T>(
   promise: Promise<T>,
@@ -93,10 +158,12 @@ export function AccountPetsSection() {
   const [dogForm, setDogForm] = useState<DogFormData>(emptyDogForm);
   const [dogPhotoFile, setDogPhotoFile] = useState<File | null>(null);
   const [dogPhotoPreview, setDogPhotoPreview] = useState("");
+  const [dogPhotoDisplay, setDogPhotoDisplay] = useState<DogPhotoDisplaySettings>(defaultDogPhotoDisplay);
   const [editingDog, setEditingDog] = useState<Dog | null>(null);
   const [editDogForm, setEditDogForm] = useState<DogFormData>(emptyDogForm);
   const [editDogPhotoFile, setEditDogPhotoFile] = useState<File | null>(null);
   const [editDogPhotoPreview, setEditDogPhotoPreview] = useState("");
+  const [editDogPhotoDisplay, setEditDogPhotoDisplay] = useState<DogPhotoDisplaySettings>(defaultDogPhotoDisplay);
   const [dogToDelete, setDogToDelete] = useState<Dog | null>(null);
   const [isAddDogDialogOpen, setIsAddDogDialogOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -205,6 +272,7 @@ export function AccountPetsSection() {
       }
       return "";
     });
+    setDogPhotoDisplay(defaultDogPhotoDisplay);
   };
 
   const openEditDogDialog = (dog: Dog) => {
@@ -220,7 +288,8 @@ export function AccountPetsSection() {
       photo_url: dog.photo_url ?? null,
     });
     setEditDogPhotoFile(null);
-    setEditDogPhotoPreview(dog.photo_url ?? "");
+    setEditDogPhotoPreview(getDogPhotoBaseUrl(dog.photo_url) ?? "");
+    setEditDogPhotoDisplay(getDogPhotoDisplaySettings(dog.photo_url));
   };
 
   const closeEditDogDialog = () => {
@@ -228,6 +297,7 @@ export function AccountPetsSection() {
     setEditDogForm(emptyDogForm);
     setEditDogPhotoFile(null);
     setEditDogPhotoPreview("");
+    setEditDogPhotoDisplay(defaultDogPhotoDisplay);
   };
 
   const handleEditDogPhotoFileChange = (
@@ -237,7 +307,7 @@ export function AccountPetsSection() {
     setEditDogPhotoFile(file);
 
     if (!file) {
-      setEditDogPhotoPreview(editDogForm.photo_url ?? "");
+      setEditDogPhotoPreview(getDogPhotoBaseUrl(editDogForm.photo_url) ?? "");
       return;
     }
 
@@ -331,7 +401,7 @@ export function AccountPetsSection() {
         return;
       }
 
-      const photoUrl = dogPhotoFile
+      const uploadedPhotoUrl = dogPhotoFile
         ? await withAsyncTimeout(
             uploadImageToMediaBucket({
               file: dogPhotoFile,
@@ -344,7 +414,7 @@ export function AccountPetsSection() {
 
       const dogPayload = {
         ...dogForm,
-        photo_url: photoUrl,
+        photo_url: applyDogPhotoDisplaySettings(uploadedPhotoUrl, dogPhotoDisplay),
       };
 
       const dog = await withAsyncTimeout(
@@ -414,13 +484,15 @@ export function AccountPetsSection() {
     setMessage("");
 
     try {
-      const nextPhotoUrl = editDogPhotoFile
+      const nextPhotoBaseUrl = editDogPhotoFile
         ? await uploadImageToMediaBucket({
             file: editDogPhotoFile,
             userId: user.id,
             folder: "dogs",
           })
-        : editDogForm.photo_url ?? null;
+        : getDogPhotoBaseUrl(editDogForm.photo_url);
+
+      const nextPhotoUrl = applyDogPhotoDisplaySettings(nextPhotoBaseUrl, editDogPhotoDisplay);
 
       const updatedDog = await updateDog(user.id, editingDog.id, {
         ...editDogForm,
@@ -502,16 +574,32 @@ export function AccountPetsSection() {
                   const dogOrderMessage = encodeURIComponent(
                     `Hola FEROX BARF, quiero pedir comida para ${dog.nombre}. Recomendación diaria: ${recommendation.gramosDia}g.`,
                   );
+                  const photoDisplay = getDogPhotoDisplaySettings(dog.photo_url);
+                  const photoSrc = getDogPhotoBaseUrl(dog.photo_url);
                   return (
                     <article key={dog.id} className="overflow-hidden rounded-[2rem] border border-border bg-background/95 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(0,0,0,0.10)]">
-                      <div className="relative h-44 overflow-hidden bg-muted sm:h-48">
-                        {dog.photo_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={dog.photo_url} alt={dog.nombre} className="h-full w-full object-cover object-top" />
+                      <div className="relative h-44 overflow-hidden bg-neutral-950 sm:h-48">
+                        {photoSrc ? (
+                          <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={photoSrc} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-45 blur-lg" aria-hidden="true" />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={photoSrc}
+                              alt={dog.nombre}
+                              className="relative z-10 h-full w-full"
+                              style={{
+                                objectFit: photoDisplay.fit,
+                                objectPosition: getDogPhotoObjectPosition(photoDisplay),
+                                transform: `scale(${photoDisplay.zoom / 100})`,
+                                transformOrigin: getDogPhotoTransformOrigin(photoDisplay),
+                              }}
+                            />
+                          </>
                         ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />
-                        <span className="absolute bottom-3 left-3 rounded-full bg-background/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">{dog.peso ? `${dog.peso} kg` : "-- kg"}</span>
-                        <span className="absolute bottom-3 right-3 rounded-full bg-background/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">{dog.edad ? `${dog.edad} años` : "-- años"}</span>
+                        <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/40 via-black/5 to-transparent" />
+                        <span className="absolute bottom-3 left-3 z-30 rounded-full bg-background/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">{dog.peso ? `${dog.peso} kg` : "-- kg"}</span>
+                        <span className="absolute bottom-3 right-3 z-30 rounded-full bg-background/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">{dog.edad ? `${dog.edad} años` : "-- años"}</span>
                       </div>
                       <div className="p-4">
                         <p className="text-center text-lg font-extrabold tracking-tight text-foreground">{dog.nombre}</p>
@@ -556,7 +644,17 @@ export function AccountPetsSection() {
               <label htmlFor="add-dog-photo-file" className="group relative block h-44 cursor-pointer overflow-hidden rounded-[1.5rem] bg-muted transition hover:ring-4 hover:ring-foreground/10 sm:h-56" aria-label="Seleccionar foto del perro">
                 {dogPhotoPreview ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={dogPhotoPreview} alt="Vista previa del perro" className="h-full w-full object-cover" />
+                  <img
+                    src={dogPhotoPreview}
+                    alt="Vista previa del perro"
+                    className="h-full w-full"
+                    style={{
+                      objectFit: dogPhotoDisplay.fit,
+                      objectPosition: getDogPhotoObjectPosition(dogPhotoDisplay),
+                      transform: `scale(${dogPhotoDisplay.zoom / 100})`,
+                      transformOrigin: getDogPhotoTransformOrigin(dogPhotoDisplay),
+                    }}
+                  />
                 ) : <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground"><Camera className="h-9 w-9" /><span className="text-sm font-medium">Toca para subir una foto</span></div>}
                 <span className="absolute inset-0 grid place-items-center bg-black/0 text-white opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100">
                   <Camera className="h-7 w-7" />
@@ -567,6 +665,7 @@ export function AccountPetsSection() {
                 <Camera className="h-4 w-4" />
                 Seleccionar foto
               </label>
+              {dogPhotoPreview ? <PhotoDisplayControls value={dogPhotoDisplay} onChange={setDogPhotoDisplay} /> : null}
             </div>
             <DogFormFields form={dogForm} setForm={setDogForm} />
             <button type="submit" disabled={isSaving} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm font-semibold text-background shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition hover:bg-foreground/90 disabled:opacity-60">
@@ -581,6 +680,8 @@ export function AccountPetsSection() {
         form={editDogForm}
         setForm={setEditDogForm}
         photoPreview={editDogPhotoPreview}
+        photoDisplay={editDogPhotoDisplay}
+        onPhotoDisplayChange={setEditDogPhotoDisplay}
         isSaving={isSaving}
         onClose={closeEditDogDialog}
         onSubmit={handleUpdateDog}

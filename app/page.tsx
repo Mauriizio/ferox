@@ -6,6 +6,7 @@ import { BenefitsSection } from "@/components/benefits-section";
 import { CalculatorSection } from "@/components/calculator-section";
 import { BarfMethodSection } from "@/components/barf-method-section";
 import { ShopSection } from "@/components/shop-section";
+import { SubscriptionPlansSection } from "@/components/subscription-plans-section";
 import { SocialProofGallerySection } from "@/components/social-proof-gallery-section";
 import { CommentsSection } from "@/components/comments-section";
 import { AccountPetsSection } from "@/components/account-pets-section";
@@ -38,6 +39,7 @@ export default function HomePage() {
           <HeroSection />
           {isAuthenticated ? <AccountPetsSection /> : null}
           <ShopSection />
+          <SubscriptionPlansSection />
           <BenefitsSection />
           <CalculatorSection />
           <BarfMethodSection />
