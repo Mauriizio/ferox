@@ -3,13 +3,11 @@
 import {
   ChangeEvent,
   FormEvent,
-  useCallback,
   useEffect,
   useMemo,
   useState,
 } from "react";
 import Image from "next/image";
-import type { Session } from "@supabase/supabase-js";
 import {
   Camera,
   CheckCircle2,
@@ -20,15 +18,7 @@ import {
   Sparkles,
   UserRound,
 } from "lucide-react";
-import {
-  getCurrentSession,
-  getProfile,
-  signInWithGoogle,
-  signInWithPassword,
-  signOut,
-  signUpWithPassword,
-  upsertProfile,
-} from "@/lib/services/auth-service";
+import { upsertProfile } from "@/lib/services/auth-service";
 import {
   createDog,
   deleteDog,
@@ -55,16 +45,14 @@ import {
 import { DogCard } from "@/components/account-pets/dog-card";
 import { DogFormFields } from "@/components/account-pets/dog-form-fields";
 import { EditDogDialog } from "@/components/account-pets/edit-dog-dialog";
-import { imageInputClassName } from "@/components/account-pets/constants";
+import { toast } from "@/hooks/use-toast";
 import {
   getSupabaseErrorMessage,
   logSupabaseError,
 } from "@/lib/services/supabase-error";
 import { supabase } from "@/lib/supabase/client";
-import type {
-  Dog,
-  Profile,
-} from "@/lib/supabase/database.types";
+import { useAuth } from "@/components/auth-provider";
+import type { Dog } from "@/lib/supabase/database.types";
 
 const emptyDogForm: DogFormData = {
   nombre: "",
@@ -77,14 +65,26 @@ const emptyDogForm: DogFormData = {
   photo_url: null,
 };
 
+const ASYNC_OPERATION_TIMEOUT_MS = 10_000;
+
+function withAsyncTimeout<T>(
+  promise: Promise<T>,
+  errorMessage: string,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timeoutId = window.setTimeout(() => {
+      reject(new Error(errorMessage));
+    }, ASYNC_OPERATION_TIMEOUT_MS);
+
+    promise
+      .then(resolve, reject)
+      .finally(() => window.clearTimeout(timeoutId));
+  });
+}
 
 export function AccountPetsSection() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user, profile, authLoading, setProfile } = useAuth();
   const [dogs, setDogs] = useState<Dog[]>([]);
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -103,66 +103,49 @@ export function AccountPetsSection() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const user = session?.user ?? null;
-
-  const refreshDashboard = useCallback(async (userId: string) => {
-    const [profileData, userDogs] = await Promise.all([
-      getProfile(userId),
-      getDogsByUser(userId),
-    ]);
-
-    setProfile(profileData);
-    setUsername(profileData?.username ?? "");
-    setFullName(profileData?.full_name ?? "");
-    setAvatarUrl(profileData?.avatar_url ?? "");
+  useEffect(() => {
+    setUsername(profile?.username ?? "");
+    setFullName(profile?.full_name ?? "");
+    setAvatarUrl(profile?.avatar_url ?? "");
     setAvatarFile(null);
-    setAvatarPreview(profileData?.avatar_url ?? "");
-    setDogs(userDogs);
-  }, []);
+    setAvatarPreview(profile?.avatar_url ?? "");
+  }, [profile]);
 
   useEffect(() => {
     let mounted = true;
 
-    async function loadInitialSession() {
-      try {
-        const currentSession = await getCurrentSession();
-        if (!mounted) return;
-        setSession(currentSession);
-        if (currentSession?.user) {
-          await refreshDashboard(currentSession.user.id);
-        }
-      } catch (error) {
-        logSupabaseError("Cargar sesión inicial / dashboard", error);
-        setMessage(getSupabaseErrorMessage(error));
-      } finally {
-        if (mounted) setIsLoading(false);
-      }
+    if (authLoading) return () => {
+      mounted = false;
+    };
+
+    if (!user) {
+      setDogs([]);
+      setDogPhotoFile(null);
+      setDogPhotoPreview("");
+      setIsLoading(false);
+      return () => {
+        mounted = false;
+      };
     }
 
-    loadInitialSession();
-
-    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      if (nextSession?.user) {
-        refreshDashboard(nextSession.user.id).catch((error) => {
-          logSupabaseError("Refrescar dashboard después de auth", error);
-          setMessage(getSupabaseErrorMessage(error));
-        });
-      } else {
-        setProfile(null);
-        setDogs([]);
-        setAvatarFile(null);
-        setAvatarPreview("");
-        setDogPhotoFile(null);
-        setDogPhotoPreview("");
-      }
-    });
+    setIsLoading(true);
+    getDogsByUser(user.id)
+      .then((userDogs) => {
+        if (mounted) setDogs(userDogs);
+      })
+      .catch((error) => {
+        if (!mounted) return;
+        logSupabaseError("Cargar perros del dashboard", error);
+        setMessage(getSupabaseErrorMessage(error));
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
 
     return () => {
       mounted = false;
-      data.subscription.unsubscribe();
     };
-  }, [refreshDashboard]);
+  }, [authLoading, user?.id]);
 
   useEffect(() => {
     return () => {
@@ -177,29 +160,6 @@ export function AccountPetsSection() {
       }
     };
   }, [avatarPreview, dogPhotoPreview, editDogPhotoPreview]);
-
-  const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsSaving(true);
-    setMessage("");
-
-    try {
-      if (authMode === "signup") {
-        await signUpWithPassword(email, password, fullName);
-        setMessage(
-          "Registro creado. Revisa tu correo si Supabase solicita confirmar la cuenta.",
-        );
-      } else {
-        await signInWithPassword(email, password);
-        setMessage("Sesión iniciada correctamente.");
-      }
-    } catch (error) {
-      logSupabaseError("Autenticación", error);
-      setMessage(getSupabaseErrorMessage(error));
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleAvatarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
@@ -348,33 +308,53 @@ export function AccountPetsSection() {
     setMessage("");
 
     try {
-      const { data: userData, error: userError } =
-        await supabase.auth.getUser();
-      if (userError) throw userError;
-      if (!userData.user || userData.user.id !== user.id) {
-        throw new Error(
-          "No hay una sesión autenticada válida para registrar el perro.",
-        );
+      const {
+        data: { session: currentSession },
+        error: sessionError,
+      } = await withAsyncTimeout(
+        supabase.auth.getSession(),
+        "No se pudo validar la sesión. Intenta nuevamente.",
+      );
+
+      if (sessionError) throw sessionError;
+
+      const currentUser = currentSession?.user;
+      if (!currentUser?.id || currentUser.id !== user.id) {
+        const expiredSessionMessage =
+          "Tu sesión expiró. Inicia sesión nuevamente para registrar perros.";
+        toast({
+          title: "Sesión expirada",
+          description: expiredSessionMessage,
+        });
+        setMessage(expiredSessionMessage);
+        setIsAddDogDialogOpen(false);
+        return;
       }
 
       const photoUrl = dogPhotoFile
-        ? await uploadImageToMediaBucket({
-            file: dogPhotoFile,
-            userId: userData.user.id,
-            folder: "dogs",
-          })
+        ? await withAsyncTimeout(
+            uploadImageToMediaBucket({
+              file: dogPhotoFile,
+              userId: currentUser.id,
+              folder: "dogs",
+            }),
+            "La subida de la foto tardó demasiado. Intenta nuevamente.",
+          )
         : null;
 
       const dogPayload = {
         ...dogForm,
         photo_url: photoUrl,
       };
-      console.info("[FEROX dogs] form payload", dogPayload);
 
-      const dog = await createDog(userData.user.id, dogPayload);
+      const dog = await withAsyncTimeout(
+        createDog(currentUser.id, dogPayload),
+        "Guardar el perro tardó demasiado. Intenta nuevamente.",
+      );
       setDogs((currentDogs) => [dog, ...currentDogs]);
       setDogForm(emptyDogForm);
       clearDogPhotoSelection();
+      setIsAddDogDialogOpen(false);
       setMessage(`${dog.nombre} quedó guardado correctamente.`);
     } catch (error) {
       logSupabaseError("Crear perro", error);
@@ -484,22 +464,6 @@ export function AccountPetsSection() {
     setDogToDelete(null);
   };
 
-  const handleSignOut = async () => {
-    setIsSaving(true);
-    setMessage("");
-
-    try {
-      await signOut();
-      setEmail("");
-      setPassword("");
-      setMessage("Sesión cerrada.");
-    } catch (error) {
-      logSupabaseError("Cerrar sesión", error);
-      setMessage(getSupabaseErrorMessage(error));
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
 
   if (isLoading) return null;
@@ -509,9 +473,12 @@ export function AccountPetsSection() {
   return (
     <section
       id="cuenta"
-      className="border-t border-border bg-[linear-gradient(180deg,#f7f7f7_0%,#ffffff_100%)]"
+      className="relative overflow-hidden border-t border-border bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.08),transparent_34%),linear-gradient(180deg,#f7f7f7_0%,#ffffff_100%)]"
     >
-      <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+      <PawPrint className="pointer-events-none absolute -left-8 top-20 h-32 w-32 rotate-[-18deg] text-foreground/[0.035]" aria-hidden="true" />
+      <PawPrint className="pointer-events-none absolute right-6 top-44 h-24 w-24 rotate-[18deg] text-foreground/[0.04]" aria-hidden="true" />
+      <PawPrint className="pointer-events-none absolute bottom-14 left-1/2 h-40 w-40 -translate-x-1/2 rotate-[10deg] text-foreground/[0.025]" aria-hidden="true" />
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         {message ? (
           <div className="mb-4 flex items-center gap-2 rounded-2xl bg-muted px-4 py-3 text-sm text-foreground">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
@@ -519,45 +486,56 @@ export function AccountPetsSection() {
           </div>
         ) : null}
 
-        <div className="mt-8 space-y-5">
-            <div className="flex flex-col items-center justify-center gap-3 text-center">
-              <h2 className="ferox-display-title text-center text-3xl font-normal tracking-tight text-foreground sm:text-4xl">Mis perros</h2>
-              <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-foreground bg-foreground px-4 py-2 text-sm font-semibold text-background"><Plus className="h-4 w-4" />Agregar perro</button>
+        <div className="mt-8 rounded-[2rem] border border-border/80 bg-background/75 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.08)] backdrop-blur sm:p-6">
+            <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+              <div>
+                <span className="section-eyebrow text-muted-foreground">Dashboard</span>
+                <h2 className="ferox-display-title text-3xl font-normal tracking-tight text-foreground sm:text-4xl">Mis perros</h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Gestiona sus datos, revisa su porción diaria y pide directo por WhatsApp.</p>
+              </div>
+              <button type="button" onClick={() => setIsAddDogDialogOpen(true)} className="inline-flex items-center gap-2 rounded-full border border-foreground bg-foreground px-5 py-3 text-sm font-semibold text-background shadow-[0_14px_32px_rgba(0,0,0,0.18)] transition hover:bg-foreground/90"><Plus className="h-4 w-4" />Agregar perro</button>
             </div>
             {dogs.length > 0 ? (
-              <div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mx-auto mt-6 grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {dogs.map((dog) => {
                   const recommendation = calculateDogFood(dog);
                   const dogOrderMessage = encodeURIComponent(
                     `Hola FEROX BARF, quiero pedir comida para ${dog.nombre}. Recomendación diaria: ${recommendation.gramosDia}g.`,
                   );
                   return (
-                    <article key={dog.id} className="rounded-3xl border border-border bg-background p-4 shadow-sm">
-                      <div className="mx-auto h-20 w-20 overflow-hidden rounded-full bg-muted">
+                    <article key={dog.id} className="overflow-hidden rounded-[2rem] border border-border bg-background/95 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(0,0,0,0.10)]">
+                      <div className="relative h-44 overflow-hidden bg-neutral-950 sm:h-48">
                         {dog.photo_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={dog.photo_url} alt={dog.nombre} className="h-full w-full object-cover" />
-                        ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-6 w-6" /></div>}
+                          <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={dog.photo_url} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-45 blur-lg" aria-hidden="true" />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={dog.photo_url} alt={dog.nombre} className="relative z-10 h-full w-full object-contain" />
+                          </>
+                        ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>}
+                        <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/40 via-black/5 to-transparent" />
+                        <span className="absolute bottom-3 left-3 z-30 rounded-full bg-background/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">{dog.peso ? `${dog.peso} kg` : "-- kg"}</span>
+                        <span className="absolute bottom-3 right-3 z-30 rounded-full bg-background/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">{dog.edad ? `${dog.edad} años` : "-- años"}</span>
                       </div>
-                      <p className="mt-2 text-center text-lg font-semibold">{dog.nombre}</p>
-                      <div className="mt-1 flex items-center justify-between text-sm text-muted-foreground">
-                        <span>{dog.peso ? `${dog.peso} kg` : "-- kg"}</span>
-                        <span>{dog.edad ? `${dog.edad} años` : "-- años"}</span>
-                      </div>
-                      <p className="mt-2 text-center text-3xl font-bold text-foreground">{recommendation.gramosDia}g</p>
-                      <p className="text-center text-xs text-muted-foreground">por día</p>
-                      <a
-                        href={`https://wa.me/56927973379?text=${dogOrderMessage}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-3 py-2 text-xs font-semibold text-background"
-                      >
-                        <MessageCircle className="h-3.5 w-3.5" />
-                        Hacer pedido
-                      </a>
-                      <div className="mt-2 flex justify-center gap-2">
-                        <button type="button" onClick={() => openEditDogDialog(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Editar</button>
-                        <button type="button" onClick={() => setDogToDelete(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Borrar</button>
+                      <div className="p-4">
+                        <p className="text-center text-lg font-extrabold tracking-tight text-foreground">{dog.nombre}</p>
+                        <div className="mx-auto mt-3 w-fit rounded-2xl bg-muted px-5 py-3 text-center">
+                          <p className="text-3xl font-bold text-foreground">{recommendation.gramosDia}g</p>
+                          <p className="text-xs text-muted-foreground">por día</p>
+                        </div>
+                        <a
+                          href={`https://wa.me/56927973379?text=${dogOrderMessage}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-3 py-2 text-xs font-semibold text-background"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5" />
+                          Hacer pedido
+                        </a>
+                        <div className="mt-2 flex justify-center gap-2">
+                          <button type="button" onClick={() => openEditDogDialog(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Editar</button>
+                          <button type="button" onClick={() => setDogToDelete(dog)} className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Borrar</button>
+                        </div>
                       </div>
                     </article>
                   );
@@ -576,22 +554,28 @@ export function AccountPetsSection() {
             <DialogTitle>Agregar nuevo perro</DialogTitle>
             <DialogDescription>Completa los datos para registrar un perro nuevo.</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleDogSubmit} className="space-y-4">
-            <DogFormFields form={dogForm} setForm={setDogForm} />
-            <div className="grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-center">
-              <div className="h-32 overflow-hidden rounded-3xl bg-muted">
+          <form onSubmit={handleDogSubmit} className="space-y-5">
+            <div className="space-y-3 rounded-[1.75rem] border border-border bg-muted/20 p-3">
+              <p className="text-sm font-semibold text-foreground">Foto del perro</p>
+              <label htmlFor="add-dog-photo-file" className="group relative block h-44 cursor-pointer overflow-hidden rounded-[1.5rem] bg-muted transition hover:ring-4 hover:ring-foreground/10 sm:h-56" aria-label="Seleccionar foto del perro">
                 {dogPhotoPreview ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={dogPhotoPreview} alt="Vista previa del perro" className="h-full w-full object-cover" />
-                ) : <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-8 w-8" /></div>}
-              </div>
-              <label className="text-sm font-medium text-foreground">Foto del perro
-                <input type="file" accept="image/*" onChange={handleDogPhotoFileChange} className={imageInputClassName} />
+                ) : <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground"><Camera className="h-9 w-9" /><span className="text-sm font-medium">Toca para subir una foto</span></div>}
+                <span className="absolute inset-0 grid place-items-center bg-black/0 text-white opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100">
+                  <Camera className="h-7 w-7" />
+                </span>
+              </label>
+              <input id="add-dog-photo-file" type="file" accept="image/*" onChange={handleDogPhotoFileChange} className="sr-only" />
+              <label htmlFor="add-dog-photo-file" className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-foreground px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-background">
+                <Camera className="h-4 w-4" />
+                Seleccionar foto
               </label>
             </div>
-            <button type="submit" disabled={isSaving} className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60">
+            <DogFormFields form={dogForm} setForm={setDogForm} />
+            <button type="submit" disabled={isSaving} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm font-semibold text-background shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition hover:bg-foreground/90 disabled:opacity-60">
               <Plus className="h-4 w-4" />
-              {isSaving ? "Guardando..." : "Añadir perro"}
+              {isSaving ? "Guardando..." : "Agregar perro"}
             </button>
           </form>
         </DialogContent>

@@ -61,8 +61,6 @@ export async function createDog(
     photo_url: dog.photo_url?.trim() || null,
   };
 
-  console.info("[FEROX dogs] create payload", payload);
-
   const { data, error } = await supabase
     .from("dogs")
     .insert(payload)

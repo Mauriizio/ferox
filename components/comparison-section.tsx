@@ -15,13 +15,13 @@ export function ComparisonSection() {
     <section className="bg-muted border-t border-border">
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="max-w-3xl">
-          <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
+          <span className="section-eyebrow text-muted-foreground">
             BARF vs Pellet
           </span>
-          <h2 className="mt-2 sm:mt-3 font-serif text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
+          <h2 className="section-heading">
             No es solo comida. Es salud a largo plazo.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
+          <p className="section-copy text-muted-foreground">
             El pellet es un alimento procesado, cocido a altas temperaturas y
             con ingredientes que muchas veces no son naturales. El BARF es real.
           </p>
