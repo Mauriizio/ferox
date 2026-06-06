@@ -168,7 +168,7 @@ export function SubscriptionPlansSection() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-5 lg:grid-cols-3 lg:items-stretch">
+        <div className="mt-10 grid items-start gap-5 lg:grid-cols-3 lg:items-stretch">
           {Object.entries(plans).map(([id, plan]) => {
             const planId = id as PlanId;
             const isSelected = selectedPlan === planId;
@@ -176,7 +176,7 @@ export function SubscriptionPlansSection() {
             return (
               <article
                 key={id}
-                className={`relative flex min-h-full flex-col overflow-hidden rounded-[2rem] border bg-background p-6 text-center text-foreground shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition sm:p-7 ${
+                className={`relative flex flex-col overflow-hidden lg:min-h-full rounded-[2rem] border bg-background p-6 text-center text-foreground shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition sm:p-7 ${
                   isSelected ? "border-background ring-2 ring-background/80" : "border-background/10"
                 } ${plan.highlight ? "lg:-translate-y-4" : ""}`}
               >
