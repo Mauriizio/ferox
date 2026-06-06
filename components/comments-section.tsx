@@ -2,8 +2,6 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Heart, Send, UserRound } from "lucide-react";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase/client";
 import {
   createComment,
   deleteComment,
@@ -15,6 +13,7 @@ import {
   getSupabaseErrorMessage,
   logSupabaseError,
 } from "@/lib/services/supabase-error";
+import { useAuth } from "@/components/auth-provider";
 
 const formatCommentDate = (createdAt: string | null) => {
   if (!createdAt) return "Ahora";
@@ -26,15 +25,13 @@ const formatCommentDate = (createdAt: string | null) => {
 };
 
 export function CommentsSection() {
-  const [session, setSession] = useState<Session | null>(null);
+  const { user, authLoading } = useAuth();
   const [comments, setComments] = useState<CommentWithMeta[]>([]);
   const [commentBody, setCommentBody] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const user = session?.user ?? null;
 
   const refreshComments = useCallback(async (currentUserId?: string) => {
     const nextComments = await listRecentComments(50, currentUserId);
@@ -44,39 +41,25 @@ export function CommentsSection() {
   useEffect(() => {
     let mounted = true;
 
-    async function loadComments() {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        if (!mounted) return;
+    if (authLoading) return () => {
+      mounted = false;
+    };
 
-        setSession(data.session);
-        await refreshComments(data.session?.user.id);
-      } catch (error) {
+    setIsLoading(true);
+    refreshComments(user?.id)
+      .catch((error) => {
+        if (!mounted) return;
         logSupabaseError("Cargar comentarios", error);
         setMessage(getSupabaseErrorMessage(error));
-      } finally {
+      })
+      .finally(() => {
         if (mounted) setIsLoading(false);
-      }
-    }
-
-    loadComments();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
-        setSession(nextSession);
-        refreshComments(nextSession?.user.id).catch((error) => {
-          logSupabaseError("Refrescar comentarios después de auth", error);
-          setMessage(getSupabaseErrorMessage(error));
-        });
-      },
-    );
+      });
 
     return () => {
       mounted = false;
-      authListener.subscription.unsubscribe();
     };
-  }, [refreshComments]);
+  }, [authLoading, refreshComments, user?.id]);
 
 
 
@@ -102,13 +85,7 @@ export function CommentsSection() {
     setMessage("");
 
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-      if (!userData.user || userData.user.id !== user.id) {
-        throw new Error("No hay una sesión autenticada válida para comentar.");
-      }
-
-      const newComment = await createComment(userData.user.id, commentBody);
+      const newComment = await createComment(user.id, commentBody);
       setComments((currentComments) => [newComment, ...currentComments]);
       setCurrentPage(1);
       setCommentBody("");
@@ -164,8 +141,9 @@ export function CommentsSection() {
   };
 
   return (
-    <section id="comentarios" className="border-t border-border bg-background">
-      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+    <section id="comentarios" className="relative overflow-hidden border-t border-border bg-[linear-gradient(180deg,#ffffff_0%,#f7f7f7_100%)]">
+      <Heart className="pointer-events-none absolute -right-10 top-20 h-40 w-40 rotate-12 text-foreground/[0.025]" aria-hidden="true" />
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="max-w-3xl">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">Reseñas reales</span>
           <h2 className="mt-2 ferox-display-title text-3xl sm:text-4xl md:text-5xl">Lo que dice la comunidad FEROX</h2>
@@ -176,14 +154,17 @@ export function CommentsSection() {
             <li className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Cargando reseñas...</li>
           ) : comments.length > 0 ? (
             paginatedComments.map((comment) => (
-              <li key={comment.id} className="rounded-2xl border border-border bg-gradient-to-br from-background to-muted/25 p-6 sm:p-7 lg:p-8 shadow-sm transition-colors hover:border-foreground">
-                <blockquote className="text-base leading-relaxed text-foreground sm:text-lg">
-                  &ldquo;{comment.body}&rdquo;
-                </blockquote>
-                <div className="mt-6 border-t border-border pt-4">
+              <li key={comment.id} className="overflow-hidden rounded-[1.75rem] border border-border bg-background shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_45px_rgba(0,0,0,0.08)]">
+                <div className="relative bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.07),transparent_34%),linear-gradient(135deg,#ffffff_0%,#f2f2f2_100%)] p-6 sm:p-7 lg:p-8">
+                  <span className="absolute right-5 top-4 text-5xl leading-none text-foreground/10">“</span>
+                  <blockquote className="relative max-w-3xl text-base leading-relaxed text-foreground sm:text-lg">
+                    &ldquo;{comment.body}&rdquo;
+                  </blockquote>
+                </div>
+                <div className="border-t border-border bg-muted/45 px-5 py-4 text-foreground sm:px-6">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <span className="grid h-8 w-8 overflow-hidden rounded-full bg-muted">
+                      <span className="grid h-10 w-10 overflow-hidden rounded-full border border-border bg-background">
                         {comment.author_avatar_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={comment.author_avatar_url} alt={comment.author_name ?? "Miembro FEROX"} className="h-full w-full object-cover" />
@@ -196,7 +177,7 @@ export function CommentsSection() {
                         <p className="text-xs text-muted-foreground">{formatCommentDate(comment.created_at)}</p>
                       </div>
                     </div>
-                    <button type="button" onClick={() => handleToggleLike(comment.id)} disabled={!user} className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground disabled:opacity-60">
+                    <button type="button" onClick={() => handleToggleLike(comment.id)} disabled={!user} className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground transition hover:bg-muted disabled:opacity-60">
                       <Heart className={`h-3.5 w-3.5 ${comment.liked_by_current_user ? "fill-current text-red-500" : ""}`} />
                       {comment.likes_count}
                     </button>
@@ -238,7 +219,7 @@ export function CommentsSection() {
           </nav>
         ) : null}
 
-        <form className="mt-8 rounded-2xl border border-border bg-background p-4 sm:p-5" onSubmit={handleCommentSubmit}>
+        <form className="mt-8 rounded-[1.75rem] border border-border bg-background p-4 shadow-sm sm:p-5" onSubmit={handleCommentSubmit}>
           <label className="grid gap-2 text-sm font-semibold text-foreground">
             Comentar
             <textarea

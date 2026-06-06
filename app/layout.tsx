@@ -1,5 +1,7 @@
 ﻿import type { Metadata, Viewport } from "next"
 import "./globals.css"
+import { AuthProvider } from "@/components/auth-provider"
+import { Toaster } from "@/components/ui/toaster"
 
 const title = "FEROX BARF — Alimentación natural para tu perro"
 const description =
@@ -64,7 +66,10 @@ export default function RootLayout({
   return (
     <html lang="es" className="bg-background">
       <body className="font-sans antialiased">
-        {children}
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
         {process.env.NODE_ENV === "production"}
       </body>
     </html>
