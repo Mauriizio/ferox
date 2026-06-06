@@ -3,34 +3,26 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 const PHONE = "56927973379";
 
 const products = [
   {
-    name: "Fórmula Vacuno",
-    subtitle: "Proteína principal de vacuno",
+    name: "BARF mix de proteína",
+    subtitle: "Pollo y carne",
     description:
-      "Receta BARF completa con carne, órganos y vegetales frescos para una nutrición diaria equilibrada.",
-    price: "$ 5.990",
-    image: "/product/product1.png",
-  },
-  {
-    name: "Mix de Proteína",
-    subtitle: "Combinación balanceada",
-    description:
-      "Blend de proteínas pensado para rotación nutricional y mayor variedad en la alimentación del perro.",
-    price: "$ 6.490",
+      "Mezcla BARF con pollo y carne para una alimentación diaria real, fresca y balanceada.",
+    price: "$ 3.000",
     image: "/product/product2.png",
   },
   {
-    name: "Snack de Pollo",
-    subtitle: "Premio natural",
+    name: "BARF solo de vacuno",
+    subtitle: "Proteína de vacuno",
     description:
-      "Snack funcional ideal para reforzar entrenamiento o complementar su rutina con una opción natural.",
-    price: "$ 15.990",
-    image: "/product/product3.png",
+      "Fórmula BARF de vacuno con ingredientes reales para perros que prefieren una proteína principal.",
+    price: "$ 3.500",
+    image: "/product/product1.png",
   },
 ];
 
@@ -51,12 +43,15 @@ export function ShopSection() {
     <section id="tienda" className="border-t border-border bg-background">
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-3 py-3 sm:min-h-[100svh] sm:px-6 sm:py-5 lg:px-8 lg:py-5">
         <div className="mx-auto max-w-3xl text-center sm:text-center">
-          <span className="inline-block text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          <span className="section-eyebrow text-muted-foreground">
             Tienda FEROX
           </span>
-          <h2 className="mt-1.5 text-[2rem] sm:text-3xl md:text-4xl">
-            Pasa de producto a producto y pide directo
+          <h2 className="section-heading">
+            Elige tu BARF y pide directo
           </h2>
+          <p className="mx-auto mt-3 inline-flex rounded-full border border-border bg-muted/45 px-4 py-2 text-sm font-semibold text-foreground">
+            Delivery $3.500 a cualquier comuna.
+          </p>
         </div>
 
         <div className="mx-auto mt-2 flex w-full max-w-5xl items-center justify-center gap-1 sm:mt-3 sm:gap-4">
@@ -78,11 +73,11 @@ export function ShopSection() {
             >
               <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 92vw, 420px" className="object-cover object-center scale-[1.04]" />
             </button>
-            <h3 className="mt-2 font-serif text-[1.9rem] font-bold leading-none text-foreground sm:text-3xl">{product.name}</h3>
+            <h3 className="mt-2 text-[1.9rem] font-bold leading-none text-foreground sm:text-3xl">{product.name}</h3>
             <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-muted-foreground line-clamp-2 sm:text-base">
               {product.description}
             </p>
-            <p className="mt-1 font-serif text-3xl font-bold text-foreground sm:text-4xl">{product.price}</p>
+            <p className="mt-1 text-3xl font-bold text-foreground sm:text-4xl">{product.price}</p>
  
             <a
               href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
@@ -108,6 +103,8 @@ export function ShopSection() {
 
       <Dialog open={imageOpen} onOpenChange={setImageOpen}>
         <DialogContent className="max-w-4xl border-0 bg-black/95 p-2 sm:p-4">
+          <DialogTitle className="sr-only">Imagen ampliada de {product.name}</DialogTitle>
+          <DialogDescription className="sr-only">Vista ampliada del producto seleccionado en la tienda FEROX.</DialogDescription>
           <div className="overflow-auto rounded-xl">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img

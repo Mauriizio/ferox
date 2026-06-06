@@ -29,10 +29,10 @@ export function TestimonialsSection() {
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="max-w-3xl">
-          <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
+          <span className="section-eyebrow text-muted-foreground">
             Reseñas reales
           </span>
-          <h2 className="mt-2 sm:mt-3 font-serif text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
+          <h2 className="section-heading">
             Lo que dicen las familias FEROX
           </h2>
         </div>

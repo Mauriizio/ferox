@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Instagram, Facebook, MessageCircle } from "lucide-react"
+import { Instagram, Facebook, Heart, MessageCircle } from "lucide-react"
 
 export function SiteFooter() {
   return (
@@ -32,14 +32,18 @@ export function SiteFooter() {
                 <MessageCircle className="h-4 w-4" />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/barfferox"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-foreground hover:text-background transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4" />
               </a>
               <a
-                href="#"
+                href="https://www.facebook.com/profile.php?id=61579530517514"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-foreground hover:text-background transition-colors"
                 aria-label="Facebook"
               >
@@ -88,8 +92,28 @@ export function SiteFooter() {
                 </a>
               </li>
               <li>
-                <a href="mailto:hola@feroxbarf.cl" className="hover:text-foreground transition-colors">
-                  hola@feroxbarf.cl
+                <a href="mailto:Ferox156500@gmail.com" className="hover:text-foreground transition-colors">
+                  Ferox156500@gmail.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.instagram.com/barfferox"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Instagram @barfferox
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.facebook.com/profile.php?id=61579530517514"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Facebook FEROX
                 </a>
               </li>
               <li>Santiago, Chile</li>
@@ -101,13 +125,23 @@ export function SiteFooter() {
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} FEROX BARF. Todos los derechos reservados.
           </p>
-          <div className="flex items-center gap-6 text-xs text-muted-foreground">
-            <Link href="#" className="hover:text-foreground transition-colors">
-              Términos
-            </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
-              Privacidad
-            </Link>
+          <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground sm:items-end">
+            <a
+              href="https://maurizio.dev/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1.5 text-background transition hover:bg-foreground/90"
+            >
+              Web hecha con <Heart className="h-3.5 w-3.5 fill-background text-background" aria-hidden="true" /> por maurizio.dev
+            </a>
+            <div className="flex items-center gap-6">
+              <Link href="#" className="hover:text-foreground transition-colors">
+                Términos
+              </Link>
+              <Link href="#" className="hover:text-foreground transition-colors">
+                Privacidad
+              </Link>
+            </div>
           </div>
         </div>
       </div>

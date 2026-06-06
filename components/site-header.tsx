@@ -4,11 +4,8 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { Camera, LogOut, Menu, Settings, UserRound, X } from "lucide-react";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase/client";
+import { Camera, Eye, EyeOff, LogOut, Menu, Settings, UserRound, X } from "lucide-react";
 import {
-  getProfile,
   signInWithGoogle,
   sendPasswordRecoveryEmail,
   signInWithPassword,
@@ -16,7 +13,7 @@ import {
   signUpWithPassword,
   upsertProfile,
 } from "@/lib/services/auth-service";
-import type { Profile } from "@/lib/supabase/database.types";
+import { useAuth } from "@/components/auth-provider";
 import { deleteMediaFile, getMediaPathFromPublicUrl, uploadImageToMediaBucket } from "@/lib/services/storage-service";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -29,17 +26,15 @@ const navLinks = [
   { href: "#tienda", label: "Tienda" },
 ];
 
-type Props = { onSessionChange?: (session: Session | null) => void };
-
-export function SiteHeader({ onSessionChange }: Props) {
+export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user, profile, authLoading, setProfile } = useAuth();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -54,6 +49,7 @@ export function SiteHeader({ onSessionChange }: Props) {
   const [settingsAvatarFile, setSettingsAvatarFile] = useState<File | null>(null);
   const [settingsAvatarPreview, setSettingsAvatarPreview] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
 
   const recoveryMessageType = recoveryMessage
     ? recoveryMessage.startsWith("Revisa tu correo")
@@ -63,7 +59,6 @@ export function SiteHeader({ onSessionChange }: Props) {
         : "loading"
     : "idle";
 
-  const user = session?.user ?? null;
   const userName =
     profile?.full_name?.trim() ||
     profile?.username?.trim() ||
@@ -104,38 +99,13 @@ export function SiteHeader({ onSessionChange }: Props) {
   }, []);
 
   useEffect(() => {
-    let mounted = true;
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const updateViewport = () => setIsDesktopViewport(mediaQuery.matches);
 
-    async function loadSession() {
-      const { data, error } = await supabase.auth.getSession();
-      if (error || !mounted) return;
-      setSession(data.session);
-      onSessionChange?.(data.session);
-      if (data.session?.user) {
-        const userProfile = await getProfile(data.session.user.id);
-        if (mounted) setProfile(userProfile);
-      }
-    }
+    updateViewport();
+    mediaQuery.addEventListener("change", updateViewport);
 
-    loadSession();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, nextSession) => {
-        setSession(nextSession);
-        onSessionChange?.(nextSession);
-        if (nextSession?.user) {
-          const userProfile = await getProfile(nextSession.user.id);
-          setProfile(userProfile);
-        } else {
-          setProfile(null);
-        }
-      },
-    );
-
-    return () => {
-      mounted = false;
-      listener.subscription.unsubscribe();
-    };
+    return () => mediaQuery.removeEventListener("change", updateViewport);
   }, []);
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -437,7 +407,7 @@ export function SiteHeader({ onSessionChange }: Props) {
           )}
         </div>
 
-        <div className="flex items-center gap-1 lg:hidden">
+        <div className="ml-auto flex items-center gap-1 lg:hidden">
           <button
             type="button"
             onClick={() => {
@@ -449,24 +419,32 @@ export function SiteHeader({ onSessionChange }: Props) {
             }}
             aria-label={user ? "Configuración" : "Entrar"}
             className={cn(
-              "inline-flex h-8 w-8 items-center justify-center transition",
-              onHero ? "text-white/95 hover:text-white" : "text-foreground hover:text-foreground/80",
+              "inline-flex h-9 w-9 items-center justify-center rounded-full transition",
+              onHero ? "text-white/95 hover:bg-white/10 hover:text-white" : "text-foreground hover:bg-muted",
             )}
           >
-            {user && profile?.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.avatar_url} alt="Avatar" className="h-6 w-6 rounded-full object-cover" />
-            ) : (
-              <UserRound className="h-5 w-5" />
-            )}
+            <UserRound className="h-5 w-5" />
           </button>
+          {user ? (
+            <button
+              type="button"
+              onClick={handleSignOut}
+              aria-label="Cerrar sesión"
+              className={cn(
+                "inline-flex h-9 w-9 items-center justify-center rounded-full transition",
+                onHero ? "text-white/95 hover:bg-white/10 hover:text-white" : "text-foreground hover:bg-muted",
+              )}
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          ) : null}
         </div>
 
         <button type="button" onClick={() => setOpen((v) => !v)} className={cn("inline-flex h-10 w-10 items-center justify-center rounded-md border lg:hidden", onHero ? "border-white/25 text-white" : "border-border text-foreground")} aria-label="Abrir menú">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
-      {authOpen && !user ? (
+      {authOpen && !user && isDesktopViewport ? (
         <div className="pointer-events-none absolute inset-x-0 top-full z-50 hidden lg:block">
           <div className="mx-auto flex w-full max-w-7xl justify-end px-4 sm:px-6 lg:px-8">
             <div className="pointer-events-auto mt-3 w-full max-w-sm rounded-2xl border border-border bg-background p-4 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
@@ -477,8 +455,25 @@ export function SiteHeader({ onSessionChange }: Props) {
               <form onSubmit={handleAuthSubmit} className="space-y-2">
                 {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
                 <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
-                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
-                <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Contraseña"
+                    className="w-full rounded-xl border border-border px-3 py-2 pr-10 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((value) => !value)}
+                    className="absolute inset-y-0 right-3 inline-flex items-center text-muted-foreground hover:text-foreground"
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <button type="submit" disabled={isSaving || authLoading} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
               </form>
               {mode === "login" ? (
                 <>
@@ -519,7 +514,7 @@ export function SiteHeader({ onSessionChange }: Props) {
 
       {mounted && open && mobileMenu ? createPortal(mobileMenu, document.body) : null}
 
-      <Dialog open={authOpen && !user} onOpenChange={setAuthOpen}>
+      <Dialog open={authOpen && !user && !isDesktopViewport} onOpenChange={setAuthOpen}>
         <DialogContent className="sm:max-w-md lg:hidden">
           <DialogHeader>
             <DialogTitle>Iniciar sesión</DialogTitle>
@@ -532,8 +527,25 @@ export function SiteHeader({ onSessionChange }: Props) {
           <form onSubmit={handleAuthSubmit} className="space-y-2">
             {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
-            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
-            <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Contraseña"
+                className="w-full rounded-xl border border-border px-3 py-2 pr-10 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((value) => !value)}
+                className="absolute inset-y-0 right-3 inline-flex items-center text-muted-foreground hover:text-foreground"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <button type="submit" disabled={isSaving || authLoading} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
           </form>
           {mode === "login" ? (
             <>
@@ -577,17 +589,24 @@ export function SiteHeader({ onSessionChange }: Props) {
             <DialogDescription>Actualiza tu nombre, usuario y foto de perfil.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleProfileUpdate} className="space-y-4">
-            <div className="mx-auto h-24 w-24 overflow-hidden rounded-full border border-border bg-muted">
-              {settingsAvatarPreview ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={settingsAvatarPreview} alt="Vista previa avatar" className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-6 w-6" /></div>
-              )}
+            <div className="flex flex-col items-center gap-3">
+              <label htmlFor="settings-avatar-file" className="group relative h-24 w-24 cursor-pointer overflow-hidden rounded-full border border-border bg-muted transition hover:ring-4 hover:ring-foreground/10" aria-label="Cambiar foto de perfil">
+                {settingsAvatarPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={settingsAvatarPreview} alt="Vista previa avatar" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-muted-foreground"><Camera className="h-6 w-6" /></div>
+                )}
+                <span className="absolute inset-0 grid place-items-center bg-black/0 text-white opacity-0 transition group-hover:bg-black/35 group-hover:opacity-100">
+                  <Camera className="h-5 w-5" />
+                </span>
+              </label>
+              <input id="settings-avatar-file" type="file" accept="image/*" onChange={handleSettingsAvatarChange} className="sr-only" />
+              <label htmlFor="settings-avatar-file" className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-foreground bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:bg-foreground/90">
+                <Camera className="h-4 w-4" />
+                Cambiar foto de perfil
+              </label>
             </div>
-            <label className="block text-sm font-medium">Foto de perfil
-              <input type="file" accept="image/*" onChange={handleSettingsAvatarChange} className="mt-2 block w-full text-sm" />
-            </label>
             <label className="block text-sm font-medium">Nombre
               <input value={settingsName} onChange={(e)=>setSettingsName(e.target.value)} className="mt-2 w-full rounded-xl border border-border px-3 py-2 text-sm" />
             </label>

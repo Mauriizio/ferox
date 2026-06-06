@@ -57,10 +57,10 @@ export function WhatIsBarf() {
           </div>
 
           <div className="lg:py-2">
-            <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
+            <span className="section-eyebrow text-muted-foreground">
               ¿Qué es BARF?
             </span>
-            <h2 className="mt-3 font-serif text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-foreground text-balance">
+            <h2 className="section-heading text-foreground">
               Comida real, como la que su cuerpo está diseñado para procesar.
             </h2>
             <div className="mt-4 space-y-3 text-base sm:text-lg text-muted-foreground leading-relaxed">
@@ -84,7 +84,7 @@ export function WhatIsBarf() {
                   key={item.label}
                   className="border border-border rounded-xl p-4 text-center glass shadow-sm sm:p-5"
                 >
-                  <div className="font-serif text-2xl sm:text-3xl font-bold text-foreground">
+                  <div className="text-3xl font-bold text-foreground sm:text-4xl">
                     {item.value}
                   </div>
                   <div className="mt-1 text-xs sm:text-sm uppercase tracking-wide text-muted-foreground">
@@ -96,7 +96,7 @@ export function WhatIsBarf() {
 
             <div className="mt-8 grid gap-4 rounded-2xl border border-border bg-muted/35 p-4 sm:p-5">
               <div>
-                <h3 className="font-serif text-xl font-bold text-foreground sm:text-2xl">
+                <h3 className="text-xl font-bold text-foreground sm:text-2xl">
                   Ingredientes que lleva nuestro BARF
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -121,7 +121,7 @@ export function WhatIsBarf() {
             </div>
 
             <div className="mt-4 rounded-2xl border border-foreground/10 bg-foreground p-4 text-background sm:p-5">
-              <h3 className="font-serif text-xl font-bold sm:text-2xl">
+              <h3 className="text-xl font-bold sm:text-2xl">
                 También puedes complementar su BARF
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-background/70 sm:text-base">

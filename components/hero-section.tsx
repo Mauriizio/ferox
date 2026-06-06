@@ -4,49 +4,47 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase/client";
+import { useAuth } from "@/components/auth-provider";
 import { getDogsByUser } from "@/lib/services/dog-service";
-import { getProfile } from "@/lib/services/auth-service";
+import { logSupabaseError } from "@/lib/services/supabase-error";
+
 const PHONE = "56927973379";
+
 export function HeroSection() {
-  const [session, setSession] = useState<Session | null>(null);
+  const { user, profile } = useAuth();
   const [dogsCount, setDogsCount] = useState(0);
-  const [fullName, setFullName] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const user = session?.user ?? null;
 
   useEffect(() => {
     let mounted = true;
-    async function load() {
-      const { data } = await supabase.auth.getSession();
-      if (!mounted) return;
-      setSession(data.session);
-      if (data.session?.user) {
-        const [dogs, profile] = await Promise.all([
-          getDogsByUser(data.session.user.id),
-          getProfile(data.session.user.id),
-        ]);
-        if (!mounted) return;
-        setDogsCount(dogs.length);
-        setFullName(profile?.full_name ?? "");
-        setAvatarUrl(profile?.avatar_url ?? "");
-      }
+
+    if (!user) {
+      setDogsCount(0);
+      return () => {
+        mounted = false;
+      };
     }
-    load();
-    const { data: listener } = supabase.auth.onAuthStateChange((_e, next) => {
-      setSession(next);
-    });
+
+    getDogsByUser(user.id)
+      .then((dogs) => {
+        if (mounted) setDogsCount(dogs.length);
+      })
+      .catch((error) => {
+        logSupabaseError("Cargar conteo de perros en hero", error);
+        if (mounted) setDogsCount(0);
+      });
+
     return () => {
       mounted = false;
-      listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [user?.id]);
 
   const welcome = useMemo(
-    () => fullName || user?.email?.split("@")[0] || "tu cuenta",
-    [fullName, user?.email],
+    () => profile?.full_name || user?.email?.split("@")[0] || "tu cuenta",
+    [profile?.full_name, user?.email],
   );
+
+  const avatarUrl = profile?.avatar_url ?? "";
+
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-background">
       <div className="absolute inset-0 z-0">

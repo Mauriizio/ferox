@@ -10,13 +10,13 @@ export function TransitionSection() {
     <section className="bg-background border-t border-border">
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="max-w-3xl">
-          <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">
+          <span className="section-eyebrow text-muted-foreground">
             Transición a BARF
           </span>
-          <h2 className="mt-2 sm:mt-3 font-serif text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-balance">
+          <h2 className="section-heading">
             Cambiar es muy sencillo. Hazlo paso a paso.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
+          <p className="section-copy text-muted-foreground">
             Recomendamos una transición progresiva en 10 días para evitar
             problemas digestivos y que tu perro se adapte sin estrés.
           </p>
@@ -29,7 +29,7 @@ export function TransitionSection() {
               className="relative rounded-2xl border border-border p-5 sm:p-6 bg-background hover:border-foreground transition-colors"
             >
               <div className="flex items-center justify-between">
-                <span className="font-serif text-2xl sm:text-3xl font-bold text-foreground">
+                <span className="text-3xl font-bold text-foreground sm:text-4xl">
                   0{idx + 1}
                 </span>
                 <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
