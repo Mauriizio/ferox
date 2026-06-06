@@ -170,7 +170,8 @@ export function SubscriptionPlansSection() {
 
         <div className="mt-10 grid gap-5 lg:grid-cols-3 lg:items-stretch">
           {Object.entries(plans).map(([id, plan]) => {
-            const isSelected = selectedPlan === id;
+            const planId = id as PlanId;
+            const isSelected = selectedPlan === planId;
 
             return (
               <article
@@ -217,24 +218,127 @@ export function SubscriptionPlansSection() {
 
                 <button
                   type="button"
-                  onClick={() => setSelectedPlan(id as PlanId)}
+                  onClick={() => setSelectedPlan(isSelected ? null : planId)}
                   className={`mt-7 inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-extrabold transition ${
                     isSelected
                       ? "border-foreground bg-foreground text-background"
                       : "border-foreground text-foreground hover:bg-foreground hover:text-background"
                   }`}
                 >
-                  {isSelected ? "Plan seleccionado" : "Elegir este plan"}
+                  {isSelected ? "Quitar selección" : "Elegir este plan"}
                 </button>
+
+                {isSelected && summary ? (
+                  <div className="mt-6 border-t border-border pt-6 text-left lg:hidden">
+                    <div className="rounded-[1.5rem] border border-border bg-muted/30 p-4">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <PackageCheck className="h-4 w-4" aria-hidden="true" />
+                        <span className="text-xs font-semibold uppercase tracking-[0.18em]">Configura tu plan</span>
+                      </div>
+
+                      <div className="mt-4 grid gap-4">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Fórmula</p>
+                          <div className="mt-2 grid gap-2">
+                            {Object.entries(formulas).map(([formulaId, formula]) => (
+                              <button
+                                key={formulaId}
+                                type="button"
+                                onClick={() => setSelectedFormula(formulaId as FormulaId)}
+                                className={`rounded-2xl border px-4 py-3 text-center transition ${
+                                  selectedFormula === formulaId
+                                    ? "border-foreground bg-foreground text-background"
+                                    : "border-border bg-background hover:bg-muted"
+                                }`}
+                              >
+                                <strong className="block text-sm">{formula.label}</strong>
+                                <span className="text-xs opacity-70">{formula.description}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Frecuencia</p>
+                          <div className="mt-2 grid gap-2">
+                            {Object.entries(frequencies).map(([frequencyId, frequency]) => (
+                              <button
+                                key={frequencyId}
+                                type="button"
+                                onClick={() => setSelectedFrequency(frequencyId as FrequencyId)}
+                                className={`rounded-2xl border px-4 py-3 text-center transition ${
+                                  selectedFrequency === frequencyId
+                                    ? "border-foreground bg-foreground text-background"
+                                    : "border-border bg-background hover:bg-muted"
+                                }`}
+                              >
+                                <strong className="block text-sm">{frequency.label}</strong>
+                                <span className="text-xs opacity-70">{frequency.description}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 rounded-[1.5rem] border border-border bg-muted/30 p-4">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <PackageCheck className="h-4 w-4" aria-hidden="true" />
+                        <span className="text-xs font-semibold uppercase tracking-[0.18em]">Resumen mensual</span>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 text-sm">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-muted-foreground">Entrega</span>
+                          <strong>
+                            {summary.frequency.shipments} x {summary.kgPerDelivery.toLocaleString("es-CL", { maximumFractionDigits: 1 })} kg
+                          </strong>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-muted-foreground">Precio normal</span>
+                          <strong className="line-through decoration-muted-foreground">{formatCurrency(summary.prices.normal)}</strong>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-muted-foreground">Suscripción</span>
+                          <strong>{formatCurrency(summary.prices.subscription)}</strong>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-muted-foreground">Despachos</span>
+                          <strong>{summary.frequency.shipments} x {formatCurrency(summary.plan.deliveryPrice)}</strong>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-muted-foreground">Total envíos</span>
+                          <strong>{formatCurrency(summary.deliveryTotal)}</strong>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 rounded-2xl bg-foreground p-4 text-center text-background">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-background/60">Pago mensual único</p>
+                        <p className="mt-1 text-4xl font-extrabold">{formatCurrency(summary.total)}</p>
+                        <p className="mt-1 text-sm text-background/65">Incluye suscripción + todos los envíos del mes.</p>
+                      </div>
+
+                      <a
+                        href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm font-bold text-background transition hover:bg-foreground/90"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        Quiero este plan por WhatsApp
+                      </a>
+                    </div>
+                  </div>
+                ) : null}
               </article>
             );
           })}
         </div>
 
-        <div className="mt-8 rounded-[2rem] border border-background/15 bg-background/10 p-4 sm:p-6">
+        <div className="mt-8 hidden rounded-[2rem] border border-background/15 bg-background/10 p-4 lg:block lg:p-6">
           {summary ? (
             <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-              <div className="rounded-[1.75rem] bg-background p-4 text-foreground sm:p-5">
+              <div className="rounded-[1.75rem] bg-background p-5 text-foreground">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <PackageCheck className="h-4 w-4" aria-hidden="true" />
                   <span className="text-xs font-semibold uppercase tracking-[0.2em]">Configura tu plan {summary.plan.name}</span>
@@ -244,13 +348,13 @@ export function SubscriptionPlansSection() {
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Fórmula</p>
                     <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                      {Object.entries(formulas).map(([id, formula]) => (
+                      {Object.entries(formulas).map(([formulaId, formula]) => (
                         <button
-                          key={id}
+                          key={formulaId}
                           type="button"
-                          onClick={() => setSelectedFormula(id as FormulaId)}
+                          onClick={() => setSelectedFormula(formulaId as FormulaId)}
                           className={`rounded-2xl border px-4 py-3 text-center transition ${
-                            selectedFormula === id ? "border-foreground bg-foreground text-background" : "border-border bg-muted/35 hover:bg-muted"
+                            selectedFormula === formulaId ? "border-foreground bg-foreground text-background" : "border-border bg-muted/35 hover:bg-muted"
                           }`}
                         >
                           <strong className="block text-sm">{formula.label}</strong>
@@ -263,13 +367,13 @@ export function SubscriptionPlansSection() {
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Frecuencia de entrega</p>
                     <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                      {Object.entries(frequencies).map(([id, frequency]) => (
+                      {Object.entries(frequencies).map(([frequencyId, frequency]) => (
                         <button
-                          key={id}
+                          key={frequencyId}
                           type="button"
-                          onClick={() => setSelectedFrequency(id as FrequencyId)}
+                          onClick={() => setSelectedFrequency(frequencyId as FrequencyId)}
                           className={`rounded-2xl border px-4 py-3 text-center transition ${
-                            selectedFrequency === id ? "border-foreground bg-foreground text-background" : "border-border bg-muted/35 hover:bg-muted"
+                            selectedFrequency === frequencyId ? "border-foreground bg-foreground text-background" : "border-border bg-muted/35 hover:bg-muted"
                           }`}
                         >
                           <strong className="block text-sm">{frequency.label}</strong>
@@ -281,7 +385,7 @@ export function SubscriptionPlansSection() {
                 </div>
               </div>
 
-              <div className="rounded-[1.75rem] bg-background p-4 text-foreground sm:p-5">
+              <div className="rounded-[1.75rem] bg-background p-5 text-foreground">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <PackageCheck className="h-4 w-4" aria-hidden="true" />
                   <span className="text-xs font-semibold uppercase tracking-[0.2em]">Resumen mensual</span>
