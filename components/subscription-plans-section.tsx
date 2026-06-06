@@ -168,7 +168,7 @@ export function SubscriptionPlansSection() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-5 lg:grid-cols-3 lg:items-start">
+        <div className="mt-10 grid gap-5 lg:grid-cols-3 lg:items-stretch">
           {Object.entries(plans).map(([id, plan]) => {
             const planId = id as PlanId;
             const isSelected = selectedPlan === planId;
@@ -218,18 +218,18 @@ export function SubscriptionPlansSection() {
 
                 <button
                   type="button"
-                  onClick={() => setSelectedPlan(planId)}
+                  onClick={() => setSelectedPlan(isSelected ? null : planId)}
                   className={`mt-7 inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-extrabold transition ${
                     isSelected
                       ? "border-foreground bg-foreground text-background"
                       : "border-foreground text-foreground hover:bg-foreground hover:text-background"
                   }`}
                 >
-                  {isSelected ? "Plan seleccionado" : "Elegir este plan"}
+                  {isSelected ? "Quitar selección" : "Elegir este plan"}
                 </button>
 
                 {isSelected && summary ? (
-                  <div className="mt-6 border-t border-border pt-6 text-left">
+                  <div className="mt-6 border-t border-border pt-6 text-left lg:hidden">
                     <div className="rounded-[1.5rem] border border-border bg-muted/30 p-4">
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <PackageCheck className="h-4 w-4" aria-hidden="true" />
@@ -333,6 +333,119 @@ export function SubscriptionPlansSection() {
               </article>
             );
           })}
+        </div>
+
+        <div className="mt-8 hidden rounded-[2rem] border border-background/15 bg-background/10 p-4 lg:block lg:p-6">
+          {summary ? (
+            <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+              <div className="rounded-[1.75rem] bg-background p-5 text-foreground">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <PackageCheck className="h-4 w-4" aria-hidden="true" />
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em]">Configura tu plan {summary.plan.name}</span>
+                </div>
+
+                <div className="mt-5 grid gap-5">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Fórmula</p>
+                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                      {Object.entries(formulas).map(([formulaId, formula]) => (
+                        <button
+                          key={formulaId}
+                          type="button"
+                          onClick={() => setSelectedFormula(formulaId as FormulaId)}
+                          className={`rounded-2xl border px-4 py-3 text-center transition ${
+                            selectedFormula === formulaId ? "border-foreground bg-foreground text-background" : "border-border bg-muted/35 hover:bg-muted"
+                          }`}
+                        >
+                          <strong className="block text-sm">{formula.label}</strong>
+                          <span className="text-xs opacity-70">{formula.description}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Frecuencia de entrega</p>
+                    <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                      {Object.entries(frequencies).map(([frequencyId, frequency]) => (
+                        <button
+                          key={frequencyId}
+                          type="button"
+                          onClick={() => setSelectedFrequency(frequencyId as FrequencyId)}
+                          className={`rounded-2xl border px-4 py-3 text-center transition ${
+                            selectedFrequency === frequencyId ? "border-foreground bg-foreground text-background" : "border-border bg-muted/35 hover:bg-muted"
+                          }`}
+                        >
+                          <strong className="block text-sm">{frequency.label}</strong>
+                          <span className="text-xs opacity-70">{frequency.description}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[1.75rem] bg-background p-5 text-foreground">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <PackageCheck className="h-4 w-4" aria-hidden="true" />
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em]">Resumen mensual</span>
+                </div>
+
+                <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                  <div>
+                    <p className="text-muted-foreground">Plan</p>
+                    <p className="font-bold">{summary.plan.name} · {summary.plan.kg} kg</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Entrega</p>
+                    <p className="font-bold">
+                      {summary.frequency.shipments} x {summary.kgPerDelivery.toLocaleString("es-CL", { maximumFractionDigits: 1 })} kg
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Precio normal</p>
+                    <p className="font-bold line-through decoration-muted-foreground">{formatCurrency(summary.prices.normal)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Suscripción</p>
+                    <p className="font-bold">{formatCurrency(summary.prices.subscription)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Despachos</p>
+                    <p className="font-bold">{summary.frequency.shipments} x {formatCurrency(summary.plan.deliveryPrice)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Total envíos</p>
+                    <p className="font-bold">{formatCurrency(summary.deliveryTotal)}</p>
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-2xl bg-foreground p-4 text-background">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-background/60">Pago mensual único</p>
+                  <p className="mt-1 text-4xl font-extrabold">{formatCurrency(summary.total)}</p>
+                  <p className="mt-1 text-sm text-background/65">Incluye suscripción + todos los envíos del mes.</p>
+                </div>
+
+                <a
+                  href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-sm font-bold text-background transition hover:bg-foreground/90"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Quiero este plan por WhatsApp
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="mx-auto max-w-2xl py-6 text-center">
+              <PackageCheck className="mx-auto h-8 w-8 text-background" aria-hidden="true" />
+              <h3 className="mt-3 text-2xl font-extrabold text-background">Primero elige un plan.</h3>
+              <p className="mt-2 text-sm leading-relaxed text-background/70">
+                Después podrás escoger la proteína, la frecuencia de entrega y ver el total mensual con los despachos incluidos.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="mt-8 rounded-[2rem] border border-background/15 bg-background/10 p-4 sm:p-6">
