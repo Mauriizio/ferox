@@ -262,7 +262,8 @@
     will-change: opacity, transform;
   }
 
-  .reveal-ready [data-reveal].is-visible {
+  .reveal-ready [data-reveal].is-visible,
+  .reveal-ready [data-reveal][data-reveal-visible="true"] {
     opacity: 1;
     transform: translateY(0);
   }
