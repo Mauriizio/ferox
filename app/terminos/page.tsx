@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Términos y Condiciones | FEROX BARF",
   description:
     "Términos y Condiciones de uso, compra, despacho, conservación y consumo responsable de productos FEROX BARF.",
+  alternates: {
+    canonical: "https://feroxbarf.com/terminos",
+  },
 };
 
 const sections = [

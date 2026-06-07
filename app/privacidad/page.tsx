@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Política de Privacidad | FEROX BARF",
   description:
     "Política de Privacidad de FEROX BARF sobre datos de cuenta, pedidos, mascotas, comentarios y uso del sitio.",
+  alternates: {
+    canonical: "https://feroxbarf.com/privacidad",
+  },
 };
 
 const sections = [

@@ -1,4 +1,4 @@
-﻿import type { Metadata, Viewport } from "next"
+import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import { AuthProvider } from "@/components/auth-provider"
 import { Toaster } from "@/components/ui/toaster"
@@ -8,12 +8,17 @@ const description =
   "Calcula la porción ideal diaria para tu perro según su peso, edad y actividad. Alimentación BARF natural, fresca y biológicamente adecuada."
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ferox-five.vercel.app"),
+  metadataBase: new URL("https://feroxbarf.com"),
   title,
   description,
-  applicationName: "FEROX",
+  applicationName: "FEROX BARF",
+  creator: "FEROX BARF",
+  publisher: "FEROX BARF",
   manifest: "/ferox-assets/manifest.webmanifest",
   generator: "v0.app",
+  alternates: {
+    canonical: "/",
+  },
   keywords: ["BARF", "alimentación natural", "perros", "FEROX", "calculadora BARF", "comida cruda"],
   icons: {
     icon: [
@@ -26,8 +31,8 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    url: "https://ferox-five.vercel.app",
-    siteName: "FEROX",
+    url: "https://feroxbarf.com",
+    siteName: "FEROX BARF",
     images: [
       {
         url: "/ferox-assets/og-1200x630.png",
@@ -47,7 +52,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "FEROX",
+    title: "FEROX BARF",
     statusBarStyle: "black-translucent",
   },
 }
@@ -70,7 +75,6 @@ export default function RootLayout({
           {children}
           <Toaster />
         </AuthProvider>
-        {process.env.NODE_ENV === "production"}
       </body>
     </html>
   )

@@ -1,4 +1,4 @@
-﻿import type { MetadataRoute } from "next"
+import type { MetadataRoute } from "next"
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://ferox-five.vercel.app/sitemap.xml",
+    sitemap: "https://feroxbarf.com/sitemap.xml",
   }
 }

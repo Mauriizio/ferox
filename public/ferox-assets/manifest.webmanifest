@@ -1,7 +1,8 @@
-﻿{
-  "name": "FEROX - Nutrición BARF Premium",
-  "short_name": "FEROX",
-  "description": "Nutrición BARF premium para perros. Calculadora, comunidad y recomendaciones personalizadas.",
+{
+  "name": "FEROX BARF",
+  "short_name": "FEROX BARF",
+  "description": "Alimentación BARF natural para perros. Calculadora, comunidad y recomendaciones personalizadas de FEROX BARF.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
