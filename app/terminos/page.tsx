@@ -4,6 +4,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Términos y Condiciones | FEROX BARF",
+  alternates: {
+    canonical: "/terminos",
+  },
   description:
     "Términos y Condiciones de uso, compra, despacho, conservación y consumo responsable de productos FEROX BARF.",
 };

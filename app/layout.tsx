@@ -11,9 +11,24 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://ferox-five.vercel.app"),
   title,
   description,
-  applicationName: "FEROX",
+  applicationName: "FEROX BARF",
   manifest: "/ferox-assets/manifest.webmanifest",
-  generator: "v0.app",
+  creator: "FEROX BARF",
+  publisher: "FEROX BARF",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   keywords: ["BARF", "alimentación natural", "perros", "FEROX", "calculadora BARF", "comida cruda"],
   icons: {
     icon: [
@@ -43,7 +58,12 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title,
     description,
-    images: ["/ferox-assets/og-1200x630.png"],
+    images: [
+      {
+        url: "/ferox-assets/og-1200x630.png",
+        alt: "FEROX BARF - Alimentación natural para perros",
+      },
+    ],
   },
   appleWebApp: {
     capable: true,
@@ -70,7 +90,6 @@ export default function RootLayout({
           {children}
           <Toaster />
         </AuthProvider>
-        {process.env.NODE_ENV === "production"}
       </body>
     </html>
   )
