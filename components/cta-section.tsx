@@ -17,7 +17,7 @@ export function CtaSection() {
         <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/70 to-foreground/40" />
       </div>
 
-      <div className="fade-up relative z-10 mx-auto flex min-h-[72svh] w-full max-w-4xl flex-col justify-center px-4 py-20 text-center sm:px-6 sm:py-24 lg:px-8 lg:py-28">
+      <div data-reveal className="fade-up relative z-10 mx-auto flex min-h-[72svh] w-full max-w-4xl flex-col justify-center px-4 py-20 text-center sm:px-6 sm:py-24 lg:px-8 lg:py-28">
         <h2 className="text-3xl sm:text-5xl md:text-6xl">
           Tu perro depende de ti para comer bien.
         </h2>

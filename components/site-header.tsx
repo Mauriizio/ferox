@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, MouseEvent, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,6 +17,7 @@ import { useAuth } from "@/components/auth-provider";
 import { deleteMediaFile, getMediaPathFromPublicUrl, uploadImageToMediaBucket } from "@/lib/services/storage-service";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { ScrollReveal } from "@/components/scroll-reveal";
 
 const navLinks = [
   { href: "#calculadora", label: "Calculadora" },
@@ -151,6 +152,17 @@ export function SiteHeader() {
     } catch {
       setMessage("No se pudo cerrar sesión. Intenta nuevamente.");
     }
+  };
+
+  const handleLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    setOpen(false);
+
+    if (window.location.pathname !== "/") {
+      return;
+    }
+
+    event.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSettingsAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -334,8 +346,9 @@ export function SiteHeader() {
           </div>
         </div>
       </div>
+      <ScrollReveal />
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-18 lg:px-8">
-        <Link href="/" className="flex items-center" aria-label="Inicio FEROX">
+        <Link href="/" onClick={handleLogoClick} className="flex items-center" aria-label="Inicio FEROX">
           <Image src={scrolled ? "/logo.png" : "/logoblanco.png"} alt="FEROX" width={170} height={48} className="h-10 w-auto transition-all" priority />
         </Link>
 

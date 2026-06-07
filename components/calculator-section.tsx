@@ -178,7 +178,7 @@ export function CalculatorSection() {
       <div className="pointer-events-none absolute left-1/2 top-10 h-52 w-52 -translate-x-1/2 rounded-full bg-foreground/5 blur-3xl sm:hidden" />
 
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
-        <div className="fade-up mx-auto max-w-3xl text-center">
+        <div data-reveal className="fade-up mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground shadow-sm sm:px-4 sm:py-2 sm:text-xs">
             <Sparkles className="h-3.5 w-3.5 text-foreground" />
             Calculadora BARF
@@ -192,7 +192,7 @@ export function CalculatorSection() {
           </p>
         </div>
 
-        <div className="mx-auto mt-4 w-full max-w-3xl rounded-[1.25rem] border border-white/70 bg-background/85 p-3 shadow-[0_12px_36px_rgba(0,0,0,0.06)] backdrop-blur sm:p-3.5 lg:mt-5 lg:p-4">
+        <div data-reveal className="mx-auto mt-4 w-full max-w-3xl rounded-[1.25rem] border border-white/70 bg-background/85 p-3 shadow-[0_12px_36px_rgba(0,0,0,0.06)] backdrop-blur sm:p-3.5 lg:mt-5 lg:p-4">
             <form className="space-y-2.5" onSubmit={(e) => e.preventDefault()}>
               
               <div className="rounded-[1rem] bg-foreground p-2.5 text-background shadow-lg">

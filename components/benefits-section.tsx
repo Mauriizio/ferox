@@ -51,7 +51,7 @@ export function BenefitsSection() {
       className="bg-foreground text-background"
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="fade-up mx-auto max-w-3xl text-center">
+        <div data-reveal className="fade-up mx-auto max-w-3xl text-center">
           <span className="section-eyebrow text-background/60">
             Beneficios
           </span>
@@ -70,7 +70,7 @@ export function BenefitsSection() {
             return (
               <li
                 key={benefit.title}
-                className="soft-card-hover premium-transition group bg-foreground p-5 hover:bg-background/5 sm:p-6 lg:p-7"
+                data-reveal className="soft-card-hover premium-transition group bg-foreground p-5 hover:bg-background/5 sm:p-6 lg:p-7"
               >
                 <div className="flex h-9 w-9 sm:h-10 sm:w-10 lg:h-12 lg:w-12 items-center justify-center rounded-full border border-background/20 group-hover:border-background/50 transition-colors">
                   <Icon className="h-4 w-4 lg:h-5 lg:w-5" aria-hidden="true" />

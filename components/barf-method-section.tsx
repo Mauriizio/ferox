@@ -18,7 +18,7 @@ export function BarfMethodSection() {
   return (
     <section id="que-es-barf" className="border-t border-border bg-foreground text-background">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="fade-up mx-auto max-w-3xl text-center">
+        <div data-reveal className="fade-up mx-auto max-w-3xl text-center">
           <span className="section-eyebrow text-background/60">¿Qué es BARF?</span>
           <h2 className="mt-3 ferox-display-title text-3xl sm:text-4xl md:text-5xl">Comida real, balanceada y completa</h2>
           <p className="section-copy mx-auto text-background/75">
@@ -29,7 +29,7 @@ export function BarfMethodSection() {
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {composition.map((item) => (
-            <article key={item.label} className="soft-card-hover premium-transition rounded-2xl border border-background/20 bg-background/10 p-4 text-center">
+            <article key={item.label} data-reveal className="soft-card-hover premium-transition rounded-2xl border border-background/20 bg-background/10 p-4 text-center">
               <p className="text-3xl font-bold">{item.value}</p>
               <p className="mt-1 text-xs uppercase tracking-wider text-background/70">{item.label}</p>
             </article>
@@ -45,7 +45,7 @@ export function BarfMethodSection() {
           ))}
         </div>
 
-        <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-background/20 bg-background/10 p-4 text-center sm:p-5">
+        <div data-reveal className="mx-auto mt-8 max-w-3xl rounded-2xl border border-background/20 bg-background/10 p-4 text-center sm:p-5">
           <p className="text-sm leading-relaxed text-background/75 sm:text-base">
             Ahora que conoces la base de la fórmula, revisa la guía responsable para hacer el cambio de forma gradual y segura.
           </p>

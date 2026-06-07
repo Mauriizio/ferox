@@ -6,7 +6,7 @@ export function SiteFooter() {
   return (
     <footer className="bg-background border-t border-border">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div data-reveal className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2">
             <Link href="/" className="inline-flex items-center" aria-label="FEROX BARF inicio">
               <Image
@@ -121,7 +121,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 grid gap-4 border-t border-border pt-8 text-center text-xs text-muted-foreground md:grid-cols-3 md:items-center">
+        <div data-reveal className="mt-12 grid gap-4 border-t border-border pt-8 text-center text-xs text-muted-foreground md:grid-cols-3 md:items-center">
           <p className="md:text-left">
             © {new Date().getFullYear()} FEROX BARF. Todos los derechos reservados.
           </p>
