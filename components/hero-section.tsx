@@ -104,7 +104,7 @@ export function HeroSection() {
               href={user ? `https://wa.me/${PHONE}` : "#tienda"}
               target={user ? "_blank" : undefined}
               rel={user ? "noopener noreferrer" : undefined}
-              className="group inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full bg-white px-4 sm:px-6 py-2.5 sm:py-4 text-sm sm:text-base font-semibold text-black text-center hover:bg-white/90 transition-all shadow-xl shadow-black/35"
+              className="interactive-lift premium-transition group inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full bg-white px-4 sm:px-6 py-2.5 sm:py-4 text-sm sm:text-base font-semibold text-black text-center hover:bg-white/90 shadow-xl shadow-black/35"
             >
               {user ? "Hacer pedido" : "Comprar ahora"}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -112,7 +112,7 @@ export function HeroSection() {
 
             <Link
               href={user ? "#cuenta" : "#calculadora"}
-              className="inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full border border-white/40 bg-black/20 px-4 sm:px-6 py-2.5 sm:py-4 text-sm sm:text-base font-medium text-white text-center hover:bg-black/35 transition-colors"
+              className="interactive-lift premium-transition inline-flex w-auto min-w-[12.5rem] self-center sm:self-auto items-center justify-center gap-2 rounded-full border border-white/40 bg-black/20 px-4 sm:px-6 py-2.5 sm:py-4 text-sm sm:text-base font-medium text-white text-center hover:bg-black/35"
             >
               {user ? "Mis perros" : "Calcular ración"}
             </Link>

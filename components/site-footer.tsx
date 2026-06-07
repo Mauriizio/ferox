@@ -26,7 +26,7 @@ export function SiteFooter() {
                 href="https://wa.me/56927973379"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-foreground hover:text-background transition-colors"
+                className="interactive-lift premium-transition inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-foreground hover:text-background"
                 aria-label="WhatsApp"
               >
                 <MessageCircle className="h-4 w-4" />
@@ -35,7 +35,7 @@ export function SiteFooter() {
                 href="https://www.instagram.com/barfferox"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-foreground hover:text-background transition-colors"
+                className="interactive-lift premium-transition inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-foreground hover:text-background"
                 aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4" />
@@ -44,7 +44,7 @@ export function SiteFooter() {
                 href="https://www.facebook.com/profile.php?id=61579530517514"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-foreground hover:text-background transition-colors"
+                className="interactive-lift premium-transition inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-foreground hover:text-background"
                 aria-label="Facebook"
               >
                 <Facebook className="h-4 w-4" />
@@ -86,13 +86,13 @@ export function SiteFooter() {
                   href="https://wa.me/56927973379"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-foreground transition-colors"
+                  className="premium-transition hover:text-foreground"
                 >
                   +56 9 2797 3379
                 </a>
               </li>
               <li>
-                <a href="mailto:Ferox156500@gmail.com" className="hover:text-foreground transition-colors">
+                <a href="mailto:Ferox156500@gmail.com" className="premium-transition hover:text-foreground">
                   Ferox156500@gmail.com
                 </a>
               </li>
@@ -101,7 +101,7 @@ export function SiteFooter() {
                   href="https://www.instagram.com/barfferox"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-foreground transition-colors"
+                  className="premium-transition hover:text-foreground"
                 >
                   Instagram @barfferox
                 </a>
@@ -111,7 +111,7 @@ export function SiteFooter() {
                   href="https://www.facebook.com/profile.php?id=61579530517514"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-foreground transition-colors"
+                  className="premium-transition hover:text-foreground"
                 >
                   Facebook FEROX
                 </a>
@@ -129,15 +129,15 @@ export function SiteFooter() {
             href="https://maurizio.dev/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 justify-self-center rounded-full bg-foreground px-3 py-1.5 text-background transition hover:bg-foreground/90"
+            className="interactive-lift premium-transition inline-flex items-center justify-center gap-1.5 justify-self-center rounded-full bg-foreground px-3 py-1.5 text-background hover:bg-foreground/90"
           >
             Web hecha con <Heart className="h-3.5 w-3.5 fill-background text-background" aria-hidden="true" /> por maurizio.dev
           </a>
           <div className="flex items-center justify-center gap-6 md:justify-end">
-            <Link href="/terminos" className="hover:text-foreground transition-colors">
+            <Link href="/terminos" className="premium-transition hover:text-foreground">
               Términos
             </Link>
-            <Link href="/privacidad" className="hover:text-foreground transition-colors">
+            <Link href="/privacidad" className="premium-transition hover:text-foreground">
               Privacidad
             </Link>
           </div>

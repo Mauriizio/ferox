@@ -42,7 +42,7 @@ export function ShopSection() {
   return (
     <section id="tienda" className="border-t border-border bg-background">
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-3 py-3 sm:min-h-[100svh] sm:px-6 sm:py-5 lg:px-8 lg:py-5">
-        <div className="mx-auto max-w-3xl text-center sm:text-center">
+        <div className="fade-up mx-auto max-w-3xl text-center sm:text-center">
           <span className="section-eyebrow text-muted-foreground">
             Tienda FEROX
           </span>
@@ -58,17 +58,17 @@ export function ShopSection() {
           <button
             type="button"
             onClick={() => setIndex((current) => (current - 1 + products.length) % products.length)}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border bg-background text-foreground transition hover:bg-muted sm:h-11 sm:w-11"
+            className="interactive-lift premium-transition grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border bg-background text-foreground hover:bg-muted sm:h-11 sm:w-11"
             aria-label="Producto anterior"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <article className="w-full max-w-xl rounded-[1.5rem] border border-border bg-background p-2 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:max-w-2xl sm:p-3">
+          <article className="soft-card-hover premium-transition w-full max-w-xl rounded-[1.5rem] border border-border bg-background p-2 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:max-w-2xl sm:p-3">
             <button
               type="button"
               onClick={() => setImageOpen(true)}
-              className="relative mx-auto block aspect-square w-full max-w-[92vw] overflow-hidden rounded-xl bg-muted/20 shadow-[0_20px_50px_rgba(0,0,0,0.18)] sm:max-w-[420px] lg:max-w-[420px]"
+              className="image-soft-zoom premium-transition relative mx-auto block aspect-square w-full max-w-[92vw] overflow-hidden rounded-xl bg-muted/20 shadow-[0_20px_50px_rgba(0,0,0,0.18)] sm:max-w-[420px] lg:max-w-[420px]"
               aria-label={`Ampliar imagen de ${product.name}`}
             >
               <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 92vw, 420px" className="object-cover object-center scale-[1.04]" />
@@ -83,7 +83,7 @@ export function ShopSection() {
               href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90 sm:mt-3"
+              className="interactive-lift premium-transition mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background hover:bg-foreground/90 sm:mt-3"
             >
               <MessageCircle className="h-4 w-4" />
               Pedir
@@ -93,7 +93,7 @@ export function ShopSection() {
           <button
             type="button"
             onClick={() => setIndex((current) => (current + 1) % products.length)}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border bg-background text-foreground transition hover:bg-muted sm:h-11 sm:w-11"
+            className="interactive-lift premium-transition grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border bg-background text-foreground hover:bg-muted sm:h-11 sm:w-11"
             aria-label="Producto siguiente"
           >
             <ChevronRight className="h-5 w-5" />

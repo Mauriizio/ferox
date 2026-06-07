@@ -345,7 +345,7 @@ export function SiteHeader() {
               key={link.href}
               href={link.href}
               className={cn(
-                "text-sm font-medium transition",
+                "premium-transition text-sm font-medium",
                 onHero ? "text-white/90 hover:text-white" : "text-foreground/80 hover:text-foreground",
               )}
             >
@@ -375,7 +375,7 @@ export function SiteHeader() {
                 onClick={() => setSettingsOpen(true)}
                 aria-label="Configuración"
                 className={cn(
-                  "inline-flex h-10 w-10 items-center justify-center rounded-full transition",
+                  "interactive-lift premium-transition inline-flex h-10 w-10 items-center justify-center rounded-full",
                   onHero ? "border border-white/30 text-white hover:bg-white/10" : "border border-border text-foreground hover:bg-muted",
                 )}
               >
@@ -385,7 +385,7 @@ export function SiteHeader() {
                 type="button"
                 onClick={handleSignOut}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
+                  "interactive-lift premium-transition inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold",
                   onHero ? "border border-white/30 text-white hover:bg-white/10" : "border border-border text-foreground hover:bg-muted",
                 )}
               >
@@ -398,7 +398,7 @@ export function SiteHeader() {
               type="button"
               onClick={() => setAuthOpen((value) => !value)}
               className={cn(
-                "rounded-full px-4 py-2 text-sm font-semibold transition",
+                "interactive-lift premium-transition rounded-full px-4 py-2 text-sm font-semibold",
                 onHero ? "bg-white text-black hover:bg-white/90" : "bg-foreground text-background hover:bg-foreground/90",
               )}
             >
@@ -419,7 +419,7 @@ export function SiteHeader() {
             }}
             aria-label={user ? "Configuración" : "Entrar"}
             className={cn(
-              "inline-flex h-9 w-9 items-center justify-center rounded-full transition",
+              "interactive-lift premium-transition inline-flex h-9 w-9 items-center justify-center rounded-full",
               onHero ? "text-white/95 hover:bg-white/10 hover:text-white" : "text-foreground hover:bg-muted",
             )}
           >
@@ -431,7 +431,7 @@ export function SiteHeader() {
               onClick={handleSignOut}
               aria-label="Cerrar sesión"
               className={cn(
-                "inline-flex h-9 w-9 items-center justify-center rounded-full transition",
+                "interactive-lift premium-transition inline-flex h-9 w-9 items-center justify-center rounded-full",
                 onHero ? "text-white/95 hover:bg-white/10 hover:text-white" : "text-foreground hover:bg-muted",
               )}
             >
@@ -440,7 +440,7 @@ export function SiteHeader() {
           ) : null}
         </div>
 
-        <button type="button" onClick={() => setOpen((v) => !v)} className={cn("inline-flex h-10 w-10 items-center justify-center rounded-md border lg:hidden", onHero ? "border-white/25 text-white" : "border-border text-foreground")} aria-label="Abrir menú">
+        <button type="button" onClick={() => setOpen((v) => !v)} className={cn("interactive-lift premium-transition inline-flex h-10 w-10 items-center justify-center rounded-md border lg:hidden", onHero ? "border-white/25 text-white" : "border-border text-foreground")} aria-label="Abrir menú">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
@@ -449,8 +449,8 @@ export function SiteHeader() {
           <div className="mx-auto flex w-full max-w-7xl justify-end px-4 sm:px-6 lg:px-8">
             <div className="pointer-events-auto mt-3 w-full max-w-sm rounded-2xl border border-border bg-background p-4 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
               <div className="mb-3 flex gap-2 text-sm font-semibold">
-                <button type="button" onClick={() => setMode("login")} className={cn("rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
-                <button type="button" onClick={() => setMode("signup")} className={cn("rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
+                <button type="button" onClick={() => setMode("login")} className={cn("premium-transition rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
+                <button type="button" onClick={() => setMode("signup")} className={cn("premium-transition rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
               </div>
               <form onSubmit={handleAuthSubmit} className="space-y-2">
                 {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
@@ -486,7 +486,7 @@ export function SiteHeader() {
                     de FEROX.
                   </p>
                 ) : null}
-                <button type="submit" disabled={isSaving || authLoading} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
+                <button type="submit" disabled={isSaving || authLoading} className="interactive-lift premium-transition w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
               </form>
               {mode === "login" ? (
                 <>
@@ -503,7 +503,7 @@ export function SiteHeader() {
                   ) : null}
                 </>
               ) : null}
-              <button type="button" onClick={() => signInWithGoogle()} className="mt-2 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
+              <button type="button" onClick={() => signInWithGoogle()} className="interactive-lift premium-transition mt-2 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
               {message ? <p className="mt-2 text-xs text-muted-foreground">{message}</p> : null}
               {recoveryMessage ? (
                 <p
@@ -534,8 +534,8 @@ export function SiteHeader() {
             <DialogDescription>Accede a tu cuenta FEROX.</DialogDescription>
           </DialogHeader>
           <div className="mb-1 flex gap-2 text-sm font-semibold">
-            <button type="button" onClick={() => setMode("login")} className={cn("rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
-            <button type="button" onClick={() => setMode("signup")} className={cn("rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
+            <button type="button" onClick={() => setMode("login")} className={cn("premium-transition rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
+            <button type="button" onClick={() => setMode("signup")} className={cn("premium-transition rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
           </div>
           <form onSubmit={handleAuthSubmit} className="space-y-2">
             {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
@@ -571,7 +571,7 @@ export function SiteHeader() {
                 de FEROX.
               </p>
             ) : null}
-            <button type="submit" disabled={isSaving || authLoading} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
+            <button type="submit" disabled={isSaving || authLoading} className="interactive-lift premium-transition w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
           </form>
           {mode === "login" ? (
             <>
@@ -588,7 +588,7 @@ export function SiteHeader() {
               ) : null}
             </>
           ) : null}
-          <button type="button" onClick={() => signInWithGoogle()} className="mt-1 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
+          <button type="button" onClick={() => signInWithGoogle()} className="interactive-lift premium-transition mt-1 w-full rounded-full border border-border px-4 py-2 text-sm font-semibold">Continuar con Google</button>
           {message ? <p className="mt-1 text-xs text-muted-foreground">{message}</p> : null}
           {recoveryMessage ? (
             <p
@@ -639,7 +639,7 @@ export function SiteHeader() {
             <label className="block text-sm font-medium">Usuario
               <input value={settingsUsername} onChange={(e)=>setSettingsUsername(e.target.value)} className="mt-2 w-full rounded-xl border border-border px-3 py-2 text-sm" />
             </label>
-            <button type="submit" disabled={isSaving} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Guardando..." : "Guardar cambios"}</button>
+            <button type="submit" disabled={isSaving} className="interactive-lift premium-transition w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Guardando..." : "Guardar cambios"}</button>
           </form>
         </DialogContent>
       </Dialog>

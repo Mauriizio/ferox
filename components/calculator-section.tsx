@@ -149,14 +149,14 @@ export function CalculatorSection() {
               href={`https://wa.me/${PHONE}?text=${whatsappMessage}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2 text-sm font-semibold text-background transition-colors hover:bg-background/10"
+              className="interactive-lift premium-transition inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2 text-sm font-semibold text-background hover:bg-background/10"
             >
               <MessageCircle className="h-4 w-4" />
               Pedir asesoría
             </a>
             <a
               href="#productos"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2 text-sm font-semibold text-background transition-colors hover:bg-background/10"
+              className="interactive-lift premium-transition inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2 text-sm font-semibold text-background hover:bg-background/10"
             >
               <ShoppingBag className="h-4 w-4" />
               Ver productos
@@ -178,7 +178,7 @@ export function CalculatorSection() {
       <div className="pointer-events-none absolute left-1/2 top-10 h-52 w-52 -translate-x-1/2 rounded-full bg-foreground/5 blur-3xl sm:hidden" />
 
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="fade-up mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground shadow-sm sm:px-4 sm:py-2 sm:text-xs">
             <Sparkles className="h-3.5 w-3.5 text-foreground" />
             Calculadora BARF
@@ -215,7 +215,7 @@ export function CalculatorSection() {
                   <button
                     type="button"
                     onClick={() => updatePeso((pesoNumber || 1) - 0.5)}
-                    className="grid h-9 w-9 place-items-center rounded-full bg-background/10 text-background transition hover:bg-background/20"
+                    className="interactive-lift premium-transition grid h-9 w-9 place-items-center rounded-full bg-background/10 text-background hover:bg-background/20"
                     aria-label="Disminuir peso"
                   >
                     <Minus className="h-4 w-4" />
@@ -235,7 +235,7 @@ export function CalculatorSection() {
                   <button
                     type="button"
                     onClick={() => updatePeso((pesoNumber || 0) + 0.5)}
-                    className="grid h-9 w-9 place-items-center rounded-full bg-background/10 text-background transition hover:bg-background/20"
+                    className="interactive-lift premium-transition grid h-9 w-9 place-items-center rounded-full bg-background/10 text-background hover:bg-background/20"
                     aria-label="Aumentar peso"
                   >
                     <Plus className="h-4 w-4" />
