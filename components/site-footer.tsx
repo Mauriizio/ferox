@@ -134,10 +134,10 @@ export function SiteFooter() {
             Web hecha con <Heart className="h-3.5 w-3.5 fill-background text-background" aria-hidden="true" /> por maurizio.dev
           </a>
           <div className="flex items-center justify-center gap-6 md:justify-end">
-            <Link href="#" className="hover:text-foreground transition-colors">
+            <Link href="/terminos" className="hover:text-foreground transition-colors">
               Términos
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
+            <Link href="/privacidad" className="hover:text-foreground transition-colors">
               Privacidad
             </Link>
           </div>

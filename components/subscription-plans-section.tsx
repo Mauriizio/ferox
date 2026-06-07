@@ -178,7 +178,7 @@ export function SubscriptionPlansSection() {
                 key={id}
                 className={`relative flex flex-col overflow-hidden lg:min-h-full rounded-[2rem] border bg-background p-6 text-center text-foreground shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition sm:p-7 ${
                   isSelected ? "border-background ring-2 ring-background/80" : "border-background/10"
-                } ${plan.highlight ? "lg:-translate-y-4" : ""}`}
+                }`}
               >
                 {plan.highlight ? (
                   <div className="absolute inset-x-0 top-0 bg-foreground px-4 py-3 text-xs font-extrabold uppercase tracking-[0.22em] text-background">
@@ -203,7 +203,7 @@ export function SubscriptionPlansSection() {
                   </div>
                 </div>
 
-                <ul className="mt-6 grid gap-3 text-left text-sm text-foreground/85">
+                <ul className="mt-6 grid gap-3 text-left text-sm text-foreground/85 lg:flex-1">
                   {plan.benefits.map((benefit) => (
                     <li key={benefit} className="flex items-start gap-3">
                       <Check className="mt-0.5 h-4 w-4 shrink-0 text-foreground" aria-hidden="true" />
@@ -219,7 +219,7 @@ export function SubscriptionPlansSection() {
                 <button
                   type="button"
                   onClick={() => setSelectedPlan(isSelected ? null : planId)}
-                  className={`mt-7 inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-extrabold transition ${
+                  className={`mt-7 inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-extrabold transition lg:mt-auto ${
                     isSelected
                       ? "border-foreground bg-foreground text-background"
                       : "border-foreground text-foreground hover:bg-foreground hover:text-background"
