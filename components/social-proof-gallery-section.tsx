@@ -45,7 +45,7 @@ export function SocialProofGallerySection() {
 
           <header className="mt-4 text-center">
             <h2 className="text-3xl text-foreground sm:text-4xl">
-              La evolución de Napoleón con BARF
+              La evolucion de Napoleon con BARF
             </h2>
             <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               De cachorro a un perro fuerte, feliz y lleno de energía.

@@ -74,7 +74,7 @@ const plans: Record<PlanId, Plan> = {
 const formulas: Record<FormulaId, { label: string; description: string }> = {
   mixto: {
     label: "BARF Mixto",
-    description: "Pollo y carne",
+    description: "Pollo y vacuno",
   },
   vacuno: {
     label: "BARF Vacuno",

@@ -9,10 +9,10 @@ const PHONE = "56927973379";
 
 const products = [
   {
-    name: "BARF mix de proteína",
-    subtitle: "Pollo y carne",
+    name: "BARF mix de proteina",
+    subtitle: "Pollo y vacuno",
     description:
-      "Mezcla BARF con pollo y carne para una alimentación diaria real, fresca y balanceada.",
+      "Mezcla BARF con pollo y vacuno para una alimentación diaria real, fresca y balanceada.",
     price: "$ 3.000",
     image: "/product/product2.png",
   },

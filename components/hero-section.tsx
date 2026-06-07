@@ -78,7 +78,7 @@ export function HeroSection() {
             className="mt-5 md:mt-6 text-4xl sm:text-5xl md:text-6xl font-normal leading-[0.98] tracking-tight text-white text-balance"
             style={{ fontFamily: '"Ferox", ui-sans-serif, system-ui, sans-serif' }}
           >
-            {user ? "BIENVENIDO A TU ESPACIO FEROX" : "NUTRICIÓN REAL PREMIUM"}
+            {user ? "BIENVENIDO A TU ESPACIO FEROX" : "NUTRICION REAL PREMIUM"}
           </h1>
           {user ? (
             <div className="mt-3 h-20 w-20 overflow-hidden rounded-full border border-white/30 bg-white/10 md:hidden">

@@ -56,14 +56,14 @@ export function WhatIsBarf() {
             />
           </div>
 
-          <div className="lg:py-2">
+          <div className="text-center lg:py-2 lg:text-left">
             <span className="section-eyebrow text-muted-foreground">
               ¿Qué es BARF?
             </span>
             <h2 className="section-heading text-foreground">
-              Comida real, como la que su cuerpo está diseñado para procesar.
+              Comida real, como la que su cuerpo esta diseñado para procesar.
             </h2>
-            <div className="mt-4 space-y-3 text-base sm:text-lg text-muted-foreground leading-relaxed">
+            <div className="mx-auto mt-4 max-w-2xl space-y-3 text-base leading-relaxed text-muted-foreground sm:text-lg lg:mx-0">
               <p>
                 La alimentación{" "}
                 <strong className="text-foreground">BARF</strong> es una dieta
@@ -122,7 +122,7 @@ export function WhatIsBarf() {
 
             <div className="mt-4 rounded-2xl border border-foreground/10 bg-foreground p-4 text-background sm:p-5">
               <h3 className="text-xl font-bold sm:text-2xl">
-                También puedes complementar su BARF
+                Tambien puedes complementar su BARF
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-background/70 sm:text-base">
                 Como orientación general, algunas familias suman extras

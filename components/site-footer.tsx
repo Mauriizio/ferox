@@ -53,7 +53,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-foreground">Navegación</h3>
+            <h3 className="text-sm font-semibold text-foreground">Navegacion</h3>
             <ul className="mt-4 space-y-3 text-sm">
               <li>
                 <Link href="#que-es-barf" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -121,27 +121,25 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-muted-foreground">
+        <div className="mt-12 grid gap-4 border-t border-border pt-8 text-center text-xs text-muted-foreground md:grid-cols-3 md:items-center">
+          <p className="md:text-left">
             © {new Date().getFullYear()} FEROX BARF. Todos los derechos reservados.
           </p>
-          <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground sm:items-end">
-            <a
-              href="https://maurizio.dev/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1.5 text-background transition hover:bg-foreground/90"
-            >
-              Web hecha con <Heart className="h-3.5 w-3.5 fill-background text-background" aria-hidden="true" /> por maurizio.dev
-            </a>
-            <div className="flex items-center gap-6">
-              <Link href="#" className="hover:text-foreground transition-colors">
-                Términos
-              </Link>
-              <Link href="#" className="hover:text-foreground transition-colors">
-                Privacidad
-              </Link>
-            </div>
+          <a
+            href="https://maurizio.dev/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-1.5 justify-self-center rounded-full bg-foreground px-3 py-1.5 text-background transition hover:bg-foreground/90"
+          >
+            Web hecha con <Heart className="h-3.5 w-3.5 fill-background text-background" aria-hidden="true" /> por maurizio.dev
+          </a>
+          <div className="flex items-center justify-center gap-6 md:justify-end">
+            <Link href="#" className="hover:text-foreground transition-colors">
+              Términos
+            </Link>
+            <Link href="#" className="hover:text-foreground transition-colors">
+              Privacidad
+            </Link>
           </div>
         </div>
       </div>

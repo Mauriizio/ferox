@@ -97,7 +97,7 @@ export function CalculatorSection() {
                 Resultado
               </span>
               <h3 className="font-serif text-base font-bold sm:text-lg">
-                Tu porción BARF
+                Tu porcion BARF
               </h3>
             </div>
           </div>
@@ -184,7 +184,7 @@ export function CalculatorSection() {
             Calculadora BARF
           </span>
           <h2 className="mt-3 text-2xl sm:mt-4 sm:text-3xl md:text-4xl">
-            Descubre cuánta comida necesita tu perro
+            Descubre cuanta comida necesita tu perro
           </h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             Primero completa los datos de tu perro. Al final verás la porción

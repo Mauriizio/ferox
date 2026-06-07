@@ -17,10 +17,10 @@ export function ResponsibleFeedingSection() {
   return (
     <section className="border-t border-border bg-background">
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:py-24">
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-center text-center lg:text-left">
           <span className="section-eyebrow text-muted-foreground">Guía responsable</span>
           <h2 className="section-heading text-foreground">Cada perro es distinto. Avanza con calma.</h2>
-          <p className="section-copy text-muted-foreground">
+          <p className="section-copy mx-auto text-muted-foreground lg:mx-0">
             BARF puede ser una excelente alternativa, pero la transición debe hacerse con observación y criterio. Nuestro objetivo es alimentar mejor, sin prometer milagros ni reemplazar la orientación profesional.
           </p>
           <div className="mt-6 rounded-[1.75rem] border border-border bg-muted/35 p-4 sm:p-5">

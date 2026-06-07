@@ -51,14 +51,14 @@ export function BenefitsSection() {
       className="bg-foreground text-background"
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="max-w-3xl">
+        <div className="mx-auto max-w-3xl text-center">
           <span className="section-eyebrow text-background/60">
             Beneficios
           </span>
           <h2 className="mt-2 sm:mt-3 ferox-display-title text-3xl sm:text-4xl md:text-5xl">
             Tu perro no solo come mejor… vive mejor.
           </h2>
-          <p className="section-copy text-background/70">
+          <p className="section-copy mx-auto text-background/70">
             Una alimentación que respeta su naturaleza se nota en cada detalle
             de su día a día.
           </p>
