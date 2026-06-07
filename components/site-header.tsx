@@ -226,7 +226,7 @@ export function SiteHeader() {
     >
       <div className="flex min-h-[100dvh] flex-col px-4 pb-8 pt-4 sm:px-6">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center" aria-label="Inicio FEROX" onClick={() => setOpen(false)}>
+          <Link href="/" className="flex items-center" aria-label="Inicio FEROX" onClick={handleLogoClick}>
             <Image src={scrolled ? "/logo.png" : "/logoblanco.png"} alt="FEROX" width={170} height={48} className="h-10 w-auto" />
           </Link>
           <button

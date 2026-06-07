@@ -71,8 +71,6 @@ export async function saveFoodCalculation({
     estado_fisico: estadoFisico,
   };
 
-  console.info("[FEROX food_calculations] create payload", payload);
-
   const { data, error } = await supabase
     .from("food_calculations")
     .insert(payload)
