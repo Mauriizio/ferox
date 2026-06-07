@@ -144,7 +144,7 @@ export function CommentsSection() {
     <section id="comentarios" className="relative overflow-hidden border-t border-border bg-[linear-gradient(180deg,#ffffff_0%,#f7f7f7_100%)]">
       <Heart className="pointer-events-none absolute -right-10 top-20 h-40 w-40 rotate-12 text-foreground/[0.025]" aria-hidden="true" />
       <div className="relative mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="fade-up mx-auto max-w-3xl text-center">
+        <div data-reveal className="fade-up mx-auto max-w-3xl text-center">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">Reseñas reales</span>
           <h2 className="mt-2 ferox-display-title text-3xl sm:text-4xl md:text-5xl">Lo que dice la comunidad FEROX</h2>
         </div>
@@ -154,7 +154,7 @@ export function CommentsSection() {
             <li className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Cargando reseñas...</li>
           ) : comments.length > 0 ? (
             paginatedComments.map((comment) => (
-              <li key={comment.id} className="soft-card-hover premium-transition overflow-hidden rounded-[1.75rem] border border-border bg-background shadow-sm">
+              <li key={comment.id} data-reveal className="soft-card-hover premium-transition overflow-hidden rounded-[1.75rem] border border-border bg-background shadow-sm">
                 <div className="relative bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.07),transparent_34%),linear-gradient(135deg,#ffffff_0%,#f2f2f2_100%)] p-6 sm:p-7 lg:p-8">
                   <span className="absolute right-5 top-4 text-5xl leading-none text-foreground/10">“</span>
                   <blockquote className="relative max-w-3xl text-base leading-relaxed text-foreground sm:text-lg">

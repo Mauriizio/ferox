@@ -42,7 +42,7 @@ export function ShopSection() {
   return (
     <section id="tienda" className="border-t border-border bg-background">
       <div className="mx-auto flex w-full max-w-7xl flex-col justify-center px-3 py-3 sm:min-h-[100svh] sm:px-6 sm:py-5 lg:px-8 lg:py-5">
-        <div className="fade-up mx-auto max-w-3xl text-center sm:text-center">
+        <div data-reveal className="fade-up mx-auto max-w-3xl text-center sm:text-center">
           <span className="section-eyebrow text-muted-foreground">
             Tienda FEROX
           </span>
@@ -64,7 +64,7 @@ export function ShopSection() {
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <article className="soft-card-hover premium-transition w-full max-w-xl rounded-[1.5rem] border border-border bg-background p-2 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:max-w-2xl sm:p-3">
+          <article data-reveal className="soft-card-hover premium-transition w-full max-w-xl rounded-[1.5rem] border border-border bg-background p-2 text-center shadow-[0_20px_55px_rgba(0,0,0,0.08)] sm:max-w-2xl sm:p-3">
             <button
               type="button"
               onClick={() => setImageOpen(true)}

@@ -160,7 +160,7 @@ export function SubscriptionPlansSection() {
   return (
     <section id="planes" className="border-t border-border bg-foreground text-background">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="fade-up mx-auto max-w-3xl text-center">
+        <div data-reveal className="fade-up mx-auto max-w-3xl text-center">
           <span className="section-eyebrow text-background/60">Planes y Club FEROX</span>
           <h2 className="section-heading text-background">Elige tu plan y asegura su BARF.</h2>
           <p className="section-copy text-background/75">
@@ -176,7 +176,7 @@ export function SubscriptionPlansSection() {
             return (
               <article
                 key={id}
-                className={`soft-card-hover premium-transition relative flex flex-col overflow-hidden lg:min-h-full rounded-[2rem] border bg-background p-6 text-center text-foreground shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-7 ${
+                data-reveal className={`soft-card-hover premium-transition relative flex flex-col overflow-hidden lg:min-h-full rounded-[2rem] border bg-background p-6 text-center text-foreground shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-7 ${
                   isSelected ? "border-background ring-2 ring-background/80" : "border-background/10"
                 }`}
               >
@@ -448,7 +448,7 @@ export function SubscriptionPlansSection() {
           )}
         </div>
 
-        <div className="mt-8 rounded-[2rem] border border-background/15 bg-background/10 p-4 sm:p-6">
+        <div data-reveal className="mt-8 rounded-[2rem] border border-background/15 bg-background/10 p-4 sm:p-6">
           <div className="flex flex-col gap-2 text-center sm:items-center">
             <span className="section-eyebrow text-background/60">Club FEROX incluido</span>
             <h3 className="mt-2 font-sans text-2xl font-extrabold tracking-tight text-background sm:text-3xl">Más que alimento: beneficios para ti y tu compañero.</h3>

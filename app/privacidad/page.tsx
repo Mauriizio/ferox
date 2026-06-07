@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -117,7 +118,10 @@ const sections = [
 export default function PrivacyPage() {
   return (
     <main className="bg-background text-foreground">
-      <section className="border-b border-border bg-foreground px-4 py-16 text-background sm:px-6 lg:px-8">
+      <section className="relative border-b border-border bg-foreground px-4 py-16 text-background sm:px-6 lg:px-8">
+        <Link href="/" className="interactive-lift premium-transition absolute left-4 top-4 inline-flex items-center" aria-label="Inicio FEROX">
+          <Image src="/logoblanco.png" alt="FEROX" width={150} height={42} className="h-9 w-auto" priority />
+        </Link>
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.26em] text-background/60">
             FEROX BARF
