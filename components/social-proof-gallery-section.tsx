@@ -37,13 +37,13 @@ export function SocialProofGallerySection() {
   return (
     <section id="comunidad" className="border-t border-border bg-background">
       <div className="mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 sm:py-16 lg:py-20">
-        <article className="rounded-3xl border border-border bg-muted/25 p-4 shadow-sm sm:p-6">
+        <article className="soft-card-hover premium-transition rounded-3xl border border-border bg-muted/25 p-4 shadow-sm sm:p-6">
           <div className="inline-flex items-center gap-2 rounded-full bg-foreground/10 px-3 py-1 text-xs font-medium text-foreground">
             <Leaf className="h-3.5 w-3.5" />
             Historias reales
           </div>
 
-          <header className="mt-4 text-center">
+          <header className="fade-up mt-4 text-center">
             <h2 className="text-3xl text-foreground sm:text-4xl">
               La evolucion de Napoleon con BARF
             </h2>
@@ -60,7 +60,7 @@ export function SocialProofGallerySection() {
                   {item.step}
                 </span>
 
-                <article className="flex w-full items-center gap-3 rounded-2xl border border-border bg-background/90 p-2.5 shadow-sm">
+                <article className="soft-card-hover premium-transition flex w-full items-center gap-3 rounded-2xl border border-border bg-background/90 p-2.5 shadow-sm">
                   <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl sm:h-28 sm:w-28">
                     <Image src={item.src} alt={item.alt} fill sizes="(max-width: 640px) 96px, 112px" className="object-cover" />
                   </div>
@@ -100,7 +100,7 @@ export function SocialProofGallerySection() {
 
           <a
             href="/#tienda"
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-foreground/90 sm:text-base"
+            className="interactive-lift premium-transition mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background hover:bg-foreground/90 sm:text-base"
           >
             <Utensils className="h-4 w-4" />
             Conoce nuestros planes BARF

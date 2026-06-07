@@ -17,13 +17,13 @@ export function ResponsibleFeedingSection() {
   return (
     <section className="border-t border-border bg-background">
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:py-24">
-        <div className="flex flex-col justify-center text-center lg:text-left">
+        <div className="fade-up flex flex-col justify-center text-center lg:text-left">
           <span className="section-eyebrow text-muted-foreground">Guía responsable</span>
           <h2 className="section-heading text-foreground">Cada perro es distinto. Avanza con calma.</h2>
           <p className="section-copy mx-auto text-muted-foreground lg:mx-0">
             BARF puede ser una excelente alternativa, pero la transición debe hacerse con observación y criterio. Nuestro objetivo es alimentar mejor, sin prometer milagros ni reemplazar la orientación profesional.
           </p>
-          <div className="mt-6 rounded-[1.75rem] border border-border bg-muted/35 p-4 sm:p-5">
+          <div className="soft-card-hover premium-transition mt-6 rounded-[1.75rem] border border-border bg-muted/35 p-4 sm:p-5">
             <div className="flex items-start gap-3">
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-foreground text-background">
                 <Stethoscope className="h-5 w-5" aria-hidden="true" />
@@ -38,7 +38,7 @@ export function ResponsibleFeedingSection() {
           </div>
         </div>
 
-        <div className="rounded-[2rem] bg-foreground p-4 text-background shadow-[0_24px_70px_rgba(0,0,0,0.16)] sm:p-6">
+        <div className="soft-card-hover premium-transition rounded-[2rem] bg-foreground p-4 text-background shadow-[0_24px_70px_rgba(0,0,0,0.16)] sm:p-6">
           <div className="flex items-center gap-2 text-background/65">
             <Clock className="h-4 w-4" aria-hidden="true" />
             <span className="text-xs font-semibold uppercase tracking-[0.22em]">Transición sugerida</span>

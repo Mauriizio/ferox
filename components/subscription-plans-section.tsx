@@ -160,7 +160,7 @@ export function SubscriptionPlansSection() {
   return (
     <section id="planes" className="border-t border-border bg-foreground text-background">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="fade-up mx-auto max-w-3xl text-center">
           <span className="section-eyebrow text-background/60">Planes y Club FEROX</span>
           <h2 className="section-heading text-background">Elige tu plan y asegura su BARF.</h2>
           <p className="section-copy text-background/75">
@@ -176,7 +176,7 @@ export function SubscriptionPlansSection() {
             return (
               <article
                 key={id}
-                className={`relative flex flex-col overflow-hidden lg:min-h-full rounded-[2rem] border bg-background p-6 text-center text-foreground shadow-[0_24px_70px_rgba(0,0,0,0.22)] transition sm:p-7 ${
+                className={`soft-card-hover premium-transition relative flex flex-col overflow-hidden lg:min-h-full rounded-[2rem] border bg-background p-6 text-center text-foreground shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-7 ${
                   isSelected ? "border-background ring-2 ring-background/80" : "border-background/10"
                 }`}
               >
@@ -219,7 +219,7 @@ export function SubscriptionPlansSection() {
                 <button
                   type="button"
                   onClick={() => setSelectedPlan(isSelected ? null : planId)}
-                  className={`mt-7 inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-extrabold transition lg:mt-auto ${
+                  className={`interactive-lift premium-transition mt-7 inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-extrabold lg:mt-auto ${
                     isSelected
                       ? "border-foreground bg-foreground text-background"
                       : "border-foreground text-foreground hover:bg-foreground hover:text-background"
@@ -245,7 +245,7 @@ export function SubscriptionPlansSection() {
                                 key={formulaId}
                                 type="button"
                                 onClick={() => setSelectedFormula(formulaId as FormulaId)}
-                                className={`rounded-2xl border px-4 py-3 text-center transition ${
+                                className={`interactive-lift premium-transition rounded-2xl border px-4 py-3 text-center ${
                                   selectedFormula === formulaId
                                     ? "border-foreground bg-foreground text-background"
                                     : "border-border bg-background hover:bg-muted"
@@ -266,7 +266,7 @@ export function SubscriptionPlansSection() {
                                 key={frequencyId}
                                 type="button"
                                 onClick={() => setSelectedFrequency(frequencyId as FrequencyId)}
-                                className={`rounded-2xl border px-4 py-3 text-center transition ${
+                                className={`interactive-lift premium-transition rounded-2xl border px-4 py-3 text-center ${
                                   selectedFrequency === frequencyId
                                     ? "border-foreground bg-foreground text-background"
                                     : "border-border bg-background hover:bg-muted"
@@ -353,7 +353,7 @@ export function SubscriptionPlansSection() {
                           key={formulaId}
                           type="button"
                           onClick={() => setSelectedFormula(formulaId as FormulaId)}
-                          className={`rounded-2xl border px-4 py-3 text-center transition ${
+                          className={`interactive-lift premium-transition rounded-2xl border px-4 py-3 text-center ${
                             selectedFormula === formulaId ? "border-foreground bg-foreground text-background" : "border-border bg-muted/35 hover:bg-muted"
                           }`}
                         >
@@ -372,7 +372,7 @@ export function SubscriptionPlansSection() {
                           key={frequencyId}
                           type="button"
                           onClick={() => setSelectedFrequency(frequencyId as FrequencyId)}
-                          className={`rounded-2xl border px-4 py-3 text-center transition ${
+                          className={`interactive-lift premium-transition rounded-2xl border px-4 py-3 text-center ${
                             selectedFrequency === frequencyId ? "border-foreground bg-foreground text-background" : "border-border bg-muted/35 hover:bg-muted"
                           }`}
                         >

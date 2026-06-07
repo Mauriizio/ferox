@@ -56,7 +56,7 @@ export function WhatIsBarf() {
             />
           </div>
 
-          <div className="text-center lg:py-2 lg:text-left">
+          <div className="fade-up text-center lg:py-2 lg:text-left">
             <span className="section-eyebrow text-muted-foreground">
               ¿Qué es BARF?
             </span>
@@ -82,7 +82,7 @@ export function WhatIsBarf() {
               {composition.map((item) => (
                 <div
                   key={item.label}
-                  className="border border-border rounded-xl p-4 text-center glass shadow-sm sm:p-5"
+                  className="soft-card-hover premium-transition border border-border rounded-xl p-4 text-center glass shadow-sm sm:p-5"
                 >
                   <div className="text-3xl font-bold text-foreground sm:text-4xl">
                     {item.value}
@@ -94,7 +94,7 @@ export function WhatIsBarf() {
               ))}
             </div>
 
-            <div className="mt-8 grid gap-4 rounded-2xl border border-border bg-muted/35 p-4 sm:p-5">
+            <div className="soft-card-hover premium-transition mt-8 grid gap-4 rounded-2xl border border-border bg-muted/35 p-4 sm:p-5">
               <div>
                 <h3 className="text-xl font-bold text-foreground sm:text-2xl">
                   Ingredientes que lleva nuestro BARF
@@ -120,7 +120,7 @@ export function WhatIsBarf() {
               </ul>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-foreground/10 bg-foreground p-4 text-background sm:p-5">
+            <div className="soft-card-hover premium-transition mt-4 rounded-2xl border border-foreground/10 bg-foreground p-4 text-background sm:p-5">
               <h3 className="text-xl font-bold sm:text-2xl">
                 Tambien puedes complementar su BARF
               </h3>
