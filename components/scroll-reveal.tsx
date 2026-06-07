@@ -9,10 +9,13 @@ export function ScrollReveal() {
     const root = document.documentElement;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    const revealElement = (element: HTMLElement) => {
+      element.dataset.revealVisible = "true";
+      element.classList.add("is-visible");
+    };
+
     const revealNow = () => {
-      document.querySelectorAll<HTMLElement>(REVEAL_SELECTOR).forEach((element) => {
-        element.classList.add("is-visible");
-      });
+      document.querySelectorAll<HTMLElement>(REVEAL_SELECTOR).forEach(revealElement);
     };
 
     if (prefersReducedMotion || !("IntersectionObserver" in window)) {
@@ -29,7 +32,7 @@ export function ScrollReveal() {
             return;
           }
 
-          entry.target.classList.add("is-visible");
+          revealElement(entry.target as HTMLElement);
           observer.unobserve(entry.target);
         });
       },
@@ -41,12 +44,14 @@ export function ScrollReveal() {
 
     const observeElements = () => {
       document.querySelectorAll<HTMLElement>(REVEAL_SELECTOR).forEach((element) => {
-        if (element.classList.contains("is-visible") || element.dataset.revealObserved === "true") {
+        if (element.dataset.revealVisible === "true") {
           return;
         }
 
-        element.dataset.revealObserved = "true";
-        observer.observe(element);
+        if (element.dataset.revealObserved !== "true") {
+          element.dataset.revealObserved = "true";
+          observer.observe(element);
+        }
       });
     };
 
