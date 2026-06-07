@@ -190,7 +190,6 @@ export async function toggleCommentLike(userId: string, commentId: string) {
   }
 
   const payload = { user_id: userId, comment_id: commentId };
-  console.info("[FEROX comment_likes] create payload", payload);
 
   const { error } = await supabase
     .from("comment_likes")

@@ -155,7 +155,7 @@ export function CalculatorSection() {
               Pedir asesoría
             </a>
             <a
-              href="#productos"
+              href="#tienda"
               className="interactive-lift premium-transition inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-4 py-2 text-sm font-semibold text-background hover:bg-background/10"
             >
               <ShoppingBag className="h-4 w-4" />
