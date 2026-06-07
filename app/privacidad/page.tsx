@@ -4,6 +4,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Política de Privacidad | FEROX BARF",
+  alternates: {
+    canonical: "/privacidad",
+  },
   description:
     "Política de Privacidad de FEROX BARF sobre datos de cuenta, pedidos, mascotas, comentarios y uso del sitio.",
 };
