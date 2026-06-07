@@ -473,6 +473,19 @@ export function SiteHeader() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {mode === "signup" ? (
+                  <p className="rounded-xl border border-border bg-muted/35 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+                    Al crear una cuenta, aceptas los{" "}
+                    <Link href="/terminos" target="_blank" rel="noopener noreferrer" className="font-semibold text-foreground underline underline-offset-4">
+                      Términos y Condiciones
+                    </Link>{" "}
+                    y la{" "}
+                    <Link href="/privacidad" target="_blank" rel="noopener noreferrer" className="font-semibold text-foreground underline underline-offset-4">
+                      Política de Privacidad
+                    </Link>{" "}
+                    de FEROX.
+                  </p>
+                ) : null}
                 <button type="submit" disabled={isSaving || authLoading} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
               </form>
               {mode === "login" ? (
@@ -545,6 +558,19 @@ export function SiteHeader() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+            {mode === "signup" ? (
+              <p className="rounded-xl border border-border bg-muted/35 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+                Al crear una cuenta, aceptas los{" "}
+                <Link href="/terminos" target="_blank" rel="noopener noreferrer" className="font-semibold text-foreground underline underline-offset-4">
+                  Términos y Condiciones
+                </Link>{" "}
+                y la{" "}
+                <Link href="/privacidad" target="_blank" rel="noopener noreferrer" className="font-semibold text-foreground underline underline-offset-4">
+                  Política de Privacidad
+                </Link>{" "}
+                de FEROX.
+              </p>
+            ) : null}
             <button type="submit" disabled={isSaving || authLoading} className="w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">{isSaving ? "Procesando..." : mode === "signup" ? "Crear cuenta" : "Entrar"}</button>
           </form>
           {mode === "login" ? (
