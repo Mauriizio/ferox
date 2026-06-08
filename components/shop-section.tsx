@@ -71,7 +71,13 @@ export function ShopSection() {
               className="image-soft-zoom premium-transition relative mx-auto block aspect-square w-full max-w-[92vw] overflow-hidden rounded-xl bg-muted/20 shadow-[0_20px_50px_rgba(0,0,0,0.18)] sm:max-w-[420px] lg:max-w-[420px]"
               aria-label={`Ampliar imagen de ${product.name}`}
             >
-              <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 92vw, 420px" className="object-cover object-center scale-[1.04]" />
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                sizes="(max-width: 640px) calc(100vw - 7rem), 420px"
+                className="object-cover object-center scale-[1.04]"
+              />
             </button>
             <h3 className="mt-2 text-[1.9rem] font-bold leading-none text-foreground sm:text-3xl">{product.name}</h3>
             <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-muted-foreground line-clamp-2 sm:text-base">
@@ -106,13 +112,17 @@ export function ShopSection() {
           <DialogTitle className="sr-only">Imagen ampliada de {product.name}</DialogTitle>
           <DialogDescription className="sr-only">Vista ampliada del producto seleccionado en la tienda FEROX.</DialogDescription>
           <div className="overflow-auto rounded-xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={product.image}
-              alt={product.name}
-              className="mx-auto h-auto w-full max-w-4xl object-contain"
-              style={{ touchAction: "pinch-zoom" }}
-            />
+            {imageOpen ? (
+              <Image
+                src={product.image}
+                alt={product.name}
+                width={1122}
+                height={1402}
+                sizes="(max-width: 768px) 94vw, 896px"
+                className="mx-auto h-auto w-full max-w-4xl object-contain"
+                style={{ touchAction: "pinch-zoom" }}
+              />
+            ) : null}
           </div>
         </DialogContent>
       </Dialog>

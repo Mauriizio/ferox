@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { getImageProps } from "next/image";
 import Link from "next/link";
 import { ArrowRight, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -44,30 +44,40 @@ export function HeroSection() {
   );
 
   const avatarUrl = profile?.avatar_url ?? "";
+  const heroImageAlt = "Perro fuerte y saludable alimentado con dieta BARF";
+  const {
+    props: { srcSet: desktopHeroSrcSet },
+  } = getImageProps({
+    src: "/hero.png",
+    alt: heroImageAlt,
+    width: 1774,
+    height: 887,
+    sizes: "100vw",
+  });
+  const {
+    props: { srcSet: mobileHeroSrcSet, ...mobileHeroImageProps },
+  } = getImageProps({
+    src: "/hero-m.png",
+    alt: heroImageAlt,
+    width: 941,
+    height: 1672,
+    sizes: "100vw",
+    loading: "eager",
+    fetchPriority: "high",
+  });
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-background">
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 md:hidden">
-          <Image
-            src="/hero-m.png"
-            alt="Perro fuerte y saludable alimentado con dieta BARF"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[56%_34%] scale-[1.02]"
+        <picture className="absolute inset-0 block h-full w-full">
+          <source media="(min-width: 768px)" srcSet={desktopHeroSrcSet} sizes="100vw" />
+          <source media="(max-width: 767px)" srcSet={mobileHeroSrcSet} sizes="100vw" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            {...mobileHeroImageProps}
+            className="h-full w-full scale-[1.02] object-cover object-[56%_34%] md:scale-[1.03] md:object-[80%_34%] md:opacity-95"
           />
-        </div>
-        <div className="absolute inset-0 hidden md:block">
-          <Image
-            src="/hero.png"
-            alt="Perro fuerte y saludable alimentado con dieta BARF"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[80%_34%] scale-[1.03] opacity-95"
-          />
-        </div>
+        </picture>
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.82)_16%,rgba(0,0,0,0.56)_34%,rgba(0,0,0,0.18)_54%,rgba(0,0,0,0)_72%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.84)_22%,rgba(0,0,0,0.62)_42%,rgba(0,0,0,0.28)_62%,rgba(0,0,0,0.08)_78%,rgba(0,0,0,0)_100%)]" />
       </div>
