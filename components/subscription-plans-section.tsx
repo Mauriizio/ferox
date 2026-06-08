@@ -448,7 +448,7 @@ export function SubscriptionPlansSection() {
           )}
         </div>
 
-        <div data-reveal className="mt-8 rounded-[2rem] border border-background/15 bg-background/10 p-4 sm:p-6">
+        <div className="mt-8 rounded-[2rem] border border-[#333333] bg-[#1a1a1a] p-4 sm:border-background/15 sm:bg-background/10 sm:p-6">
           <div className="flex flex-col gap-2 text-center sm:items-center">
             <span className="section-eyebrow text-background/60">Club FEROX incluido</span>
             <h3 className="mt-2 font-sans text-2xl font-extrabold tracking-tight text-background sm:text-3xl">Más que alimento: beneficios para ti y tu compañero.</h3>
@@ -457,12 +457,12 @@ export function SubscriptionPlansSection() {
             </p>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-5 flex flex-col gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4">
             {clubBenefits.map((benefit) => {
               const Icon = benefit.icon;
               return (
-                <article key={benefit.title} className="rounded-2xl border border-background/15 bg-background/10 p-4 text-center">
-                  <Icon className="mx-auto h-5 w-5 text-background" aria-hidden="true" />
+                <article key={benefit.title} className="flex min-h-20 flex-col items-center justify-center rounded-2xl border border-[#333333] bg-[#1a1a1a] p-4 text-center sm:border-background/15 sm:bg-background/10">
+                  <Icon className="h-5 w-5 text-background" aria-hidden="true" />
                   <p className="mt-3 text-sm font-bold text-background">{benefit.title}</p>
                 </article>
               );
