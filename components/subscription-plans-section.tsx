@@ -23,50 +23,46 @@ type FrequencyId = "semanal" | "quincenal" | "mensual";
 type Plan = {
   name: string;
   kg: number;
-  discount: number;
   deliveryPrice: number;
   highlight?: string;
   description: string;
   benefits: string[];
-  prices: Record<FormulaId, { normal: number; subscription: number }>;
+  prices: Record<FormulaId, { normal: number }>;
 };
 
 const plans: Record<PlanId, Plan> = {
   bronze: {
     name: "Bronze",
     kg: 10,
-    discount: 10,
     deliveryPrice: 3500,
-    description: "Ideal para comenzar con entregas programadas y ahorro mensual.",
-    benefits: ["10 kg mensuales", "10% de descuento", "Despacho programado", "Acceso al Club FEROX"],
+    description: "Ideal para organizar su alimentación mensual con entregas programadas.",
+    benefits: ["10 kg mensuales", "Despacho programado", "Preparación preferente", "Acceso al Club FEROX"],
     prices: {
-      mixto: { normal: 30000, subscription: 27000 },
-      vacuno: { normal: 35000, subscription: 31500 },
+      mixto: { normal: 30000 },
+      vacuno: { normal: 35000 },
     },
   },
   gold: {
     name: "Gold",
     kg: 15,
-    discount: 15,
     deliveryPrice: 3000,
     highlight: "Más elegido",
-    description: "Más cantidad, mejor descuento y menor costo por despacho.",
-    benefits: ["15 kg mensuales", "15% de descuento", "Despacho preferente", "Beneficios del Club FEROX"],
+    description: "Más comodidad para planificar el mes con un despacho más conveniente.",
+    benefits: ["15 kg mensuales", "Despacho preferente", "Valor de despacho preferente", "Beneficios del Club FEROX"],
     prices: {
-      mixto: { normal: 45000, subscription: 38250 },
-      vacuno: { normal: 52500, subscription: 44625 },
+      mixto: { normal: 45000 },
+      vacuno: { normal: 52500 },
     },
   },
   platinum: {
     name: "Platinum",
     kg: 20,
-    discount: 20,
     deliveryPrice: 2500,
-    description: "La opción más completa para asegurar BARF con máximo ahorro.",
-    benefits: ["20 kg mensuales", "20% de descuento", "Despacho prioritario", "Mayor ahorro mensual"],
+    description: "La opción más completa para coordinar mejor sus entregas mensuales.",
+    benefits: ["20 kg mensuales", "Despacho prioritario", "Continuidad en su rutina BARF", "Valor de despacho preferente"],
     prices: {
-      mixto: { normal: 60000, subscription: 48000 },
-      vacuno: { normal: 70000, subscription: 56000 },
+      mixto: { normal: 60000 },
+      vacuno: { normal: 70000 },
     },
   },
 };
@@ -104,10 +100,10 @@ const clubBenefits = [
   { icon: Gift, title: "Kit de bienvenida" },
   { icon: Truck, title: "Prioridad en entregas" },
   { icon: HeartHandshake, title: "Atención personalizada" },
-  { icon: Users, title: "Referidos con 10%" },
+  { icon: Users, title: "Programa de referidos" },
   { icon: CakeSlice, title: "Mini torta de cumpleaños" },
-  { icon: Sparkles, title: "20% en snacks" },
-  { icon: Star, title: "Promociones exclusivas" },
+  { icon: Sparkles, title: "Beneficios en snacks" },
+  { icon: Star, title: "Beneficios exclusivos" },
 ];
 
 function formatCurrency(value: number) {
@@ -133,7 +129,7 @@ export function SubscriptionPlansSection() {
     const frequency = frequencies[selectedFrequency];
     const prices = plan.prices[selectedFormula];
     const deliveryTotal = plan.deliveryPrice * frequency.shipments;
-    const total = prices.subscription + deliveryTotal;
+    const total = prices.normal + deliveryTotal;
     const kgPerDelivery = plan.kg / frequency.shipments;
 
     return {
@@ -153,7 +149,7 @@ export function SubscriptionPlansSection() {
     }
 
     return encodeURIComponent(
-      `Hola FEROX BARF, quiero información del Plan ${summary.plan.name}. Fórmula: ${summary.formula.label}. Frecuencia: ${summary.frequency.label} (${summary.frequency.shipments} entregas al mes). Total mensual estimado: ${formatCurrency(summary.total)}.`,
+      `Hola FEROX BARF, quiero información del Plan ${summary.plan.name}. Fórmula: ${summary.formula.label}. Alimento: ${summary.plan.kg} kg mensuales por ${formatCurrency(summary.prices.normal)}. Frecuencia: ${summary.frequency.label} (${summary.frequency.shipments} entregas al mes). Despacho: ${summary.frequency.shipments} x ${formatCurrency(summary.plan.deliveryPrice)} (${formatCurrency(summary.deliveryTotal)}). Total mensual estimado: ${formatCurrency(summary.total)}. Me interesa organizar su alimentación con despacho programado, preparación preferente y beneficios del Club FEROX.`,
     );
   }, [summary]);
 
@@ -162,9 +158,9 @@ export function SubscriptionPlansSection() {
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div data-reveal className="fade-up mx-auto max-w-3xl text-center">
           <span className="section-eyebrow text-background/60">Planes y Club FEROX</span>
-          <h2 className="section-heading text-background">Elige tu plan y asegura su BARF.</h2>
+          <h2 className="section-heading text-background">Planes Ferox para organizar su alimentación mes a mes</h2>
           <p className="section-copy text-background/75">
-            Planes mensuales con entregas programadas, descuentos por volumen y beneficios exclusivos del Club FEROX.
+            Mismo alimento, misma calidad y una forma más cómoda de planificar sus entregas, con preparación preferente, despacho programado y beneficios del Club FEROX. El valor del alimento se mantiene igual en todos los planes y el valor del despacho varía según el plan seleccionado.
           </p>
         </div>
 
@@ -198,7 +194,7 @@ export function SubscriptionPlansSection() {
                     <p className="mt-1 text-5xl font-black tracking-tight">{plan.kg} kg</p>
                     <p className="text-sm text-muted-foreground">mensuales</p>
                     <span className="mt-4 inline-flex rounded-full bg-foreground px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-background">
-                      {plan.discount}% dcto.
+                      Despacho desde {formatCurrency(plan.deliveryPrice)}
                     </span>
                   </div>
                 </div>
@@ -295,12 +291,8 @@ export function SubscriptionPlansSection() {
                           </strong>
                         </div>
                         <div className="flex items-center justify-between gap-3">
-                          <span className="text-muted-foreground">Precio normal</span>
-                          <strong className="line-through decoration-muted-foreground">{formatCurrency(summary.prices.normal)}</strong>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-muted-foreground">Suscripción</span>
-                          <strong>{formatCurrency(summary.prices.subscription)}</strong>
+                          <span className="text-muted-foreground">Alimento</span>
+                          <strong>{formatCurrency(summary.prices.normal)}</strong>
                         </div>
                         <div className="flex items-center justify-between gap-3">
                           <span className="text-muted-foreground">Despachos</span>
@@ -315,7 +307,7 @@ export function SubscriptionPlansSection() {
                       <div className="mt-5 rounded-2xl bg-foreground p-4 text-center text-background">
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-background/60">Pago mensual único</p>
                         <p className="mt-1 text-4xl font-extrabold">{formatCurrency(summary.total)}</p>
-                        <p className="mt-1 text-sm text-background/65">Incluye suscripción + todos los envíos del mes.</p>
+                        <p className="mt-1 text-sm text-background/65">Incluye alimento al mismo valor para todos los planes + envíos del mes.</p>
                       </div>
 
                       <a
@@ -403,12 +395,8 @@ export function SubscriptionPlansSection() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Precio normal</p>
-                    <p className="font-bold line-through decoration-muted-foreground">{formatCurrency(summary.prices.normal)}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Suscripción</p>
-                    <p className="font-bold">{formatCurrency(summary.prices.subscription)}</p>
+                    <p className="text-muted-foreground">Alimento</p>
+                    <p className="font-bold">{formatCurrency(summary.prices.normal)}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Despachos</p>
@@ -423,7 +411,7 @@ export function SubscriptionPlansSection() {
                 <div className="mt-5 rounded-2xl bg-foreground p-4 text-background">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-background/60">Pago mensual único</p>
                   <p className="mt-1 text-4xl font-extrabold">{formatCurrency(summary.total)}</p>
-                  <p className="mt-1 text-sm text-background/65">Incluye suscripción + todos los envíos del mes.</p>
+                  <p className="mt-1 text-sm text-background/65">Incluye alimento al mismo valor para todos los planes + envíos del mes.</p>
                 </div>
 
                 <a
@@ -442,7 +430,7 @@ export function SubscriptionPlansSection() {
               <PackageCheck className="mx-auto h-8 w-8 text-background" aria-hidden="true" />
               <h3 className="mt-3 text-2xl font-extrabold text-background">Primero elige un plan.</h3>
               <p className="mt-2 text-sm leading-relaxed text-background/70">
-                Después podrás escoger la proteína, la frecuencia de entrega y ver el total mensual con los despachos incluidos.
+                Después podrás escoger la proteína, la frecuencia de entrega y ver el total mensual con el alimento y los despachos incluidos.
               </p>
             </div>
           )}
