@@ -36,8 +36,8 @@ const sections = [
   {
     title: "4. Productos, precios y disponibilidad",
     body: [
-      "Los productos, formatos, precios, planes, descuentos, costos de despacho y disponibilidad pueden variar según stock, comuna, fechas de entrega, volumen solicitado y confirmación previa. La información publicada en el sitio es referencial hasta que FEROX confirme el pedido por un canal oficial.",
-      "FEROX puede actualizar productos, precios, promociones o disponibilidad sin aviso previo, procurando mantener la información comercial clara y actualizada.",
+      "Los productos, formatos, precios, planes, costos de despacho y disponibilidad pueden variar según stock, comuna, fechas de entrega y confirmación previa. La información publicada en el sitio es referencial hasta que FEROX confirme el pedido por un canal oficial.",
+      "FEROX puede actualizar productos, precios, planes o disponibilidad sin aviso previo, procurando mantener la información comercial clara y actualizada.",
     ],
   },
   {
@@ -51,7 +51,7 @@ const sections = [
     title: "6. Pagos",
     body: [
       "Las formas de pago disponibles serán informadas por FEROX al momento de coordinar la compra. El pedido puede quedar sujeto a confirmación de pago, transferencia, comprobante o validación interna antes de su preparación o despacho.",
-      "El cliente debe revisar que el monto pagado coincida con el pedido confirmado, incluyendo productos, planes, descuentos aplicables y despacho cuando corresponda.",
+      "El cliente debe revisar que el monto pagado coincida con el pedido confirmado, incluyendo productos, planes y despacho cuando corresponda.",
     ],
   },
   {
