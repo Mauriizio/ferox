@@ -1,10 +1,17 @@
 import { supabase } from "@/lib/supabase/client";
+import {
+  deleteMediaFile,
+  getTrustedCommentMediaPath,
+  type CommentMediaType,
+} from "@/lib/services/storage-service";
 
 export type CommentWithMeta = {
-  id: string;
+  id: number;
   created_at: string | null;
   user_id: string;
   body: string;
+  media_url: string | null;
+  media_type: CommentMediaType | null;
   author_name: string | null;
   author_avatar_url: string | null;
   likes_count: number;
@@ -12,12 +19,14 @@ export type CommentWithMeta = {
 };
 
 type CommentRow = {
-  id: string;
+  id: number;
   created_at?: string | null;
   user_id: string;
   content?: string | null;
   body?: string | null;
   comment?: string | null;
+  media_url?: string | null;
+  media_type?: string | null;
 };
 
 type ProfileRow = {
@@ -38,6 +47,11 @@ function normalizeComment(
     created_at: row.created_at ?? null,
     user_id: row.user_id,
     body: row.content ?? row.body ?? row.comment ?? "",
+    media_url: row.media_url ?? null,
+    media_type:
+      row.media_type === "image" || row.media_type === "video"
+        ? row.media_type
+        : null,
   };
 }
 
@@ -62,7 +76,7 @@ async function getCommentMetadata(
     profiles = (data ?? []) as ProfileRow[];
   }
 
-  let likes: { comment_id: string }[] = [];
+  let likes: { comment_id: number }[] = [];
   if (commentIds.length) {
     const { data, error } = await supabase
       .from("comment_likes")
@@ -70,10 +84,10 @@ async function getCommentMetadata(
       .in("comment_id", commentIds);
 
     if (error) throw error;
-    likes = (data ?? []) as { comment_id: string }[];
+    likes = (data ?? []) as { comment_id: number }[];
   }
 
-  let currentUserLikes: { comment_id: string }[] = [];
+  let currentUserLikes: { comment_id: number }[] = [];
   if (currentUserId && commentIds.length) {
     const { data, error } = await supabase
       .from("comment_likes")
@@ -82,13 +96,13 @@ async function getCommentMetadata(
       .in("comment_id", commentIds);
 
     if (error) throw error;
-    currentUserLikes = (data ?? []) as { comment_id: string }[];
+    currentUserLikes = (data ?? []) as { comment_id: number }[];
   }
 
   const profilesById = new Map(
     profiles.map((profile) => [profile.id, profile]),
   );
-  const likeCounts = new Map<string, number>();
+  const likeCounts = new Map<number, number>();
   for (const like of likes) {
     likeCounts.set(like.comment_id, (likeCounts.get(like.comment_id) ?? 0) + 1);
   }
@@ -126,14 +140,21 @@ export async function listRecentComments(
 export async function createComment(
   userId: string,
   body: string,
+  media?: { url: string; type: CommentMediaType },
 ): Promise<CommentWithMeta> {
   const cleanBody = body.trim();
   if (!cleanBody) {
     throw new Error("Escribe un comentario antes de publicarlo.");
   }
 
-  const contentPayload = { user_id: userId, content: cleanBody };
-  const bodyPayload = { user_id: userId, body: cleanBody };
+  if (media && (!media.url || !["image", "video"].includes(media.type))) {
+    throw new Error("El archivo adjunto no es válido.");
+  }
+
+  const media_url = media?.url ?? null;
+  const media_type = media?.type ?? null;
+  const contentPayload = { user_id: userId, content: cleanBody, media_url, media_type };
+  const bodyPayload = { user_id: userId, body: cleanBody, media_url, media_type };
   let data: unknown;
 
   const contentInsert = await supabase
@@ -142,14 +163,16 @@ export async function createComment(
     .select("*")
     .single();
 
-  if (contentInsert.error) {
+  if (contentInsert.error && isMissingContentColumnError(contentInsert.error)) {
     const bodyInsert = await supabase
       .from("comments")
-      .insert(bodyPayload)
+      .insert(bodyPayload as never)
       .select("*")
       .single();
     if (bodyInsert.error) throw bodyInsert.error;
     data = bodyInsert.data;
+  } else if (contentInsert.error) {
+    throw contentInsert.error;
   } else {
     data = contentInsert.data;
   }
@@ -158,17 +181,51 @@ export async function createComment(
   return comment;
 }
 
-export async function deleteComment(userId: string, commentId: string) {
-  const { error } = await supabase
+function isMissingContentColumnError(error: {
+  code?: string;
+  message?: string;
+  details?: string | null;
+  hint?: string | null;
+}) {
+  const errorText = `${error.message ?? ""} ${error.details ?? ""} ${error.hint ?? ""}`.toLowerCase();
+  return (
+    (error.code === "42703" || error.code === "PGRST204") &&
+    errorText.includes("content") &&
+    (errorText.includes("column") || errorText.includes("schema cache"))
+  );
+}
+
+export async function deleteComment(userId: string, commentId: number) {
+  const { data, error } = await supabase
     .from("comments")
     .delete()
     .eq("id", commentId)
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .select("media_url, media_type")
+    .maybeSingle();
 
   if (error) throw error;
+  if (!data) {
+    throw new Error("No se encontró la reseña o ya había sido eliminada.");
+  }
+  const deletedComment = data as {
+    media_url?: string | null;
+    media_type?: string | null;
+  } | null;
+  const mediaPath = getTrustedCommentMediaPath(deletedComment?.media_url, userId);
+  if (!mediaPath) {
+    return { cleanupError: null };
+  }
+
+  try {
+    await deleteMediaFile(mediaPath);
+    return { cleanupError: null };
+  } catch (cleanupError) {
+    return { cleanupError };
+  }
 }
 
-export async function toggleCommentLike(userId: string, commentId: string) {
+export async function toggleCommentLike(userId: string, commentId: number) {
   const { data: existingLike, error: findError } = await supabase
     .from("comment_likes")
     .select("id")

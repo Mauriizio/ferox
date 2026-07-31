@@ -38,8 +38,8 @@ const plans: Record<PlanId, Plan> = {
     description: "Ideal para organizar su alimentación mensual con entregas programadas.",
     benefits: ["10 kg mensuales", "Despacho programado", "Preparación preferente", "Acceso al Club FEROX"],
     prices: {
-      mixto: { normal: 30000 },
-      vacuno: { normal: 35000 },
+      mixto: { normal: 40000 },
+      vacuno: { normal: 45000 },
     },
   },
   gold: {
@@ -50,8 +50,8 @@ const plans: Record<PlanId, Plan> = {
     description: "Más comodidad para planificar el mes con un despacho más conveniente.",
     benefits: ["15 kg mensuales", "Despacho preferente", "Valor de despacho preferente", "Beneficios del Club FEROX"],
     prices: {
-      mixto: { normal: 45000 },
-      vacuno: { normal: 52500 },
+      mixto: { normal: 60000 },
+      vacuno: { normal: 67500 },
     },
   },
   platinum: {
@@ -61,19 +61,19 @@ const plans: Record<PlanId, Plan> = {
     description: "La opción más completa para coordinar mejor sus entregas mensuales.",
     benefits: ["20 kg mensuales", "Despacho prioritario", "Continuidad en su rutina BARF", "Valor de despacho preferente"],
     prices: {
-      mixto: { normal: 60000 },
-      vacuno: { normal: 70000 },
+      mixto: { normal: 80000 },
+      vacuno: { normal: 90000 },
     },
   },
 };
 
 const formulas: Record<FormulaId, { label: string; description: string }> = {
   mixto: {
-    label: "BARF Mixto",
+    label: "Mix Pollo + Vacuno",
     description: "Pollo y vacuno",
   },
   vacuno: {
-    label: "BARF Vacuno",
+    label: "Vacuno Premium",
     description: "Solo vacuno",
   },
 };

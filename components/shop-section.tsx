@@ -9,19 +9,19 @@ const PHONE = "56927973379";
 
 const products = [
   {
-    name: "BARF mix de proteina",
+    name: "Mix Pollo + Vacuno",
     subtitle: "Pollo y vacuno",
     description:
       "Mezcla BARF con pollo y vacuno para una alimentación diaria real, fresca y balanceada.",
-    price: "$ 3.000",
+    price: "$4.000/kg",
     image: "/product/product2.png",
   },
   {
-    name: "BARF solo de vacuno",
+    name: "Vacuno Premium",
     subtitle: "Proteína de vacuno",
     description:
       "Fórmula BARF de vacuno con ingredientes reales para perros que prefieren una proteína principal.",
-    price: "$ 3.500",
+    price: "$4.500/kg",
     image: "/product/product1.png",
   },
 ];

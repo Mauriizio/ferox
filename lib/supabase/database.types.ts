@@ -113,19 +113,25 @@ export type Database = {
       };
       comments: {
         Row: {
-          id: string;
+          id: number;
           created_at: string | null;
           user_id: string;
-          body: string;
+          content: string;
+          media_url: string | null;
+          media_type: "image" | "video" | null;
         };
         Insert: {
-          id?: string;
+          id?: number;
           created_at?: string | null;
           user_id: string;
-          body: string;
+          content: string;
+          media_url?: string | null;
+          media_type?: "image" | "video" | null;
         };
         Update: {
-          body?: string;
+          content?: string;
+          media_url?: string | null;
+          media_type?: "image" | "video" | null;
         };
         Relationships: [];
       };
@@ -134,13 +140,13 @@ export type Database = {
           id: string;
           created_at: string | null;
           user_id: string;
-          comment_id: string;
+          comment_id: number;
         };
         Insert: {
           id?: string;
           created_at?: string | null;
           user_id: string;
-          comment_id: string;
+          comment_id: number;
         };
         Update: Record<string, never>;
         Relationships: [];
