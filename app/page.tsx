@@ -39,13 +39,13 @@ export default function HomePage() {
           <HeroSection />
           {isAuthenticated ? <AccountPetsSection /> : null}
           <ShopSection />
+          <CommentsSection />
           <SubscriptionPlansSection />
           <BenefitsSection />
           <CalculatorSection />
           <BarfMethodSection />
           <ResponsibleFeedingSection />
           <SocialProofGallerySection />
-          <CommentsSection />
           <CtaSection />
         </main>
       )}

@@ -38,7 +38,7 @@ function CommentMedia({ comment }: { comment: CommentWithMeta }) {
   if (!getTrustedCommentMediaPath(comment.media_url, comment.user_id)) return null;
 
   return (
-    <div className="relative mt-5 aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-2xl bg-muted">
+    <div className="relative mt-4 aspect-[4/3] w-full overflow-hidden rounded-xl bg-neutral-900">
       {comment.media_type === "image" ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={comment.media_url} alt="Imagen adjunta a la reseña" loading="lazy" className="h-full w-full object-cover" />
@@ -272,84 +272,13 @@ export function CommentsSection() {
   return (
     <section id="comentarios" className="relative overflow-hidden border-t border-border bg-[linear-gradient(180deg,#ffffff_0%,#f7f7f7_100%)]">
       <Heart className="pointer-events-none absolute -right-10 top-20 h-40 w-40 rotate-12 text-foreground/[0.025]" aria-hidden="true" />
-      <div className="relative mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
         <div data-reveal className="fade-up mx-auto max-w-3xl text-center">
           <span className="inline-block text-xs font-medium tracking-widest uppercase text-muted-foreground">Reseñas reales</span>
-          <h2 className="mt-2 ferox-display-title text-3xl sm:text-4xl md:text-5xl">Lo que dice la comunidad FEROX</h2>
+          <h2 className="mt-2 ferox-display-title text-3xl sm:text-4xl">Lo que dice la comunidad FEROX</h2>
         </div>
 
-        <ul className="mt-8 grid grid-cols-1 gap-4">
-          {isLoading ? (
-            <li className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Cargando reseñas...</li>
-          ) : comments.length > 0 ? (
-            paginatedComments.map((comment) => (
-              <li key={comment.id} data-reveal className="soft-card-hover premium-transition overflow-hidden rounded-[1.75rem] border border-border bg-background shadow-sm">
-                <div className="relative bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.07),transparent_34%),linear-gradient(135deg,#ffffff_0%,#f2f2f2_100%)] p-6 sm:p-7 lg:p-8">
-                  <span className="absolute right-5 top-4 text-5xl leading-none text-foreground/10">“</span>
-                  <blockquote className="relative max-w-3xl text-base leading-relaxed text-foreground sm:text-lg">
-                    &ldquo;{comment.body}&rdquo;
-                  </blockquote>
-                  <CommentMedia comment={comment} />
-                </div>
-                <div className="border-t border-border bg-muted/45 px-5 py-4 text-foreground sm:px-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <span className="grid h-10 w-10 overflow-hidden rounded-full border border-border bg-background">
-                        {comment.author_avatar_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={comment.author_avatar_url} alt={comment.author_name ?? "Miembro FEROX"} className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="grid h-full w-full place-items-center text-muted-foreground"><UserRound className="h-4 w-4" /></span>
-                        )}
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">{comment.author_name ?? "Miembro FEROX"}</p>
-                        <p className="text-xs text-muted-foreground">{formatCommentDate(comment.created_at)}</p>
-                      </div>
-                    </div>
-                    <button type="button" onClick={() => handleToggleLike(comment.id)} disabled={!user} className="interactive-lift premium-transition inline-flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-muted disabled:opacity-60">
-                      <Heart className={`h-3.5 w-3.5 ${comment.liked_by_current_user ? "fill-current text-red-500" : ""}`} />
-                      {comment.likes_count}
-                    </button>
-                  </div>
-                  {user?.id === comment.user_id ? (
-                    <button type="button" onClick={() => handleDeleteComment(comment.id)} disabled={isSaving} className="mt-3 text-xs font-semibold text-muted-foreground hover:text-foreground">
-                      Eliminar reseña
-                    </button>
-                  ) : null}
-                </div>
-              </li>
-            ))
-          ) : (
-            <li className="rounded-2xl border border-dashed border-border bg-background p-6 text-sm text-muted-foreground">Aún no hay reseñas. Sé la primera persona en compartir su experiencia.</li>
-          )}
-        </ul>
-
-        {comments.length > commentsPerPage ? (
-          <nav className="mt-6 flex items-center justify-center gap-2" aria-label="Paginación de reseñas">
-            <button
-              type="button"
-              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              disabled={currentPage === 1}
-              className="rounded-full border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground disabled:opacity-50"
-            >
-              Anterior
-            </button>
-            <span className="text-sm text-muted-foreground">
-              Página {currentPage} de {totalPages}
-            </span>
-            <button
-              type="button"
-              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-              disabled={currentPage === totalPages}
-              className="rounded-full border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground disabled:opacity-50"
-            >
-              Siguiente
-            </button>
-          </nav>
-        ) : null}
-
-        <form className="mt-8 rounded-[1.75rem] border border-border bg-background p-4 shadow-sm sm:p-5" onSubmit={handleCommentSubmit}>
+        <form className="mt-8 w-full rounded-[1.75rem] border border-border bg-background p-4 shadow-sm sm:p-5" onSubmit={handleCommentSubmit}>
           <label className="grid gap-2 text-sm font-semibold text-foreground">
             Comentar
             <textarea
@@ -424,6 +353,78 @@ export function CommentsSection() {
             <p role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">{message}</p>
           </div>
         </form>
+
+        <ul className="mt-6 grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-3 xl:gap-5">
+          {isLoading ? (
+            <li className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground md:col-span-2 xl:col-span-3">Cargando reseñas...</li>
+          ) : comments.length > 0 ? (
+            paginatedComments.map((comment) => (
+              <li key={comment.id} data-reveal className="soft-card-hover premium-transition h-fit self-start overflow-hidden rounded-[1.5rem] border border-border bg-background shadow-sm">
+                <div className="relative bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.07),transparent_34%),linear-gradient(135deg,#ffffff_0%,#f2f2f2_100%)] p-5">
+                  <span className="absolute right-4 top-3 text-4xl leading-none text-foreground/10">“</span>
+                  <blockquote className="relative break-words pr-5 text-sm leading-relaxed text-foreground sm:text-base">
+                    &ldquo;{comment.body}&rdquo;
+                  </blockquote>
+                  <CommentMedia comment={comment} />
+                </div>
+                <div className="border-t border-border bg-muted/45 px-4 py-3 text-foreground">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="grid h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border bg-background">
+                        {comment.author_avatar_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={comment.author_avatar_url} alt={comment.author_name ?? "Miembro FEROX"} className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="grid h-full w-full place-items-center text-muted-foreground"><UserRound className="h-4 w-4" /></span>
+                        )}
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{comment.author_name ?? "Miembro FEROX"}</p>
+                        <p className="text-xs text-muted-foreground">{formatCommentDate(comment.created_at)}</p>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => handleToggleLike(comment.id)} disabled={!user} className="interactive-lift premium-transition inline-flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-muted disabled:opacity-60">
+                      <Heart className={`h-3.5 w-3.5 ${comment.liked_by_current_user ? "fill-current text-red-500" : ""}`} />
+                      {comment.likes_count}
+                    </button>
+                  </div>
+                  {user?.id === comment.user_id ? (
+                    <button type="button" onClick={() => handleDeleteComment(comment.id)} disabled={isSaving} className="mt-3 text-xs font-semibold text-muted-foreground hover:text-foreground">
+                      Eliminar reseña
+                    </button>
+                  ) : null}
+                </div>
+              </li>
+            ))
+          ) : (
+            <li className="rounded-2xl border border-dashed border-border bg-background p-6 text-sm text-muted-foreground md:col-span-2 xl:col-span-3">Aún no hay reseñas. Sé la primera persona en compartir su experiencia.</li>
+          )}
+        </ul>
+
+        {comments.length > commentsPerPage ? (
+          <nav className="mt-6 flex items-center justify-center gap-2" aria-label="Paginación de reseñas">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={currentPage === 1}
+              className="rounded-full border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground disabled:opacity-50"
+            >
+              Anterior
+            </button>
+            <span className="text-sm text-muted-foreground">
+              Página {currentPage} de {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-full border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground disabled:opacity-50"
+            >
+              Siguiente
+            </button>
+          </nav>
+        ) : null}
+
       </div>
     </section>
   );
