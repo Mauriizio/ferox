@@ -81,8 +81,12 @@ Comprobaciones manuales posteriores:
 Rollback manual, solo si fuera necesario:
 
 ```sql
-alter policy "Users can upload own media"
+drop policy if exists "Users can upload own media" on storage.objects;
+
+create policy "Users can upload own media"
   on storage.objects
+  for insert
+  to authenticated
   with check (
     bucket_id = 'media'
     and (storage.foldername(name))[1] in ('avatars', 'dogs')
