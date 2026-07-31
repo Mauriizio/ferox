@@ -1,7 +1,7 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Heart, Send, UserRound } from "lucide-react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Heart, ImagePlus, Send, UserRound, X } from "lucide-react";
 import {
   createComment,
   deleteComment,
@@ -14,6 +14,15 @@ import {
   logSupabaseError,
 } from "@/lib/services/supabase-error";
 import { useAuth } from "@/components/auth-provider";
+import {
+  createImagePreview,
+  deleteMediaFile,
+  getTrustedCommentMediaPath,
+  uploadCommentMedia,
+  validateCommentMediaFile,
+  validateVideoDuration,
+  type CommentMediaType,
+} from "@/lib/services/storage-service";
 
 const formatCommentDate = (createdAt: string | null) => {
   if (!createdAt) return "Ahora";
@@ -24,6 +33,22 @@ const formatCommentDate = (createdAt: string | null) => {
   }).format(new Date(createdAt));
 };
 
+function CommentMedia({ comment }: { comment: CommentWithMeta }) {
+  if (!comment.media_url || !comment.media_type) return null;
+  if (!getTrustedCommentMediaPath(comment.media_url, comment.user_id)) return null;
+
+  return (
+    <div className="relative mt-5 aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-2xl bg-muted">
+      {comment.media_type === "image" ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={comment.media_url} alt="Imagen adjunta a la reseña" loading="lazy" className="h-full w-full object-cover" />
+      ) : (
+        <video src={comment.media_url} controls preload="metadata" playsInline className="h-full w-full object-contain" aria-label="Video adjunto a la reseña" />
+      )}
+    </div>
+  );
+}
+
 export function CommentsSection() {
   const { user, authLoading } = useAuth();
   const [comments, setComments] = useState<CommentWithMeta[]>([]);
@@ -32,6 +57,18 @@ export function CommentsSection() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaType, setMediaType] = useState<CommentMediaType | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [isValidatingMedia, setIsValidatingMedia] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMediaBusy = isSaving || isValidatingMedia;
+
+  useEffect(() => {
+    return () => {
+      if (mediaPreview) URL.revokeObjectURL(mediaPreview);
+    };
+  }, [mediaPreview]);
 
   const refreshComments = useCallback(async (currentUserId?: string) => {
     const nextComments = await listRecentComments(50, currentUserId);
@@ -81,24 +118,111 @@ export function CommentsSection() {
       return;
     }
 
+    if (!commentBody.trim()) {
+      setMessage("Escribe una reseña antes de publicarla.");
+      return;
+    }
+
+    if (mediaFile) {
+      try {
+        const validatedMedia = validateCommentMediaFile(mediaFile);
+        if (validatedMedia.mediaType !== mediaType) {
+          throw new Error("El tipo del archivo adjunto no es válido.");
+        }
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "El archivo no es válido.");
+        return;
+      }
+    }
+
     setIsSaving(true);
     setMessage("");
+    let uploadedMedia: { publicUrl: string; mediaType: CommentMediaType } | null = null;
+    let cleanupPending = false;
 
     try {
-      const newComment = await createComment(user.id, commentBody);
+      if (mediaFile) {
+        uploadedMedia = await uploadCommentMedia({
+          file: mediaFile,
+          userId: user.id,
+        });
+      }
+
+      let newComment: CommentWithMeta;
+      try {
+        newComment = await createComment(
+          user.id,
+          commentBody,
+          uploadedMedia
+            ? { url: uploadedMedia.publicUrl, type: uploadedMedia.mediaType }
+            : undefined,
+        );
+      } catch (insertError) {
+        const uploadedPath = getTrustedCommentMediaPath(uploadedMedia?.publicUrl, user.id);
+        if (uploadedPath) {
+          try {
+            await deleteMediaFile(uploadedPath);
+          } catch (cleanupError) {
+            logSupabaseError("Limpiar archivo tras fallo al crear comentario", cleanupError);
+            cleanupPending = true;
+          }
+        }
+        throw insertError;
+      }
+
       setComments((currentComments) => [newComment, ...currentComments]);
       setCurrentPage(1);
       setCommentBody("");
+      setMediaFile(null);
+      setMediaType(null);
+      setMediaPreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       setMessage("Reseña publicada correctamente.");
     } catch (error) {
       logSupabaseError("Crear comentario", error);
-      setMessage(getSupabaseErrorMessage(error));
+      const publishError = getSupabaseErrorMessage(error);
+      setMessage(
+        cleanupPending
+          ? `${publishError} Además, el archivo subido quedó pendiente de limpieza.`
+          : publishError,
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleToggleLike = async (commentId: string) => {
+  const handleMediaChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    if (!file) return;
+
+    setIsValidatingMedia(true);
+    setMessage("Validando archivo...");
+    try {
+      const validatedMedia = validateCommentMediaFile(file);
+      if (validatedMedia.mediaType === "video") {
+        setMessage("Validando duración del video...");
+        await validateVideoDuration(file);
+      }
+      setMediaFile(file);
+      setMediaType(validatedMedia.mediaType);
+      setMediaPreview(createImagePreview(file));
+      setMessage("");
+    } catch (error) {
+      event.target.value = "";
+      setMessage(error instanceof Error ? error.message : "El archivo no es válido.");
+    } finally {
+      setIsValidatingMedia(false);
+    }
+  };
+
+  const removeMedia = () => {
+    setMediaFile(null);
+    setMediaType(null);
+    setMediaPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleToggleLike = async (commentId: number) => {
     if (!user) {
       setMessage("Inicia sesión para dar like.");
       return;
@@ -123,15 +247,20 @@ export function CommentsSection() {
     }
   };
 
-  const handleDeleteComment = async (commentId: string) => {
+  const handleDeleteComment = async (commentId: number) => {
     if (!user) return;
     setIsSaving(true);
     setMessage("");
 
     try {
-      await deleteComment(user.id, commentId);
+      const { cleanupError } = await deleteComment(user.id, commentId);
       setComments((currentComments) => currentComments.filter((comment) => comment.id !== commentId));
-      setMessage("Reseña eliminada.");
+      if (cleanupError) {
+        logSupabaseError("Limpiar archivo de comentario eliminado", cleanupError);
+        setMessage("Reseña eliminada. No fue posible limpiar su archivo del almacenamiento; quedó limpieza pendiente.");
+      } else {
+        setMessage("Reseña eliminada.");
+      }
     } catch (error) {
       logSupabaseError("Eliminar comentario", error);
       setMessage(getSupabaseErrorMessage(error));
@@ -160,6 +289,7 @@ export function CommentsSection() {
                   <blockquote className="relative max-w-3xl text-base leading-relaxed text-foreground sm:text-lg">
                     &ldquo;{comment.body}&rdquo;
                   </blockquote>
+                  <CommentMedia comment={comment} />
                 </div>
                 <div className="border-t border-border bg-muted/45 px-5 py-4 text-foreground sm:px-6">
                   <div className="flex items-center justify-between gap-3">
@@ -223,23 +353,75 @@ export function CommentsSection() {
           <label className="grid gap-2 text-sm font-semibold text-foreground">
             Comentar
             <textarea
-              disabled={!user || isSaving}
+              required
+              disabled={!user || isMediaBusy}
               value={commentBody}
               onChange={(event) => setCommentBody(event.target.value)}
               placeholder={user ? "Escribe tu reseña" : "Inicia sesión para publicar"}
               className="min-h-20 resize-none rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm text-foreground outline-none transition focus:border-foreground focus:bg-background"
             />
           </label>
+          <div className="mt-3 rounded-2xl border border-dashed border-border bg-muted/20 p-3">
+            <input
+              ref={fileInputRef}
+              id="comment-media"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm"
+              disabled={!user || isMediaBusy}
+              onChange={handleMediaChange}
+              className="sr-only"
+            />
+            <div className="flex flex-wrap items-center gap-3">
+              <label
+                htmlFor="comment-media"
+                aria-disabled={!user || isMediaBusy}
+                className={`inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition ${
+                  !user || isMediaBusy ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-muted"
+                }`}
+              >
+                <ImagePlus className="h-4 w-4" aria-hidden="true" />
+                {isValidatingMedia
+                  ? "Validando archivo..."
+                  : isSaving
+                    ? "Publicando..."
+                    : mediaFile
+                      ? "Reemplazar foto o video"
+                      : "Agregar foto o video"}
+              </label>
+              <p className="text-xs text-muted-foreground">Un archivo: JPG, PNG, WEBP o GIF hasta 5 MB; MP4, MOV o WebM hasta 20 MB y 20 segundos.</p>
+            </div>
+            {mediaPreview && mediaType ? (
+              <div className="mt-3 max-w-sm">
+                <div className="aspect-[4/3] overflow-hidden rounded-xl bg-muted">
+                  {mediaType === "image" ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={mediaPreview} alt="Vista previa de la imagen seleccionada" className="h-full w-full object-cover" />
+                  ) : (
+                    <video src={mediaPreview} controls preload="metadata" playsInline className="h-full w-full object-contain" aria-label="Vista previa del video seleccionado" />
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={removeMedia}
+                  disabled={isMediaBusy}
+                  className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground disabled:opacity-60"
+                >
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  Quitar archivo
+                </button>
+              </div>
+            ) : null}
+          </div>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="submit"
-              disabled={!user || isSaving}
+              disabled={!user || isMediaBusy}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background transition hover:bg-foreground/90 disabled:opacity-60"
             >
               <Send className="h-4 w-4" />
-              {isSaving ? "Publicando..." : "Publicar reseña"}
+              {isValidatingMedia ? "Validando..." : isSaving ? "Publicando..." : "Publicar reseña"}
             </button>
-            {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+            <p role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">{message}</p>
           </div>
         </form>
       </div>
