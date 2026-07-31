@@ -1,10 +1,10 @@
 "use client";
 
-import { ChangeEvent, FormEvent, MouseEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, MouseEvent, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { Camera, Eye, EyeOff, LogOut, Menu, Settings, UserRound, X } from "lucide-react";
+import { Camera, Eye, EyeOff, LogOut, MailCheck, Menu, Settings, UserRound, X } from "lucide-react";
 import {
   signInWithGoogle,
   sendPasswordRecoveryEmail,
@@ -39,6 +39,8 @@ export function SiteHeader() {
   const [fullName, setFullName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [signupConfirmationEmail, setSignupConfirmationEmail] = useState("");
+  const signupSuccessRef = useRef<HTMLDivElement>(null);
   const [recoveryOpen, setRecoveryOpen] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [isSendingRecovery, setIsSendingRecovery] = useState(false);
@@ -100,6 +102,17 @@ export function SiteHeader() {
   }, []);
 
   useEffect(() => {
+    if (signupConfirmationEmail) signupSuccessRef.current?.focus();
+  }, [signupConfirmationEmail]);
+
+  useEffect(() => {
+    if (!authOpen) {
+      setSignupConfirmationEmail("");
+      setMessage("");
+    }
+  }, [authOpen]);
+
+  useEffect(() => {
     const mediaQuery = window.matchMedia("(min-width: 1024px)");
     const updateViewport = () => setIsDesktopViewport(mediaQuery.matches);
 
@@ -116,7 +129,7 @@ export function SiteHeader() {
     try {
       if (mode === "signup") {
         await signUpWithPassword(email, password, fullName);
-        setMessage("Cuenta creada. Revisa tu correo para confirmar.");
+        setSignupConfirmationEmail(email.trim());
       } else {
         await signInWithPassword(email, password);
         setAuthOpen(false);
@@ -127,6 +140,51 @@ export function SiteHeader() {
       setIsSaving(false);
     }
   };
+
+  const handleAuthModeChange = (nextMode: "login" | "signup") => {
+    setMode(nextMode);
+    setSignupConfirmationEmail("");
+    setMessage("");
+  };
+
+  const handleReturnToLogin = () => {
+    setPassword("");
+    setShowPassword(false);
+    handleAuthModeChange("login");
+  };
+
+  const signupSuccessPanel = signupConfirmationEmail ? (
+    <div
+      ref={signupSuccessRef}
+      role="status"
+      aria-live="polite"
+      tabIndex={-1}
+      className="rounded-2xl border border-border bg-white p-5 text-center text-black outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 sm:p-6"
+    >
+      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-black/10 bg-black/[0.04]" aria-hidden="true">
+        <MailCheck className="h-7 w-7" />
+      </div>
+      <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">¡Cuenta creada!</h2>
+      <p className="mt-3 text-base font-semibold leading-snug">Revisa tu correo para confirmar tu cuenta</p>
+      <p className="mt-4 text-sm text-black/65">Enviamos un enlace de confirmación a:</p>
+      <p className="mt-2 break-all rounded-xl border border-black/10 bg-black/[0.04] px-3 py-2 text-sm font-semibold">
+        {signupConfirmationEmail}
+      </p>
+      <p className="mt-4 text-sm leading-relaxed text-black/75">
+        Abre el mensaje y pulsa el enlace para activar tu cuenta. Después podrás iniciar sesión.
+      </p>
+      <p className="mt-3 text-xs leading-relaxed text-black/60">
+        Si no lo encuentras, revisa Spam, Promociones o Correo no deseado.
+      </p>
+      <button
+        type="button"
+        onClick={handleReturnToLogin}
+        className="interactive-lift premium-transition mt-5 w-full rounded-full bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-black/90"
+      >
+        Volver a iniciar sesión
+      </button>
+    </div>
+  ) : null;
 
   const handleSendRecovery = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -462,9 +520,11 @@ export function SiteHeader() {
           <div className="mx-auto flex w-full max-w-7xl justify-end px-4 sm:px-6 lg:px-8">
             <div className="pointer-events-auto mt-3 w-full max-w-sm rounded-2xl border border-border bg-background p-4 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
               <div className="mb-3 flex gap-2 text-sm font-semibold">
-                <button type="button" onClick={() => setMode("login")} className={cn("premium-transition rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
-                <button type="button" onClick={() => setMode("signup")} className={cn("premium-transition rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
+                <button type="button" onClick={() => handleAuthModeChange("login")} className={cn("premium-transition rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
+                <button type="button" onClick={() => handleAuthModeChange("signup")} className={cn("premium-transition rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
               </div>
+              {signupSuccessPanel ?? (
+              <>
               <form onSubmit={handleAuthSubmit} className="space-y-2">
                 {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
                 <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
@@ -533,6 +593,8 @@ export function SiteHeader() {
                   {recoveryMessage}
                 </p>
               ) : null}
+              </>
+              )}
             </div>
           </div>
         </div>
@@ -547,9 +609,11 @@ export function SiteHeader() {
             <DialogDescription>Accede a tu cuenta FEROX.</DialogDescription>
           </DialogHeader>
           <div className="mb-1 flex gap-2 text-sm font-semibold">
-            <button type="button" onClick={() => setMode("login")} className={cn("premium-transition rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
-            <button type="button" onClick={() => setMode("signup")} className={cn("premium-transition rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
+            <button type="button" onClick={() => handleAuthModeChange("login")} className={cn("premium-transition rounded-full px-3 py-1", mode === "login" ? "bg-foreground text-background" : "bg-muted")}>Entrar</button>
+            <button type="button" onClick={() => handleAuthModeChange("signup")} className={cn("premium-transition rounded-full px-3 py-1", mode === "signup" ? "bg-foreground text-background" : "bg-muted")}>Crear cuenta</button>
           </div>
+          {signupSuccessPanel ?? (
+          <>
           <form onSubmit={handleAuthSubmit} className="space-y-2">
             {mode === "signup" ? <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" className="w-full rounded-xl border border-border px-3 py-2 text-sm" /> : null}
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" className="w-full rounded-xl border border-border px-3 py-2 text-sm" />
@@ -618,6 +682,8 @@ export function SiteHeader() {
               {recoveryMessage}
             </p>
           ) : null}
+          </>
+          )}
         </DialogContent>
       </Dialog>
 
